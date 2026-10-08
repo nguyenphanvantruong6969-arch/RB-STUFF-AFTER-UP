@@ -1,0 +1,1773 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  html{color-scheme:light dark}
+  body{margin:0}
+  img{max-width:100%}
+  [hidden]{display:none!important}
+</style>
+<title>Phần mềm xếp câu lạc bộ chạy thế nào</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ink:#1C2321; --ink-soft:#3A423F; --slate:#5B6570;
+  --paper:#F3F4F1; --raised:#FFFFFF; --sunk:#EAEBE6;
+  --hairline:#DBDCD5; --hairline-strong:#C4C6BD;
+  --gold:#C98A1F; --gold-soft:#F6EAD0; --gold-ink:#7A5310;
+  --moss:#3F6B52; --moss-soft:#DFEAE3; --moss-ink:#2B4D3A;
+  --rust:#B84A3E; --rust-soft:#F6E1DE; --rust-ink:#8A3025;
+  --display:"Be Vietnam Pro",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#E8EAE4; --ink-soft:#C3C8C0; --slate:#9AA29B;
+    --paper:#151917; --raised:#1E2422; --sunk:#12100E;
+    --hairline:#333B37; --hairline-strong:#485049;
+    --gold:#E2A948; --gold-soft:#39301C; --gold-ink:#F0C87C;
+    --moss:#7FB393; --moss-soft:#1E2E24; --moss-ink:#A6CFB5;
+    --rust:#E08376; --rust-soft:#3A211D; --rust-ink:#F0AAA0;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#E8EAE4; --ink-soft:#C3C8C0; --slate:#9AA29B;
+  --paper:#151917; --raised:#1E2422; --sunk:#12100E;
+  --hairline:#333B37; --hairline-strong:#485049;
+  --gold:#E2A948; --gold-soft:#39301C; --gold-ink:#F0C87C;
+  --moss:#7FB393; --moss-soft:#1E2E24; --moss-ink:#A6CFB5;
+  --rust:#E08376; --rust-soft:#3A211D; --rust-ink:#F0AAA0;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--body); font-size:16.5px; line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding-inline:20px; padding-block:0 96px;}
+.measure{max-width:70ch;}
+
+/* ---------- MASTHEAD ---------- */
+.masthead{
+  border-bottom:3px solid var(--ink);
+  padding-block:52px 24px; margin-bottom:8px;
+}
+.kicker{
+  font-family:var(--mono); font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--gold-ink); margin:0 0 18px;
+}
+.masthead h1{
+  font-family:var(--display); font-weight:700; font-size:clamp(32px,6.4vw,58px);
+  line-height:1.08; letter-spacing:-.02em; margin:0 0 20px; text-wrap:balance;
+}
+.standfirst{font-size:clamp(17px,2.3vw,20px); color:var(--ink-soft); margin:0; max-width:62ch;}
+.byline{
+  display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:26px;
+  font-family:var(--mono); font-size:12.5px; color:var(--slate);
+}
+
+/* ---------- TYPE ---------- */
+h2{
+  font-family:var(--display); font-weight:700; font-size:clamp(25px,4vw,36px);
+  line-height:1.18; letter-spacing:-.015em; margin:0 0 6px; text-wrap:balance;
+}
+h3{font-family:var(--display); font-weight:600; font-size:clamp(19px,2.8vw,23px); line-height:1.3; margin:38px 0 10px; text-wrap:balance;}
+h4{font-family:var(--display); font-weight:600; font-size:17px; margin:26px 0 6px;}
+p{margin:0 0 17px;}
+strong{font-weight:600;}
+a{color:var(--gold-ink);}
+ul,ol{margin:0 0 18px; padding-left:22px;}
+li{margin-bottom:8px;}
+li::marker{color:var(--gold);}
+
+.chapter{padding-block:54px 8px; border-top:1px solid var(--hairline);}
+.chapter:first-of-type{border-top:none;}
+.chapnum{
+  font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--gold-ink); display:block; margin-bottom:12px;
+}
+.deck{font-size:18px; color:var(--slate); margin:0 0 28px; max-width:62ch;}
+
+/* ---------- CITATION ---------- */
+code, .cite{font-family:var(--mono); font-size:.87em;}
+code{background:var(--sunk); padding:1px 5px; border-radius:3px;}
+.cite{
+  display:inline-block; background:var(--gold-soft); color:var(--gold-ink);
+  border:1px solid color-mix(in srgb, var(--gold) 34%, transparent);
+  padding:0 6px; border-radius:3px; font-size:12.5px; white-space:nowrap;
+  font-weight:500;
+}
+
+/* ---------- CODE BLOCK ---------- */
+figure.code{margin:22px 0; border:1px solid var(--hairline); border-radius:6px; overflow:hidden; background:var(--raised);}
+figure.code figcaption{
+  font-family:var(--mono); font-size:12px; color:var(--slate);
+  padding:9px 14px; border-bottom:1px solid var(--hairline); background:var(--sunk);
+  display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+}
+figure.code pre{margin:0; padding:15px 16px; overflow-x:auto; font-family:var(--mono); font-size:13px; line-height:1.66;}
+figure.code .cm{color:var(--slate);}
+figure.code .hl{background:var(--gold-soft); border-radius:2px;}
+
+/* ---------- CALLOUTS ---------- */
+.box{border:1px solid var(--hairline); border-radius:8px; padding:20px 22px; margin:26px 0; background:var(--raised);}
+.box > :last-child{margin-bottom:0;}
+.box-title{font-family:var(--display); font-weight:600; font-size:15px; margin:0 0 10px; display:flex; align-items:center; gap:9px;}
+.box-title::before{content:""; width:9px; height:9px; border-radius:50%; flex:none;}
+.judge{border-left:4px solid var(--gold); background:var(--gold-soft);}
+.judge .box-title::before{background:var(--gold);}
+.judge .box-title{color:var(--gold-ink);}
+.warn{border-left:4px solid var(--rust); background:var(--rust-soft);}
+.warn .box-title::before{background:var(--rust);}
+.warn .box-title{color:var(--rust-ink);}
+.proof{border-left:4px solid var(--moss); background:var(--moss-soft);}
+.proof .box-title::before{background:var(--moss);}
+.proof .box-title{color:var(--moss-ink);}
+
+/* ---------- TABLE ---------- */
+.tablewrap{overflow-x:auto; margin:24px 0; border:1px solid var(--hairline); border-radius:6px; background:var(--raised);}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:480px;}
+th,td{padding:10px 14px; text-align:left; border-bottom:1px solid var(--hairline); vertical-align:top;}
+thead th{background:var(--sunk); font-family:var(--display); font-weight:600; font-size:13px; white-space:nowrap;}
+tbody tr:last-child td{border-bottom:none;}
+td.num, th.num{text-align:right; font-variant-numeric:tabular-nums; font-family:var(--mono); font-size:13.5px;}
+.ok{color:var(--moss-ink); font-weight:600;}
+.bad{color:var(--rust-ink); font-weight:600;}
+
+/* ---------- DIAGRAM ---------- */
+.diagram{margin:34px 0; border:1px solid var(--hairline); border-radius:8px; background:var(--raised); overflow:hidden;}
+.diagram-head{padding:13px 18px; border-bottom:1px solid var(--hairline); background:var(--sunk);}
+.diagram-head strong{font-family:var(--display); font-size:14.5px; display:block;}
+.diagram-head span{font-size:13px; color:var(--slate);}
+.diagram-body{overflow-x:auto; padding:22px 18px;}
+.diagram svg{display:block; margin:0 auto; max-width:100%; height:auto;}
+.d-fill-ink{fill:var(--ink)} .d-fill-paper{fill:var(--raised)} .d-fill-sunk{fill:var(--sunk)}
+.d-stroke{stroke:var(--hairline-strong); fill:none; stroke-width:1.5}
+.d-arrow{stroke:var(--slate); fill:none; stroke-width:1.6}
+.d-arrow-bad{stroke:var(--rust); fill:none; stroke-width:1.6; stroke-dasharray:5 4}
+.d-t{fill:var(--ink); font-family:"IBM Plex Sans",sans-serif; font-size:13px}
+.d-tb{fill:var(--ink); font-family:"Be Vietnam Pro",sans-serif; font-size:13.5px; font-weight:600}
+.d-ts{fill:var(--slate); font-family:"IBM Plex Mono",monospace; font-size:11px}
+.d-gold{fill:var(--gold-soft); stroke:var(--gold); stroke-width:1.5}
+.d-moss{fill:var(--moss-soft); stroke:var(--moss); stroke-width:1.5}
+.d-rust{fill:var(--rust-soft); stroke:var(--rust); stroke-width:1.5}
+
+/* ---------- SIM ---------- */
+.sim{border:2px solid var(--ink); border-radius:8px; margin:34px 0; background:var(--raised); overflow:hidden;}
+.sim-head{background:var(--ink); color:var(--paper); padding:13px 18px; display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;}
+.sim-head strong{font-family:var(--display); font-size:15px;}
+.sim-head span{font-family:var(--mono); font-size:12px; opacity:.78;}
+.sim-body{padding:20px 18px;}
+.sim-stage{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;}
+@media (max-width:640px){.sim-stage{grid-template-columns:1fr;}}
+.club-card{border:1px solid var(--hairline); border-radius:7px; background:var(--paper); padding:14px;}
+.club-card h5{font-family:var(--display); font-size:14.5px; line-height:1.5; margin:0 0 3px; display:flex; justify-content:space-between; align-items:baseline; gap:8px; flex-wrap:wrap;}
+.club-card .cap{font-family:var(--mono); font-size:11.5px; line-height:1.6; color:var(--slate); font-weight:400; white-space:nowrap;}
+.club-card .prio{font-family:var(--mono); font-size:11px; color:var(--slate); margin:0 0 11px; line-height:1.5;}
+.slot{
+  display:flex; align-items:center; gap:9px; padding:7px 10px; margin-bottom:6px;
+  border:1px dashed var(--hairline-strong); border-radius:5px; font-size:14px;
+  min-height:38px; transition:background .25s var(--e), border-color .25s;
+}
+.slot.filled{border-style:solid; border-color:var(--moss); background:var(--moss-soft);}
+.slot.reserved{border-style:solid; border-color:var(--gold); background:var(--gold-soft);}
+.slot .tag{font-family:var(--mono); font-size:10.5px; margin-left:auto; color:var(--slate); text-transform:uppercase; letter-spacing:.06em;}
+.slot.empty{color:var(--slate); font-style:italic; font-size:13px;}
+.bench{border-top:1px dashed var(--hairline-strong); padding-top:14px;}
+.bench h5{font-family:var(--display); font-size:13.5px; margin:0 0 9px; color:var(--slate);}
+.chips{display:flex; flex-wrap:wrap; gap:7px;}
+.chip{
+  font-size:13.5px; padding:5px 11px; border-radius:20px;
+  border:1px solid var(--hairline-strong); background:var(--paper);
+}
+.chip.out{border-color:var(--rust); background:var(--rust-soft); color:var(--rust-ink);}
+.chip .sub{font-family:var(--mono); font-size:10.5px; opacity:.72; margin-left:5px;}
+.narrate{
+  border-left:3px solid var(--gold); padding:11px 15px; background:var(--gold-soft);
+  border-radius:0 5px 5px 0; margin-bottom:16px; font-size:14.5px; min-height:70px;
+}
+.narrate b{font-family:var(--display);}
+.controls{display:flex; flex-wrap:wrap; gap:9px; align-items:center;}
+button.ctl{
+  font-family:var(--display); font-weight:600; font-size:14px;
+  padding:9px 17px; border-radius:6px; border:1px solid var(--ink);
+  background:var(--ink); color:var(--paper); cursor:pointer;
+}
+button.ctl.ghost{background:transparent; color:var(--ink);}
+button.ctl:disabled{opacity:.35; cursor:not-allowed;}
+button.ctl:focus-visible{outline:3px solid var(--gold); outline-offset:2px;}
+.step-pips{display:flex; gap:5px; margin-left:auto;}
+.pip{width:9px; height:9px; border-radius:50%; background:var(--hairline-strong);}
+.pip.on{background:var(--gold);}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important;}}
+
+/* ---------- TOC ---------- */
+.toc{border:1px solid var(--hairline); border-radius:8px; background:var(--raised); padding:22px 24px; margin:36px 0 0;}
+.toc h2{font-size:17px; margin-bottom:14px;}
+.toc ol{columns:2; column-gap:34px; padding-left:20px; margin:0;}
+@media (max-width:640px){.toc ol{columns:1;}}
+.toc a{text-decoration:none; color:var(--ink);}
+.toc a:hover{color:var(--gold-ink); text-decoration:underline;}
+</style>
+
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="kicker">Báo cáo kỹ thuật · rbda-kiosk · nhánh claude/blissful-archimedes-hcg1cf</p>
+  <h1>Phần mềm xếp câu lạc bộ chạy thế nào</h1>
+  <p class="standfirst">Toàn bộ đường đi của chương trình, từ lúc bấm đúp tệp chạy cho tới lúc in ra danh sách dán bảng — kể bằng lời thường, kèm sơ đồ, hai mô phỏng bấm được, và trích dẫn tới đúng dòng mã cho mọi câu khẳng định.</p>
+  <div class="byline">
+    <span>Đọc trong ~35 phút</span>
+    <span>9 chương · 5 sơ đồ · 2 mô phỏng</span>
+    <span>Mọi số liệu đo bằng lệnh chạy thật</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <h2>Mục lục</h2>
+  <ol>
+    <li><a href="#c0">Bài toán là gì</a></li>
+    <li><a href="#c1">Bản đồ toàn cảnh</a></li>
+    <li><a href="#c2">Vòng đời một lần chạy</a></li>
+    <li><a href="#c3">Trái tim: năm lớp cơ chế</a></li>
+    <li><a href="#c4">Xếp cả tuần</a></li>
+    <li><a href="#c5">Dữ liệu vào và ra</a></li>
+    <li><a href="#c6">Khi mọi thứ hỏng</a></li>
+    <li><a href="#c7">Bằng chứng</a></li>
+    <li><a href="#c8">Phụ lục: câu hỏi giám khảo</a></li>
+    <li><a href="#c9">Ranh giới trung thực</a></li>
+  </ol>
+</nav>
+
+<div class="box" style="margin-top:28px;">
+  <p class="box-title" style="color:var(--slate)">Cách đọc các ô màu vàng trong bài</p>
+  <p style="margin-bottom:0">Mỗi chỗ có ô vàng như <span class="cite">api.py:1104</span> là một <strong>địa chỉ trong mã nguồn</strong>: tên tệp, rồi số dòng. Giám khảo mở tệp đó, nhảy tới dòng đó, sẽ thấy đúng câu lệnh đang được nói tới. Không câu nào trong báo cáo này để trống địa chỉ.</p>
+</div>
+
+<!-- ==================== CHƯƠNG 0 ==================== -->
+<section class="chapter" id="c0">
+  <span class="chapnum">Chương 0</span>
+  <h2>Bài toán là gì</h2>
+  <p class="deck">Trước khi nói phần mềm, phải nói việc mà phần mềm được sinh ra để làm.</p>
+
+  <div class="measure">
+    <p>Một trường có vài trăm học sinh và chừng mười câu lạc bộ. Mỗi câu lạc bộ có số chỗ giới hạn — ví dụ CLB Bóng rổ nhận 20 em. Mỗi em muốn vào vài CLB, và có thứ tự ưu tiên: thích nhất cái nào, thích nhì cái nào.</p>
+
+    <p><strong>Chuyện rắc rối bắt đầu ở đây.</strong> Có CLB tổ chức thi tuyển (Bóng rổ bắt các em đá thử, chấm điểm). Có CLB không thi, ai đăng ký cũng như nhau. Và một số CLB muốn để dành vài suất cho một nhóm riêng — ví dụ học sinh diện chính sách.</p>
+
+    <p>Cách làm cũ của các trường: <strong>xét theo thứ tự đăng ký</strong>. Ai mở biểu mẫu nhanh, bấm nút nhanh thì được. Cách đó có ba chỗ hỏng:</p>
+
+    <ol>
+      <li><strong>Nó thưởng cho tốc độ bấm chuột</strong>, không thưởng cho nguyện vọng thật hay năng lực thật.</li>
+      <li><strong>Nó phạt em khai thật.</strong> Em thích CLB A nhất nhưng biết A rất đông, sợ trượt thì mất luôn CLB B — nên em khai B lên đầu. Em đang phải đoán, thay vì nói thật.</li>
+      <li><strong>Nó không giải thích được.</strong> Phụ huynh hỏi "sao con tôi trượt?" thì trường không có câu trả lời nào ngoài "cháu đăng ký muộn".</li>
+    </ol>
+
+    <p>Phần mềm này thay cách đó. Ba điều nó phải làm được, và cả ba đều đã đo được bằng số:</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Phải làm được</th><th>Nghĩa là gì</th><th>Đo ở đâu trong báo cáo</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Khai thật là có lợi nhất</strong></td><td>Không em nào ghi sai thứ tự nguyện vọng mà được CLB tốt hơn</td><td>Chương 7 — <span class="ok">0 / 1 400</span> lượt vét cạn</td></tr>
+        <tr><td><strong>Không ai phá được kết quả</strong></td><td>Không có cặp (em, CLB) nào mà cả hai cùng muốn đổi sang nhau</td><td>Chương 3 · Lớp 5 — <span class="ok">0 cặp phá vỡ</span></td></tr>
+        <tr><td><strong>Chạy lại ra đúng số cũ</strong></td><td>Cùng dữ liệu, cùng hạt giống → cùng kết quả, trên mọi máy</td><td>Chương 3 · Lớp 3 và Chương 4</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box judge">
+    <p class="box-title">Giám khảo hỏi — trả lời thế này</p>
+    <p style="margin-bottom:0"><em>"Sao không xét theo điểm rồi cho em điểm cao chọn trước?"</em> — Vì không phải CLB nào cũng thi. Một em không thi CLB Làm vườn thì không có điểm nào để xếp. Và ngay cả khi mọi CLB đều thi, cách "điểm cao chọn trước" vẫn đòi em phải đoán xem mình đứng thứ mấy — tức là quay lại đúng vấn đề số 2 ở trên.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 1 ==================== -->
+<section class="chapter" id="c1">
+  <span class="chapnum">Chương 1</span>
+  <h2>Bản đồ toàn cảnh</h2>
+  <p class="deck">Sáu tệp làm nên chương trình, và ai gọi ai. Xem sơ đồ này trước, mọi chương sau sẽ dễ hơn nhiều.</p>
+
+  <div class="measure">
+    <p>Chương trình không phải một khối liền. Nó là <strong>bốn tầng xếp chồng</strong>, mỗi tầng chỉ nói chuyện với tầng ngay dưới mình:</p>
+    <ul>
+      <li><strong>Tầng cửa sổ</strong> — vẽ ra cái khung có thanh tiêu đề. Có hai cách vẽ, một chính một dự phòng.</li>
+      <li><strong>Tầng giao diện</strong> — nút bấm, bảng biểu, 5 tab. Viết bằng HTML/JavaScript.</li>
+      <li><strong>Tầng cầu nối</strong> — <code>api.py</code>. Giao diện gọi xuống đây; đây gọi tiếp xuống dưới.</li>
+      <li><strong>Tầng thuật toán + dữ liệu</strong> — <code>rbda_priority_pipeline.py</code> và tệp <code>app.db</code>.</li>
+    </ul>
+    <p>Vì sao tách ra như vậy quan trọng: <strong>tầng thuật toán không biết gì về nút bấm, và không biết gì về SQLite khi đang tính.</strong> Nó nhận vào mấy cuốn từ điển Python, trả ra kết quả. Nhờ thế người ta kiểm tra nó được bằng test tự động mà không cần mở một cửa sổ nào — và nhờ thế phần lớn trong 756 ca test chạy xong mà không cần mở cửa sổ nào.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-head">
+      <strong>Sơ đồ 1 · Bản đồ tệp và luồng gọi</strong>
+      <span>Mũi tên liền = đường chạy bình thường. Mũi tên đứt đỏ = đường chỉ dùng khi hỏng.</span>
+    </div>
+    <div class="diagram-body">
+      <svg viewBox="0 0 880 610" width="880" role="img" aria-label="Sơ đồ kiến trúc: main.py mở cửa sổ pywebview hoặc trình duyệt, giao diện gọi api.py, api.py gọi thuật toán và app.db">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--slate)"/>
+          </marker>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rust)"/>
+          </marker>
+        </defs>
+
+        <rect x="280" y="14" width="320" height="46" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="440" y="34" class="d-tb" text-anchor="middle">Người vận hành</text>
+        <text x="440" y="51" class="d-ts" text-anchor="middle">bấm đúp PhanBoCauLacBo.exe</text>
+
+        <path d="M440,60 L440,88" class="d-arrow" marker-end="url(#ar)"/>
+
+        <rect x="300" y="90" width="280" height="52" rx="6" class="d-gold"/>
+        <text x="440" y="112" class="d-tb" text-anchor="middle">main.py</text>
+        <text x="440" y="130" class="d-ts" text-anchor="middle">điểm khởi động · dòng 126–153</text>
+
+        <path d="M440,142 L440,164" class="d-arrow"/>
+        <path d="M120,164 L760,164" class="d-arrow"/>
+        <path d="M120,164 L120,184" class="d-arrow" marker-end="url(#ar)"/>
+        <path d="M420,164 L420,184" class="d-arrow" marker-end="url(#ar)"/>
+        <path d="M760,164 L760,184" class="d-arrow-bad" marker-end="url(#arr)"/>
+
+        <rect x="14" y="186" width="212" height="66" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="120" y="208" class="d-tb" text-anchor="middle">Cửa sổ pywebview</text>
+        <text x="120" y="225" class="d-ts" text-anchor="middle">đường ƯU TIÊN</text>
+        <text x="120" y="242" class="d-ts" text-anchor="middle">main.py:85–106</text>
+
+        <rect x="252" y="186" width="336" height="66" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="420" y="208" class="d-tb" text-anchor="middle">browser_host.py</text>
+        <text x="420" y="225" class="d-ts" text-anchor="middle">máy chủ 127.0.0.1 + cửa sổ Chromium --app=</text>
+        <text x="420" y="242" class="d-ts" text-anchor="middle">DỰ PHÒNG, tự bật nếu trên hỏng · main.py:122</text>
+
+        <rect x="614" y="186" width="252" height="66" rx="6" class="d-rust"/>
+        <text x="740" y="208" class="d-tb" text-anchor="middle">recovery.html + recovery.py</text>
+        <text x="740" y="225" class="d-ts" text-anchor="middle">CHỈ khi app.db hỏng/mất</text>
+        <text x="740" y="242" class="d-ts" text-anchor="middle">main.py:139–148</text>
+
+        <path d="M120,252 L120,282" class="d-arrow" marker-end="url(#ar)"/>
+        <path d="M420,252 L420,282" class="d-arrow" marker-end="url(#ar)"/>
+
+        <rect x="14" y="284" width="574" height="62" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="301" y="308" class="d-tb" text-anchor="middle">index.html · app.js · i18n.js · style.css</text>
+        <text x="301" y="326" class="d-ts" text-anchor="middle">5 tab: Vận hành · Kết quả · Nhập tại chỗ · Quản lý CLB · Nhập điểm</text>
+
+        <path d="M301,346 L301,378" class="d-arrow" marker-end="url(#ar)"/>
+        <text x="311" y="366" class="d-ts">gọi window.pywebview.api.&lt;tên hàm&gt;(...)</text>
+
+        <rect x="14" y="380" width="574" height="62" rx="6" class="d-gold"/>
+        <text x="301" y="404" class="d-tb" text-anchor="middle">api.py · lớp PipelineAPI</text>
+        <text x="301" y="422" class="d-ts" text-anchor="middle">cầu nối JS ↔ Python · nạp tệp, chấm điểm, chạy phân bổ, xuất kết quả</text>
+
+        <path d="M588,411 L646,411" class="d-arrow" marker-end="url(#ar)"/>
+
+        <rect x="648" y="380" width="218" height="62" rx="6" class="d-moss"/>
+        <text x="757" y="401" class="d-tb" text-anchor="middle">rbda_priority_pipeline.py</text>
+        <text x="757" y="418" class="d-ts" text-anchor="middle">THUẬT TOÁN THUẦN</text>
+        <text x="757" y="434" class="d-ts" text-anchor="middle">không biết gì về nút bấm</text>
+
+        <path d="M301,442 L301,500" class="d-arrow" marker-end="url(#ar)"/>
+        <text x="311" y="474" class="d-ts">đọc/ghi qua connect_db()</text>
+        <path d="M757,442 L757,470 L470,470 L470,500" class="d-arrow" marker-end="url(#ar)"/>
+        <path d="M740,252 L740,266 L610,266 L610,516 L600,516" class="d-arrow-bad" marker-end="url(#arr)"/>
+
+        <rect x="200" y="502" width="400" height="58" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="400" y="525" class="d-tb" text-anchor="middle">app.db — SQLite, 9 bảng</text>
+        <text x="400" y="543" class="d-ts" text-anchor="middle">DEFAULT_SCHEMA · rbda_priority_pipeline.py:1173–1271</text>
+
+        <rect x="200" y="576" width="400" height="28" rx="4" class="d-fill-paper d-stroke"/>
+        <text x="400" y="594" class="d-ts" text-anchor="middle">app.db.bak-&lt;thời điểm&gt; — 10 bản sao lưu gần nhất</text>
+        <path d="M400,560 L400,574" class="d-arrow" marker-end="url(#ar)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="measure">
+    <h3>Vì sao có tận hai cách vẽ cửa sổ</h3>
+    <p>Đây không phải thừa thãi. Trên Windows, thư viện vẽ cửa sổ (<code>pywebview</code>) <strong>bắt buộc</strong> đi qua .NET Framework, và mắt xích đó đã hỏng thật trên máy người dùng sau khi đóng gói:</p>
+
+    <figure class="code">
+      <figcaption><span>Lỗi có thật, ghi trong README.md:155–158</span></figcaption>
+      <pre>RuntimeError: Failed to resolve Python.Runtime.Loader.Initialize
+from ...\_internal\pythonnet\runtime\Python.Runtime.dll</pre>
+    </figure>
+
+    <p>Chữ <strong>"from"</strong> trong câu lỗi là manh mối: tệp DLL <em>có mặt</em> — .NET tìm thấy nhưng từ chối nạp. Nguyên nhân tìm ra sau đó: Windows gắn một dấu vô hình "tải từ Internet" vào mọi tệp giải nén từ <code>.zip</code>, và .NET từ chối nạp thư viện mang dấu ấy. Phần mềm gỡ dấu đó ngay lúc khởi động, <strong>trước</strong> khi nạp thư viện vẽ cửa sổ <span class="cite">main.py:81–83</span> — đo trên máy thật: 173 tệp mang dấu, gỡ xong là mở được.</p>
+
+    <p>Nhưng lớp dự phòng vẫn ở đó. Nếu tầng cửa sổ chính vẫn hỏng vì lý do khác, <code>main.py</code> nuốt <em>mọi</em> loại lỗi rồi chuyển sang dựng cửa sổ bằng trình duyệt <span class="cite">main.py:107–123</span>. Hai điều đáng chú ý trong đoạn mã đó:</p>
+
+    <figure class="code">
+      <figcaption><span>main.py:104–123 (rút gọn)</span></figcaption>
+<pre>        webview.start()
+        return
+    <span class="hl">except BaseException:</span>
+        <span class="cm"># Nuot MOI loai loi (ke ca khong phai Exception) roi thu cach 2 —</span>
+        <span class="cm"># con mot duong chay duoc van hon la chet kem stack trace.</span>
+        chan_doan.ghi_ngoai_le(BASE_DIR, "cua so goc (pywebview) HONG, ...")
+    browser_host.serve(js_api, RESOURCE_DIR, page, ...)</pre>
+    </figure>
+
+    <ol>
+      <li>Bắt <code>BaseException</code> chứ không phải <code>Exception</code> — để bắt được cả những loại lỗi nằm ngoài nhánh thông thường.</li>
+      <li><strong>Ghi vết lỗi ra tệp</strong>, không ra màn hình đen. Bản đóng gói cho máy kiosk chạy ở chế độ không có cửa sổ dòng lệnh, nên in ra màn hình là vứt bỏ vết lỗi đúng lúc cần nó nhất <span class="cite">main.py:110–114</span>.</li>
+    </ol>
+
+    <p>Và <strong>giao diện không phải sửa một dòng nào</strong> để chạy trên đường dự phòng: <code>browser_host</code> chèn sẵn một đoạn JavaScript dựng lại <code>window.pywebview.api</code> giả lập, mỗi lời gọi biến thành một yêu cầu HTTP tới máy chủ cục bộ <span class="cite">README.md:208–212</span>.</p>
+  </div>
+
+  <div class="box judge">
+    <p class="box-title">Giám khảo hỏi — trả lời thế này</p>
+    <p><em>"Mở bằng trình duyệt thì có phải là một trang web ai cũng vào được không?"</em> — Không. Máy chủ chỉ lắng nghe trên <code>127.0.0.1</code>, tức chính máy đó, không ra mạng LAN. Mọi lời gọi phải kèm một mã ngẫu nhiên sinh lúc khởi động, để một trang web khác đang mở trong cùng trình duyệt không tự gọi vào được. Và các hàm nội bộ (tên bắt đầu bằng dấu gạch dưới) bị cấm gọi qua HTTP <span class="cite">README.md:214–222</span>.</p>
+    <p style="margin-bottom:0">Cửa sổ dùng cờ <code>--app=</code> nên <strong>không có thanh địa chỉ, không có tab, không có nút Back</strong> — học sinh ngồi ở máy kiosk không gõ sang trang khác được, và không nhìn thấy mã trong URL.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 2 ==================== -->
+<section class="chapter" id="c2">
+  <span class="chapnum">Chương 2</span>
+  <h2>Vòng đời một lần chạy</h2>
+  <p class="deck">Người vận hành bấm một nút. Bên dưới, sáu bước chạy theo đúng thứ tự này — và thứ tự đó không phải ngẫu nhiên.</p>
+
+  <div class="measure">
+    <p>Toàn bộ chương này nói về <strong>một hàm duy nhất</strong>: <code>PipelineAPI.run_pipeline</code> <span class="cite">api.py:681–1172</span>. Đây là hàm quan trọng nhất của phần mềm — chính chú thích trong mã cũng gọi nó như vậy <span class="cite">api.py:602–603</span>.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-head">
+      <strong>Sơ đồ 2 · Sáu bước của một lần chạy phân bổ</strong>
+      <span>Cột giữa = đường chạy thuận. Cột phải = chuyện gì xảy ra khi bước đó hỏng.</span>
+    </div>
+    <div class="diagram-body">
+      <svg viewBox="0 0 880 800" width="880" role="img" aria-label="Sơ đồ sáu bước: sao lưu, kiểm dữ liệu, bốc thăm, chạy thuật toán, ghi kết quả, xuất tệp, với các nhánh lỗi">
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--slate)"/>
+          </marker>
+          <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rust)"/>
+          </marker>
+        </defs>
+
+        <!-- BƯỚC 1 -->
+        <rect x="120" y="14" width="420" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="134" y="36" class="d-tb">BƯỚC 1/6 · SAO LƯU</text>
+        <text x="134" y="56" class="d-ts">connection.backup() — chụp app.db · api.py:615–646</text>
+        <path d="M540,42 L596,42" class="d-arrow" marker-end="url(#ar2)"/>
+        <rect x="598" y="18" width="270" height="48" rx="6" class="d-moss"/>
+        <text x="612" y="38" class="d-t">Hỏng → chỉ ghi cảnh báo,</text>
+        <text x="612" y="56" class="d-t"><tspan font-weight="600">vẫn chạy tiếp</tspan> · api.py:757–758</text>
+
+        <path d="M330,70 L330,96" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <!-- BƯỚC 2 -->
+        <rect x="120" y="98" width="420" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="134" y="120" class="d-tb">BƯỚC 2/6 · KIỂM DỮ LIỆU</text>
+        <text x="134" y="140" class="d-ts">validate_data_integrity() · pipeline:966 — bắt dữ liệu sai</text>
+        <path d="M540,126 L596,126" class="d-arrow-bad" marker-end="url(#arr2)"/>
+        <rect x="598" y="102" width="270" height="48" rx="6" class="d-rust"/>
+        <text x="612" y="122" class="d-t"><tspan font-weight="600">Có lỗi → DỪNG HẲN.</tspan></text>
+        <text x="612" y="140" class="d-t">Chưa bốc thăm nên chưa mất gì.</text>
+
+        <path d="M330,154 L330,180" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <!-- BƯỚC 3 -->
+        <rect x="120" y="182" width="420" height="52" rx="6" class="d-gold"/>
+        <text x="134" y="204" class="d-tb">BƯỚC 3/6 · SỐ BỐC THĂM</text>
+        <text x="134" y="223" class="d-ts">api.py:850–936 — ba nhánh, tuỳ khoá đã đóng hay chưa</text>
+
+        <path d="M330,234 L330,250" class="d-arrow"/>
+        <path d="M170,250 L594,250" class="d-arrow"/>
+        <path d="M170,250 L170,266" class="d-arrow" marker-end="url(#ar2)"/>
+        <path d="M382,250 L382,266" class="d-arrow" marker-end="url(#ar2)"/>
+        <path d="M594,250 L594,266" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <rect x="70" y="268" width="200" height="62" rx="5" class="d-fill-sunk d-stroke"/>
+        <text x="82" y="288" class="d-t"><tspan font-weight="600">Chưa khoá</tspan></text>
+        <text x="82" y="306" class="d-ts">vẽ số cho MỌI em,</text>
+        <text x="82" y="322" class="d-ts">rồi tự khoá lại ngay</text>
+
+        <rect x="282" y="268" width="200" height="62" rx="5" class="d-fill-sunk d-stroke"/>
+        <text x="294" y="288" class="d-t"><tspan font-weight="600">Đã khoá + có em mới</tspan></text>
+        <text x="294" y="306" class="d-ts">chèn ngẫu nhiên vào dàn số,</text>
+        <text x="294" y="322" class="d-ts">thứ tự em cũ GIỮ NGUYÊN</text>
+
+        <rect x="494" y="268" width="200" height="62" rx="5" class="d-fill-sunk d-stroke"/>
+        <text x="506" y="288" class="d-t"><tspan font-weight="600">Đã khoá, không em mới</tspan></text>
+        <text x="506" y="306" class="d-ts">dùng lại nguyên bộ số cũ,</text>
+        <text x="506" y="322" class="d-ts">không đụng vào gì</text>
+
+        <path d="M170,330 L170,344 L330,344" class="d-arrow"/>
+        <path d="M382,330 L382,344" class="d-arrow"/>
+        <path d="M594,330 L594,344 L330,344" class="d-arrow"/>
+        <path d="M330,344 L330,362" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <!-- BƯỚC 4 -->
+        <rect x="120" y="364" width="420" height="52" rx="6" class="d-moss"/>
+        <text x="134" y="386" class="d-tb">BƯỚC 4/6 · CHẠY THUẬT TOÁN</text>
+        <text x="134" y="405" class="d-ts">run_rbda_nhieu_buoi() · pipeline:827 — xem Chương 3</text>
+
+        <path d="M330,416 L330,438" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <rect x="120" y="440" width="420" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="134" y="461" class="d-tb">HAI CHỐT KIỂM — chạy xong MỚI được ghi</text>
+        <text x="134" y="480" class="d-ts">sanity_check_result():1687 + verify_stability():410</text>
+        <path d="M540,468 L596,468" class="d-arrow-bad" marker-end="url(#arr2)"/>
+        <rect x="598" y="440" width="270" height="56" rx="6" class="d-rust"/>
+        <text x="612" y="461" class="d-t"><tspan font-weight="600">Hỏng 1 trong 2 → ROLLBACK</tspan></text>
+        <text x="612" y="480" class="d-t">huỷ sạch, kể cả số vừa vẽ</text>
+
+        <path d="M330,496 L330,520" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <!-- BƯỚC 5 -->
+        <rect x="120" y="522" width="420" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="134" y="543" class="d-tb">BƯỚC 5/6 · GHI KẾT QUẢ</text>
+        <text x="134" y="562" class="d-ts">match_results + run_meta + run_history · api.py:978–1098</text>
+
+        <path d="M330,578 L330,600" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <!-- COMMIT -->
+        <rect x="90" y="602" width="480" height="52" rx="26" class="d-gold"/>
+        <text x="330" y="624" class="d-tb" text-anchor="middle">conn.commit() — ĐIỂM CHỐT DUY NHẤT của cả pipeline</text>
+        <text x="330" y="643" class="d-ts" text-anchor="middle">api.py:1104 · tới đây mọi thứ mới thật sự nằm trên đĩa</text>
+
+        <!-- rollback arrow -->
+        <path d="M598,468 L598,432 L594,432" class="d-arrow-bad"/>
+        <path d="M90,628 L26,628 L26,200 L114,200" class="d-arrow-bad" marker-end="url(#arr2)"/>
+        <text x="18" y="430" class="d-ts" transform="rotate(-90 18 430)" fill="var(--rust)">ROLLBACK — quay về trạng thái sạch</text>
+
+        <path d="M330,654 L330,678" class="d-arrow" marker-end="url(#ar2)"/>
+
+        <!-- BƯỚC 6 -->
+        <rect x="120" y="680" width="420" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="134" y="701" class="d-tb">BƯỚC 6/6 · XUẤT TỆP</text>
+        <text x="134" y="720" class="d-ts">match_results.csv, đọc lại TỪ CSDL · api.py:648–679</text>
+        <path d="M540,708 L596,708" class="d-arrow" marker-end="url(#ar2)"/>
+        <rect x="598" y="682" width="270" height="54" rx="6" class="d-moss"/>
+        <text x="612" y="703" class="d-t">Hỏng → kết quả trong CSDL</text>
+        <text x="612" y="721" class="d-t"><tspan font-weight="600">vẫn an toàn</tspan>, xuất lại bằng nút khác</text>
+
+        <path d="M330,736 L330,758" class="d-arrow" marker-end="url(#ar2)"/>
+        <rect x="120" y="760" width="420" height="34" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="330" y="782" class="d-tb" text-anchor="middle">XONG — giao diện hiện log từng bước</text>
+      </svg>
+    </div>
+  </div>
+
+  <h3>Vì sao thứ tự đúng là thứ tự này</h3>
+  <div class="measure">
+    <p>Ba chỗ trong thứ tự trên trông tuỳ tiện nhưng thật ra là <strong>quyết định đã cân nhắc</strong>, và lý do được ghi thẳng trong mã.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Chỗ đáng hỏi</th><th>Lý do, chép từ chú thích trong mã</th><th>Địa chỉ</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Kiểm dữ liệu đứng TRƯỚC bốc thăm</strong></td>
+          <td>"Sai ở đây thì dừng hẳn, không vẽ số bốc thăm. Vẽ rồi mới phát hiện dữ liệu hỏng là <em>đã tiêu mất một bộ số</em>."</td>
+          <td><span class="cite">api.py:774–775</span></td>
+        </tr>
+        <tr>
+          <td><strong>Sao lưu hỏng không chặn chạy</strong></td>
+          <td>"Sao lưu là lưới an toàn, KHÔNG phải điều kiện tiên quyết — mất bản sao còn hơn mất luôn khả năng phân bổ."</td>
+          <td><span class="cite">api.py:757–758</span></td>
+        </tr>
+        <tr>
+          <td><strong>Xuất tệp đứng SAU commit</strong></td>
+          <td>"CSV là sản phẩm phụ, lỗi ghi file không được phép khiến CSDL rơi vào trạng thái dở dang."</td>
+          <td><span class="cite">api.py:710–712</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>"Giao dịch" nghĩa là gì — giải thích bằng chuyện chuyển tiền</h3>
+  <div class="measure">
+    <p>Hãy tưởng tượng chuyển tiền: trừ 1 triệu ở tài khoản A, cộng 1 triệu vào tài khoản B. Nếu mất điện đúng lúc vừa trừ xong mà chưa cộng, tiền <strong>biến mất</strong>. Cách phòng là gói cả hai việc vào một "giao dịch": hoặc cả hai cùng xảy ra, hoặc <strong>không việc nào</strong> xảy ra.</p>
+
+    <p>Phần mềm này làm đúng thế. Vẽ số bốc thăm, khoá số, ghi kết quả, ghi nhật ký — tất cả nằm trong <strong>một kết nối duy nhất</strong>, và chỉ có <strong>đúng một</strong> lệnh <code>commit()</code> ở cuối <span class="cite">api.py:1104</span>. Nếu bất kỳ bước nào ở giữa hỏng, toàn bộ bị huỷ — kể cả số bốc thăm vừa vẽ.</p>
+
+    <p>Vì sao điều này quan trọng đến thế: nếu chỉ huỷ một nửa, cơ sở dữ liệu sẽ rơi vào trạng thái <em>"số bốc thăm đã khoá nhưng không có kết quả nào đi kèm"</em>. Lần chạy sau sẽ dùng bộ số đã khoá đó mà không ai biết nó đến từ một lần chạy thất bại <span class="cite">README.md:105–114</span>.</p>
+
+    <p>Và khối bắt lỗi bắt cả <strong>Ctrl+C</strong>:</p>
+
+    <figure class="code">
+      <figcaption><span>api.py:1135–1153 (rút gọn)</span></figcaption>
+<pre>        <span class="hl">except BaseException as e:</span>
+            <span class="cm"># KeyboardInterrupt/SystemExit KHONG ke thua tu Exception,</span>
+            <span class="cm"># nhung mot "crash giua chung" phai duoc rollback du no la loai nao</span>
+            if conn is not None:
+                conn.rollback()
+                conn.close()
+            if not isinstance(e, Exception):
+                <span class="hl">raise</span>   <span class="cm"># Ctrl+C: don dep xong thi NEM LAI, khong nuot</span></pre>
+    </figure>
+
+    <p>Một chi tiết nhỏ nhưng đúng: sau khi dọn dẹp, nếu đây là tín hiệu người dùng bấm Ctrl+C thì phần mềm <strong>ném lại</strong> tín hiệu đó thay vì nuốt nó thành một lỗi nghiệp vụ bình thường. Chương trình phải thoát thật khi được yêu cầu thoát.</p>
+  </div>
+
+  <div class="box judge">
+    <p class="box-title">Giám khảo hỏi — trả lời thế này</p>
+    <p style="margin-bottom:0"><em>"Nếu mất điện giữa lúc đang chạy thì sao?"</em> — Cơ sở dữ liệu quay về đúng trạng thái trước khi bấm nút, không sót nửa vời. Ngoài ra còn hai lớp nữa: một bản sao lưu vừa chụp ở Bước 1, và cấu hình <code>synchronous=FULL</code> bảo đảm khi <code>commit()</code> trả về thì dữ liệu đã nằm trên đĩa thật, không chỉ trong bộ nhớ đệm của hệ điều hành <span class="cite">rbda_priority_pipeline.py:1295</span>.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 3 ==================== -->
+<section class="chapter" id="c3">
+  <span class="chapnum">Chương 3 · phần dài nhất</span>
+  <h2>Trái tim: năm lớp cơ chế</h2>
+  <p class="deck">Bước 4 ở chương trước — "chạy thuật toán" — thật ra là năm cơ chế chồng lên nhau. Chương này mở từng lớp ra, mỗi lớp theo đúng ba mục: <em>ví dụ đời thường</em> → <em>mã làm gì</em> → <em>vì sao phải có</em>.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="num">#</th><th>Lớp</th><th>Hàm</th><th class="num">Dòng</th><th>Trả lời câu hỏi nào</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td><strong>Ghép cặp trì hoãn</strong></td><td><code>run_rbda</code></td><td class="num">275</td><td>Ai vào CLB nào?</td></tr>
+        <tr><td class="num">2</td><td><strong>Dự trữ mềm, xét hai lượt</strong></td><td><code>club_choice_function</code></td><td class="num">204</td><td>CLB chọn ai trong số đang nộp?</td></tr>
+        <tr><td class="num">3</td><td><strong>Bốc thăm dùng chung</strong></td><td><code>generate_stb_lottery</code></td><td class="num">1037</td><td>Hai em ngang nhau thì ai trước?</td></tr>
+        <tr><td class="num">4</td><td><strong>Ưu tiên hai tầng</strong></td><td><code>compute_club_priority</code></td><td class="num">116</td><td>CLB xếp hạng các em thế nào?</td></tr>
+        <tr><td class="num">5</td><td><strong>Kiểm chứng ổn định</strong></td><td><code>verify_stability</code></td><td class="num">410</td><td>Kết quả có ai phá được không?</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">Một cảnh báo về tài liệu cũ</p>
+    <p style="margin-bottom:0">Tệp <code>CO_CHE_THUAT_TOAN.md</code> trong repo ghi <code>run_rbda · dòng 207</code>. Con số đó <strong>đã lỗi thời</strong> — mã đã dài thêm từ khi tệp ấy được viết. Mọi số dòng trong báo cáo này được kiểm lại bằng <code>grep -n "^def " rbda_priority_pipeline.py</code> tại đúng lần commit hiện tại. Nếu giám khảo đối chiếu và thấy lệch, hãy chạy lại lệnh đó — chính tài liệu dặn làm vậy <span class="cite">CO_CHE_THUAT_TOAN.md:8–13</span>.</p>
+  </div>
+
+  <!-- ---------- LỚP 1 ---------- -->
+  <h3>Lớp 1 — Ghép cặp trì hoãn: "giữ tạm, chưa chốt"</h3>
+
+  <div class="measure">
+    <h4>Ví dụ đời thường</h4>
+    <p>Hình dung một buổi tuyển người vào đội bóng. Có 2 chỗ. Sáng nay ba bạn đến xin, huấn luyện viên chọn hai bạn tốt nhất. Nhưng ông <strong>không ký hợp đồng</strong> — ông chỉ nói "em cứ ngồi đây đã". Chiều có một bạn giỏi hơn đến. Ông cho bạn ấy vào, và bảo một trong hai bạn buổi sáng đứng dậy.</p>
+    <p>Chữ <strong>"trì hoãn"</strong> nằm đúng ở chỗ đó: <strong>giữ tạm chứ chưa chốt</strong>. Câu lạc bộ không quyết định dứt điểm cho tới vòng cuối cùng. Nhờ thế, một em giỏi xuất hiện muộn vẫn đẩy được em kém hơn ra — chứ không phải "đến trước được trước".</p>
+    <p>Em bị đẩy ra không mất trắng: em đi tiếp sang nguyện vọng thứ hai của mình, và ở đó lại cạnh tranh bình thường. Vòng lặp chạy tới khi không còn ai để đi tiếp.</p>
+  </div>
+
+  <!-- ===== MÔ PHỎNG 1 ===== -->
+  <div class="sim" id="sim1">
+    <div class="sim-head">
+      <strong>Mô phỏng 1 · Vòng lặp ghép cặp trì hoãn</strong>
+      <span>4 học sinh · 2 CLB · bấm để đi từng vòng</span>
+    </div>
+    <div class="sim-body">
+      <div class="narrate" id="s1-text"></div>
+      <div class="sim-stage">
+        <div class="club-card">
+          <h5>CLB Bóng rổ <span class="cap" id="s1-br-cap"></span></h5>
+          <p class="prio">Ưu tiên: An 9,0 → Chi 8,5 → Bình 7,0 → Dũng (không thi)</p>
+          <div id="s1-br"></div>
+        </div>
+        <div class="club-card">
+          <h5>CLB Cờ vua <span class="cap" id="s1-cv-cap"></span></h5>
+          <p class="prio">Ưu tiên: Bình 9,5 → Dũng 6,0 → An, Chi (không thi)</p>
+          <div id="s1-cv"></div>
+        </div>
+      </div>
+      <div class="bench">
+        <h5 id="s1-bench-title">Đang chờ / chưa có chỗ</h5>
+        <div class="chips" id="s1-bench"></div>
+      </div>
+      <div class="controls" style="margin-top:18px;">
+        <button type="button" class="ctl ghost" id="s1-prev">← Lùi</button>
+        <button type="button" class="ctl" id="s1-next">Bước tiếp →</button>
+        <button type="button" class="ctl ghost" id="s1-reset">Chạy lại</button>
+        <div class="step-pips" id="s1-pips"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box proof">
+    <p class="box-title">Mô phỏng này không phải vẽ tay</p>
+    <p style="margin-bottom:0">Kịch bản trên đã được <strong>chạy qua đúng hàm <code>run_rbda</code> thật</strong> của phần mềm, và kết quả trùng khít từng vòng: 3 vòng, nhật ký từ chối <code>[(1, Bình, bóng rổ), (2, Dũng, cờ vua), (3, Dũng, bóng rổ)]</code>, Dũng không có suất. Giám khảo muốn tự kiểm thì nạp đúng bốn em này vào phần mềm và chạy — không có con số nào ở đây được bịa để cho dễ nhìn.</p>
+  </div>
+
+  <div class="measure">
+    <h4>Mã làm gì</h4>
+    <p>Toàn bộ vòng lặp nằm ở <span class="cite">rbda_priority_pipeline.py:332–375</span>. Hai biến giữ toàn bộ trạng thái:</p>
+
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:307–309</span></figcaption>
+<pre><span class="hl">held</span>: dict[str, list[str]] = {cid: [] for cid in clubs}
+held_tier: dict[str, dict[str, str]] = {cid: {} for cid in clubs}
+<span class="hl">next_choice_idx</span>: dict[str, int] = {sid: 0 for sid in students}</pre>
+    </figure>
+
+    <ul>
+      <li><code>held</code> — <strong>danh sách em mỗi CLB đang giữ tạm</strong>. Đây chính là "em cứ ngồi đây đã". Nó bị ghi đè lại ở mỗi vòng <span class="cite">:364</span>.</li>
+      <li><code>next_choice_idx</code> — <strong>mỗi em hiện đang đề xuất vào nguyện vọng thứ mấy</strong>. Bị từ chối thì con số này cộng 1 <span class="cite">:368</span>.</li>
+    </ul>
+
+    <p>Mỗi vòng làm đúng hai việc: (a) mọi em chưa có chỗ gửi đề xuất vào nguyện vọng hiện tại của mình; (b) mỗi CLB gộp <em>em đang giữ</em> với <em>em vừa đến</em> thành một "bể" rồi chọn lại từ đầu:</p>
+
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:351–369 (rút gọn)</span></figcaption>
+<pre>for club_id, new_applicants in proposals.items():
+    <span class="hl">pool = held[club_id] + new_applicants</span>   <span class="cm"># em đang giữ + em vừa đến</span>
+    accepted, tier_of = club_choice_function(
+        pool, capacity, reserve_capacity, eligible_fn, rank)
+    rejected = [s for s in pool if s not in set(accepted)]
+    <span class="hl">held[club_id] = accepted</span>
+    for sid in rejected:
+        next_choice_idx[sid] += 1         <span class="cm"># đẩy sang nguyện vọng sau</span>
+        still_unassigned.append(sid)</pre>
+    </figure>
+
+    <p><strong>Chỗ then chốt là dòng <code>pool = held + new</code>.</strong> Em đang được giữ <em>không</em> được miễn cạnh tranh — mỗi vòng em lại bị đem ra xét lại cùng người mới. Đó là toàn bộ ý nghĩa của chữ "trì hoãn", gói trong một phép cộng danh sách.</p>
+
+    <h4>Vòng lặp có bao giờ chạy mãi không</h4>
+    <p>Không, và cận trên đã được đo chứ không phải đoán. Mỗi vòng, mỗi em chưa có chỗ tiến đúng <strong>một</strong> nguyện vọng. Nên số vòng tối đa bằng <strong>độ dài danh sách nguyện vọng dài nhất</strong> — 10 nguyện vọng thì 10 vòng <span class="cite">rbda_priority_pipeline.py:296–302</span>. Phần mềm chặn cứng 10 nguyện vọng mỗi buổi <span class="cite">:84</span>, còn trần trong mã đặt ở 1 000 — gấp 100 lần mức cần.</p>
+    <p>Và nếu chạm được trần đó, hàm <strong>ném lỗi thay vì trả kết quả</strong> <span class="cite">:382–389</span>. Lý do ghi ngay trên chỗ ném: kết quả lúc ấy dở dang, và người đọc sẽ nhận một câu báo lỗi nói sai nguyên nhân. "Nói thẳng ra ở đây rẻ hơn nhiều."</p>
+  </div>
+
+  <!-- ---------- LỚP 2 ---------- -->
+  <h3>Lớp 2 — Dự trữ mềm: câu lạc bộ xét hai lượt</h3>
+
+  <div class="measure">
+    <h4>Ví dụ đời thường</h4>
+    <p>CLB Bóng rổ có 3 chỗ, trong đó trường muốn <strong>để dành 1 chỗ</strong> cho học sinh diện chính sách. Cách làm: chia việc xét thành hai lượt.</p>
+    <ol>
+      <li><strong>Lượt dự trữ</strong> — chỉ nhìn các em thuộc diện, lấy nhiều nhất 1 em (đúng bằng số suất để dành).</li>
+      <li><strong>Lượt chung</strong> — nhìn <em>tất cả</em> những em còn lại, kể cả em thuộc diện chưa được suất dự trữ, lấp nốt các chỗ còn trống.</li>
+    </ol>
+    <p>Chữ <strong>"mềm"</strong> nghĩa là suất để dành <strong>không bị khoá cứng</strong>. Nếu không có em nào thuộc diện, chỗ ấy <em>tự</em> chuyển sang lượt chung — CLB vẫn tuyển đủ 3 em, không bỏ trống chỗ nào. Điều này nằm gọn trong một dòng:</p>
+
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:236–248</span></figcaption>
+<pre>reserve_candidates = sorted(
+    (s for s in pool if is_reserve_eligible_fn(s)),
+    key=lambda s: rank.get(s, len(rank)))
+reserve_held = reserve_candidates[:reserve_capacity]   <span class="cm"># LƯỢT 1</span>
+
+<span class="hl">general_capacity = capacity - len(reserve_held)</span>       <span class="cm"># ← chữ "mềm" ở đây</span>
+general_candidates = sorted(
+    (s for s in pool if s not in set(reserve_held)),
+    key=lambda s: rank.get(s, len(rank)))
+general_held = general_candidates[:general_capacity]   <span class="cm"># LƯỢT 2</span></pre>
+    </figure>
+
+    <p>Trừ đi <code>len(reserve_held)</code> — tức <em>số em thật sự lấy được</em> — chứ không trừ <code>reserve_capacity</code>. Nếu lượt 1 chỉ lấy được 0 em thì lượt 2 có trọn 3 chỗ. Nếu trừ theo số suất khai báo thì 1 chỗ sẽ mất trắng.</p>
+  </div>
+
+  <!-- ===== MÔ PHỎNG 2 ===== -->
+  <div class="sim" id="sim2">
+    <div class="sim-head">
+      <strong>Mô phỏng 2 · Hai lượt xét, và chỗ lý thuyết không mô tả nổi</strong>
+      <span>Sức chứa 3 · 1 suất dự trữ · ưu tiên A &gt; B &gt; C &gt; D</span>
+    </div>
+    <div class="sim-body">
+      <div class="narrate" id="s2-text"></div>
+      <div class="sim-stage" style="grid-template-columns:1fr;">
+        <div class="club-card">
+          <h5>Đang nộp vào CLB <span class="cap" id="s2-pool-cap"></span></h5>
+          <div class="chips" id="s2-pool" style="margin-bottom:14px;"></div>
+          <h5 style="font-size:13.5px; color:var(--slate); margin-bottom:8px;">Ba chỗ của CLB</h5>
+          <div id="s2-slots"></div>
+        </div>
+      </div>
+      <div class="bench">
+        <h5>Mô hình lý thuyết "một danh sách ưu tiên <em>Q<sub>j</sub></em>" sẽ nói gì</h5>
+        <div class="chips" id="s2-model"></div>
+      </div>
+      <div class="controls" style="margin-top:18px;">
+        <button type="button" class="ctl ghost" id="s2-prev">← Lùi</button>
+        <button type="button" class="ctl" id="s2-next">Bước tiếp →</button>
+        <button type="button" class="ctl ghost" id="s2-reset">Chạy lại</button>
+        <div class="step-pips" id="s2-pips"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box proof">
+    <p class="box-title">Đây là chỗ đắt giá nhất của cả dự án — và nó chạy lại được</p>
+    <p>Phần mềm có sẵn một tệp đo dựng đúng hai cảnh trên. Chạy:</p>
+    <figure class="code" style="margin:12px 0;"><pre>python3 du_lieu_test/do_hai_canh_du_tru.py</pre></figure>
+    <p style="margin-bottom:0">Đầu ra thật, đã chạy khi viết báo cáo này: <strong>Cảnh 1 → <code>['D','A','B']</code></strong> (mô hình nói <code>['A','B','C']</code> — <span class="bad">LỆCH</span>), <strong>Cảnh 2 → <code>['A','B','C']</code></strong> (<span class="ok">KHỚP</span>). Có 11 ca test canh bảng này <span class="cite">tests/test_hai_canh_du_tru.py</span>; gỡ cơ chế dự trữ ra thì 5 test đỏ.</p>
+  </div>
+
+  <div class="measure">
+    <h4>Vì sao điều này lớn đến vậy</h4>
+    <p>Sách giáo khoa về ghép cặp giả định mỗi câu lạc bộ có <strong>một danh sách ưu tiên cố định</strong>, thường ký hiệu là <em>Q<sub>j</sub></em>: cứ đọc từ trên xuống, lấy đủ số chỗ thì dừng. Mô phỏng vừa rồi cho thấy phần mềm này <strong>không hoạt động như vậy</strong>.</p>
+    <p>Cụ thể: <strong>cùng em C, cùng thứ hạng, cùng CLB, cùng sức chứa</strong> — cảnh 1 C trượt, cảnh 2 C đỗ. Cái duy nhất thay đổi là <em>D có mặt hay không</em>. Nghĩa là số phận của C không chỉ phụ thuộc thứ hạng của C, mà còn phụ thuộc <strong>ai khác đang nộp cùng lúc</strong>.</p>
+    <p><strong>Đây không phải lỗi.</strong> Đó chính xác là điều suất dự trữ sinh ra. Nhưng nó kéo theo một hệ quả bắt buộc, và hệ quả đó là Lớp 5 ở cuối chương: không thể kiểm tra tính đúng đắn bằng cách so với một bảng ưu tiên tĩnh nữa.</p>
+
+    <h4>Một lỗi đã mắc và đã sửa — chép nguyên từ chú thích trong mã</h4>
+    <p>Bản đầu tiên gộp lượt dự trữ và lượt chung thành <strong>một thứ tự tổng thể, tính một lần</strong> cho toàn bộ ứng viên. Chú thích dài 15 dòng ngay trên hàm giải thích vì sao đó là sai <span class="cite">rbda_priority_pipeline.py:188–202</span>:</p>
+    <blockquote style="border-left:3px solid var(--hairline-strong); padding-left:16px; margin:0 0 17px; color:var(--ink-soft);">
+      "Nếu học sinh eligible có ưu tiên cao nhất TOÀN CỤC lại KHÔNG xuất hiện trong pool thực tế của một vòng cụ thể (vd đã được giữ ở club khác), thứ tự tĩnh đó tính sai — nó để một học sinh KHÔNG eligible chen vào suất lẽ ra phải thuộc về học sinh eligible xếp hạng thấp hơn nhưng đang có mặt."
+    </blockquote>
+    <p>Nói gọn: <strong>việc phân nhóm dự trữ/chung phải tính lại ở mỗi vòng</strong>, theo đúng tập em đang có mặt lúc đó. Cái duy nhất tính một lần là <em>thứ hạng nền</em>, vì thứ hạng chỉ phụ thuộc điểm và số bốc thăm, không phụ thuộc ai đang nộp <span class="cite">:312–314</span>.</p>
+  </div>
+
+  <div class="box judge">
+    <p class="box-title">Giám khảo hỏi — trả lời thế này</p>
+    <p style="margin-bottom:0"><em>"Trường tôi không dùng suất dự trữ thì phần mềm có chạy được không?"</em> — Được, và đã đo. Đặt <code>reserve_capacity = 0</code> thì <code>reserve_held</code> thành danh sách rỗng, <code>general_capacity</code> bằng đúng sức chứa, và hàm lựa chọn thu về đúng "sắp theo thứ hạng, lấy K em đầu" — tức mô hình <em>Q<sub>j</sub></em> trở thành <strong>đúng</strong>. Tự kiểm bằng <code>python3 du_lieu_test/do_khong_du_tru.py</code>; có 7 ca test canh, trong đó một ca kiểm trên 200 bể ngẫu nhiên <span class="cite">CO_CHE_THUAT_TOAN.md:209–260</span>.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 3 (tiếp) ==================== -->
+<section class="chapter" id="c3b">
+  <span class="chapnum">Chương 3 · tiếp</span>
+  <h2>Ba lớp còn lại</h2>
+
+  <!-- ---------- LỚP 3 ---------- -->
+  <h3>Lớp 3 — Bốc thăm: một số duy nhất, dùng chung mọi câu lạc bộ</h3>
+
+  <div class="measure">
+    <h4>Ví dụ đời thường</h4>
+    <p>Ở tầng không thi tuyển, nhiều em <strong>ngang nhau hoàn toàn</strong> — không có điểm nào để phân biệt. Phải có cách phá hoà, và cách đó phải <strong>chạy lại ra đúng kết quả cũ</strong> để trường còn giải thích được với phụ huynh.</p>
+    <p>Cách làm: mỗi em rút <strong>một</strong> lá thăm, và lá đó <strong>dùng cho mọi CLB</strong>. Đó là nghĩa của chữ "single" trong Single Tie-Breaking — trái với việc mỗi CLB bốc một bộ thăm riêng. Số nhỏ = ưu tiên cao.</p>
+
+    <h4>Mã làm gì — và một dòng cứu cả tính tái lập</h4>
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:1045–1058</span></figcaption>
+<pre>rng = random.Random(seed)
+<span class="hl">shuffled = sorted(student_ids)</span>    <span class="cm"># ← SẮP XẾP TRƯỚC khi xáo</span>
+rng.shuffle(shuffled)
+return {sid: idx for idx, sid in enumerate(shuffled)}</pre>
+    </figure>
+
+    <p>Dòng <code>sorted()</code> trông vô hại nhưng nó là bản vá cho một lỗi thật. <code>random.shuffle</code> xáo <em>đúng danh sách được đưa vào</em>, mà hàm đọc bảng học sinh không có <code>ORDER BY</code> nên trả về theo <strong>thứ tự chèn</strong>. Không sắp thì cùng một trường, cùng hạt giống, nhập học sinh theo thứ tự khác là ra kết quả khác — <strong>đo được 6 trên 10 em đổi CLB</strong> <span class="cite">rbda_priority_pipeline.py:1046–1051</span>.</p>
+
+    <p>Vì sao đó là loại lỗi tệ nhất: thứ tự nhập <strong>không ai ghi lại và không màn hình nào hiện</strong>. Nó là một điều kiện ngầm không thể tái lập. Sau khi sắp xếp, bộ số bốc thăm phụ thuộc đúng hai thứ: <em>tập mã học sinh</em> và <em>hạt giống</em>.</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">Đừng bao giờ viết câu này trong báo cáo</p>
+    <p style="margin-bottom:0"><strong>SAI:</strong> <em>"số bốc thăm dựa trên mã học sinh"</em>. Câu đó vừa sai, vừa nghe như em tên A có lợi hơn em tên Z. Sắp xếp chỉ là bước chuẩn bị; xáo xong thì mã học sinh <strong>không còn vai trò gì</strong>, hoán vị vẫn ngẫu nhiên đều. <strong>ĐÚNG:</strong> <em>"bốc thăm không phụ thuộc thứ tự nhập liệu"</em>. Đã kiểm bằng số: tương quan giữa mã và số bốc thăm <strong>đổi dấu</strong> qua 8 khối hạt giống, tức chỉ là nhiễu <span class="cite">CO_CHE_THUAT_TOAN.md:100–108</span>.</p>
+  </div>
+
+  <div class="measure">
+    <h4>Em chuyển đến sau khi đã bốc thăm xong thì sao</h4>
+    <p>Đây là tình huống có thật ở trường, và cách xử lý đầu tiên đã <strong>sai nghiêm trọng</strong>.</p>
+    <p>Bản đầu cấp cho em mới số <code>MAX(stb) + 1</code>. Ghi chú trong mã lúc đó chỉ nói mục đích là <em>"tránh trùng số"</em>. Nhưng vì <strong>số nhỏ = ưu tiên cao</strong>, cách đó đặt em mới <strong>sau mọi em cũ, ở mọi CLB, vĩnh viễn</strong>. Với nhóm em đó, bốc thăm không còn tồn tại.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Thí nghiệm: 20 em cũ + 10 em mới tranh 10 suất, đều Tầng 2</th><th class="num">Em mới giành được</th></tr></thead>
+      <tbody>
+        <tr><td>Cách cũ (<code>MAX(stb)+1</code>), mọi hạt giống</td><td class="num bad">0</td></tr>
+        <tr><td>Công bằng thì kỳ vọng</td><td class="num">≈ 3,3</td></tr>
+        <tr><td>Sau khi sửa — 20 hạt giống: ít nhất 2, nhiều nhất 5</td><td class="num ok">trung bình 3,5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>Cách đang dùng: chọn ngẫu nhiên <em>k</em> vị trí trong <em>n + k</em> chỗ cho các em mới, phần còn lại giữ nguyên thứ tự cũ <span class="cite">rbda_priority_pipeline.py:1119–1131</span>. Hai điều được bảo đảm, cả hai đều có test canh:</p>
+    <ol>
+      <li><strong>Thứ tự tương đối giữa các em cũ không bao giờ đổi.</strong> Đây mới là lời hứa thật của việc khoá bộ số.</li>
+      <li><strong>Mỗi em mới rơi vào vị trí phân bố đều</strong> — có thể trên hoặc dưới em cũ, đúng nghĩa bốc thăm.</li>
+    </ol>
+    <p>Chú ý cách diễn đạt trong mã: lời hứa <strong>không phải</strong> "số tuyệt đối không đổi", vì số tuyệt đối không ai nhìn thấy — không hiện trên giao diện, không nằm trong tệp xuất, màn hình chấm điểm cố ý giấu <span class="cite">:1089–1094</span>. Có 13 ca test canh riêng cơ chế này <span class="cite">tests/test_chen_stb_cong_bang.py</span>.</p>
+  </div>
+
+  <!-- ---------- LỚP 4 ---------- -->
+  <h3>Lớp 4 — Ưu tiên hai tầng: em đã thi đứng trọn trước em không thi</h3>
+
+  <div class="measure">
+    <h4>Vì sao lớp này tồn tại</h4>
+    <p>Đây là lớp <strong>sinh ra từ hoàn cảnh trường</strong>, không có trong sách. Có CLB tổ chức thi tuyển, có CLB không. Một bài toán ghép cặp chuẩn không có chỗ cho tình huống hai loại CLB cùng tồn tại trong một đợt phân bổ.</p>
+    <p>Cách giải: mỗi CLB xếp các em thành <strong>hai tầng</strong>, và Tầng 1 luôn đứng <strong>trọn vẹn</strong> trước Tầng 2 — không xen kẽ.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Tầng</th><th>Gồm ai</th><th>Xếp theo gì</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tầng 1</strong></td><td>Em <strong>đã được chấm điểm</strong> cho CLB đó</td><td>Điểm giảm dần; <strong>hoà điểm mới tới</strong> số bốc thăm</td></tr>
+        <tr><td><strong>Tầng 2</strong></td><td>Em có đăng ký nhưng <strong>không thi</strong> CLB đó</td><td><strong>Thuần</strong> số bốc thăm</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>Toàn bộ lớp này gói trong bốn dòng:</p>
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:168–177</span></figcaption>
+<pre>tier1 = [sid for sid in applicants_for_club if sid <span class="hl">in</span> tested_scores_for_club]
+tier2 = [sid for sid in applicants_for_club if sid <span class="hl">not in</span> tested_scores_for_club]
+
+tier1_sorted = sorted(tier1,
+    key=lambda sid: (<span class="hl">-tested_scores_for_club[sid]</span>, stb_lottery[sid]))
+tier2_sorted = sorted(tier2, key=lambda sid: stb_lottery[sid])
+
+return <span class="hl">tier1_sorted + tier2_sorted</span>   <span class="cm"># nối đuôi, không trộn</span></pre>
+    </figure>
+    <p>Dấu trừ trước điểm là để sắp <em>giảm dần</em> (điểm cao lên trước), trong khi số bốc thăm sắp <em>tăng dần</em> (số nhỏ lên trước). Một dòng mang cả hai chiều.</p>
+
+    <h4>Ràng buộc quan trọng nhất của cả phần mềm</h4>
+    <p>Docstring của hàm này ghi một điều cấm, viết hoa:</p>
+
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:131–137</span></figcaption>
+<pre>RÀNG BUỘC BẮT BUỘC (chống nội sinh / endogeneity):
+    Hàm này <span class="hl">KHÔNG được nhận bất kỳ tham số nào liên quan đến</span>
+    <span class="hl">thứ hạng nguyện vọng (preference rank) của học sinh.</span>
+    Nếu sau này cần mở rộng, TUYỆT ĐỐI không truyền `preferences`
+    vào hàm này dưới bất kỳ hình thức nào.</pre>
+    </figure>
+
+    <p><strong>Vì sao cấm.</strong> Nếu CLB biết em xếp mình là nguyện vọng thứ mấy rồi ưu tiên em nào đặt mình lên đầu, thì em nào <em>khai thật</em> sẽ bị thiệt — em học được rằng phải "đặt cược" nguyện vọng 1 vào CLB dễ đỗ. Đó chính là cái bệnh mà cả dự án được dựng lên để chữa (xem Chương 0, chỗ hỏng số 2).</p>
+
+    <p>Và đây <strong>không phải lời hứa suông</strong>. Nó đã được đo bằng cách vét cạn mọi cách khai gian có thể:</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Cơ chế</th><th class="num">Em khai gian mà có lợi</th><th class="num">Trên tổng</th><th class="num">Tỉ lệ</th></tr></thead>
+      <tbody>
+        <tr><td><strong>RB-DA (phần mềm này)</strong></td><td class="num ok">0</td><td class="num">1 400</td><td class="num ok">0,0 %</td></tr>
+        <tr><td>Boston / nhận ngay (cách nhiều nơi dùng)</td><td class="num bad">258</td><td class="num">1 400</td><td class="num bad">18,43 %</td></tr>
+        <tr><td>TTC</td><td class="num ok">0</td><td class="num">1 400</td><td class="num ok">0,0 %</td></tr>
+        <tr><td>Xét theo bốc thăm</td><td class="num ok">0</td><td class="num">1 400</td><td class="num ok">0,0 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>Nguồn số: <code>du_lieu_test/so_lieu_khai_that.json</code>, sinh bởi <code>python3 du_lieu_test/do_khai_that.py</code> — 200 thể hiện, mỗi em thử mọi cách khai. Không con số nào gõ tay; chính tệp JSON ghi dòng đầu <em>"Sinh bởi do_khai_that.py — KHÔNG sửa tay."</em></p>
+  </div>
+
+  <!-- ---------- LỚP 5 ---------- -->
+  <h3>Lớp 5 — Kiểm chứng: tự bắt lỗi chính mình trước khi ghi</h3>
+
+  <div class="measure">
+    <h4>"Cặp phá vỡ" là gì</h4>
+    <p>Một kết quả phân bổ bị coi là <strong>hỏng</strong> nếu tồn tại một cặp (em <em>s</em>, câu lạc bộ <em>c</em>) mà:</p>
+    <ul>
+      <li>em <em>s</em> thích <em>c</em> hơn chỗ mình đang được xếp, <strong>và</strong></li>
+      <li>câu lạc bộ <em>c</em> — nếu được chọn lại — <strong>sẽ nhận</strong> em <em>s</em>.</li>
+    </ul>
+    <p>Nghĩa là cả hai bên cùng muốn đổi. Cặp như vậy gọi là <strong>cặp phá vỡ</strong>, và sự tồn tại của nó là bằng chứng kết quả sai. Phần mềm quét <strong>mọi</strong> cặp như thế trước khi ghi bất cứ gì xuống đĩa.</p>
+
+    <h4>Cách kiểm — và vì sao phải kiểm kiểu này</h4>
+    <p>Cách thường gặp là so kết quả với một <em>bảng ưu tiên tĩnh</em>. <strong>Không dùng được ở đây</strong> — Lớp 2 vừa chứng minh hàm lựa chọn không phải một thứ tự tuyến tính. Cách cũ dùng bảng tĩnh <strong>đã bị phát hiện sai</strong> khi đối chiếu với bản tham chiếu <span class="cite">rbda_priority_pipeline.py:420–424</span>.</p>
+    <p>Cách phần mềm làm thay vào đó rất thẳng: <strong>thử thật</strong>.</p>
+
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:464–476 (rút gọn)</span></figcaption>
+<pre><span class="hl">trial_pool = holders + [sid]</span>       <span class="cm"># thêm em s vào tập CLB đang giữ</span>
+accepted, _ = <span class="hl">club_choice_function</span>(   <span class="cm"># chạy lại ĐÚNG hàm lựa chọn thật</span>
+    trial_pool, capacity, reserve_capacity, eligible_fn, rank)
+if sid in accepted:
+    problems.append(err("blocking_pair", student_id=sid, club_id=candidate_cid, ...))</pre>
+    </figure>
+
+    <p>Nó không suy luận. Nó <strong>gọi lại chính hàm mà CLB dùng để chọn người</strong>, với em nghi vấn thêm vào, rồi xem em có nằm trong danh sách được nhận không. Đây là định nghĩa tổng quát của tính ổn định, đúng cả khi hàm lựa chọn không phải một thứ tự tuyến tính.</p>
+    <p>Chốt này chạy ở Bước 4 của pipeline, <strong>trước</strong> lệnh ghi. Tìm thấy dù chỉ một cặp là toàn bộ giao dịch bị huỷ <span class="cite">api.py:962–971</span>.</p>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">Chỗ giám khảo bắt lỗi được ngay — đừng lẫn hai khái niệm</p>
+    <div class="tablewrap" style="margin:12px 0 0;">
+      <table>
+        <thead><tr><th></th><th>Gồm những ai</th><th>Nghĩa là gì</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Cặp phá vỡ</strong><br>(blocking pair)</td><td>1 học sinh + 1 <strong>câu lạc bộ</strong></td><td>Kết quả <strong>không ổn định</strong> → <span class="bad">LỖI PHẦN MỀM</span></td></tr>
+          <tr><td><strong>Cặp đôi cùng có lợi</strong></td><td>2 <strong>học sinh</strong></td><td>Không tối ưu Pareto → <strong>đánh đổi đã biết</strong>, không phải lỗi</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin:14px 0 0;">Phần mềm có <strong>0 cặp phá vỡ</strong> ở mọi phép đo. Nhưng nó <strong>có</strong> cặp đôi cùng có lợi — hai em đổi chỗ cho nhau thì <em>cả hai cùng lên</em> nguyện vọng cao hơn, mà thuật toán không cho, vì đổi như vậy phá mất tính ổn định. Trên bộ 140 em đo được <strong>85 cặp</strong> như vậy <span class="cite">CO_CHE_THUAT_TOAN.md:292–296</span>.</p>
+    <p style="margin:12px 0 0;"><strong>Đây là đánh đổi bắt buộc của mọi thuật toán ghép cặp giữ tính ổn định</strong>, không phải khuyết điểm của bản cài đặt này. Và nó <strong>không</strong> do bốc thăm gây ra: khi bỏ hết điểm để bốc thăm quyết định 100%, số cặp lại <em>ít nhất</em> (90,2 → 4,1) — ngược hẳn với cách đọc "tại bốc thăm" <span class="cite">CO_CHE_THUAT_TOAN.md:319–342</span>.</p>
+  </div>
+
+  <div class="measure">
+    <h4>Còn một chốt nữa trước chốt này</h4>
+    <p><code>sanity_check_result</code> <span class="cite">rbda_priority_pipeline.py:1687</span> kiểm bốn bất biến đơn giản hơn, chạy cùng lúc:</p>
+    <ol>
+      <li>Không CLB nào vượt sức chứa.</li>
+      <li>Không CLB nào có số suất <em>diện dự trữ</em> vượt số suất dự trữ khai báo.</li>
+      <li>Mỗi học sinh chỉ được xếp vào đúng 1 CLB (hoặc không CLB nào).</li>
+      <li>CLB được gán <strong>phải nằm trong danh sách nguyện vọng</strong> của em đó.</li>
+    </ol>
+    <p>Điều 4 nghe hiển nhiên nhưng nó là chốt chặn cuối cùng cho câu hỏi "phần mềm có tự ý nhét em vào CLB em không đăng ký không?" — câu trả lời là không, và có một phép kiểm chạy ở mỗi lần bấm nút.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 4 ==================== -->
+<section class="chapter" id="c4">
+  <span class="chapnum">Chương 4</span>
+  <h2>Xếp cả tuần, không chỉ một buổi</h2>
+  <p class="deck">Trường sinh hoạt CLB nhiều buổi trong tuần. Phần mềm giải bài toán tuần bằng cách <strong>không</strong> giải một bài toán mới.</p>
+
+  <div class="measure">
+    <p>Mỗi CLB sinh hoạt đúng <strong>một</strong> buổi. Hai CLB cùng buổi là trùng giờ, nên một em chỉ vào được một trong hai. Mỗi em tối đa một CLB mỗi buổi, và <strong>không có trần số CLB mỗi tuần</strong>.</p>
+    <p>Ba điều đó cộng lại cho một kết luận mạnh: <strong>các buổi hoàn toàn độc lập với nhau.</strong> Không ràng buộc nào nối thứ Hai với thứ Năm. Nên bài toán tuần không phải một bài toán lớn hơn — nó là <em>N bản sao độc lập của bài toán đã giải</em> <span class="cite">rbda_priority_pipeline.py:485–503</span>.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-head">
+      <strong>Sơ đồ 3 · Cắt → gọi → ghép</strong>
+      <span>Không hàm nào ở đây đụng vào logic ưu tiên hay logic dự trữ.</span>
+    </div>
+    <div class="diagram-body">
+      <svg viewBox="0 0 840 340" width="840" role="img" aria-label="Sơ đồ: dữ liệu cả tuần được cắt theo buổi, mỗi buổi gọi run_rbda riêng, rồi ghép kết quả">
+        <defs><marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--slate)"/></marker></defs>
+
+        <rect x="20" y="120" width="164" height="86" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="102" y="150" class="d-tb" text-anchor="middle">Dữ liệu cả tuần</text>
+        <text x="102" y="170" class="d-ts" text-anchor="middle">mọi CLB, mọi em,</text>
+        <text x="102" y="186" class="d-ts" text-anchor="middle">mọi nguyện vọng</text>
+
+        <path d="M184,163 L232,163" class="d-arrow" marker-end="url(#ar3)"/>
+        <text x="208" y="152" class="d-ts" text-anchor="middle">cắt</text>
+
+        <rect x="234" y="22" width="188" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="328" y="44" class="d-t" text-anchor="middle">Dữ liệu buổi thứ Hai</text>
+        <text x="328" y="63" class="d-ts" text-anchor="middle">cat_du_lieu_theo_buoi · 657</text>
+
+        <rect x="234" y="94" width="188" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="328" y="116" class="d-t" text-anchor="middle">Dữ liệu buổi thứ Ba</text>
+        <text x="328" y="135" class="d-ts" text-anchor="middle">nguyện vọng được LỌC</text>
+
+        <rect x="234" y="166" width="188" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="328" y="196" class="d-tb" text-anchor="middle">…</text>
+
+        <rect x="234" y="238" width="188" height="56" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="328" y="260" class="d-t" text-anchor="middle">Dữ liệu buổi thứ Sáu</text>
+        <text x="328" y="279" class="d-ts" text-anchor="middle">tách rời hoàn toàn</text>
+
+        <path d="M184,163 L208,163 L208,50 L230,50" class="d-arrow" marker-end="url(#ar3)"/>
+        <path d="M208,122 L230,122" class="d-arrow" marker-end="url(#ar3)"/>
+        <path d="M208,194 L230,194" class="d-arrow" marker-end="url(#ar3)"/>
+        <path d="M208,163 L208,266 L230,266" class="d-arrow" marker-end="url(#ar3)"/>
+
+        <path d="M422,50 L468,50" class="d-arrow" marker-end="url(#ar3)"/>
+        <path d="M422,122 L468,122" class="d-arrow" marker-end="url(#ar3)"/>
+        <path d="M422,194 L468,194" class="d-arrow" marker-end="url(#ar3)"/>
+        <path d="M422,266 L468,266" class="d-arrow" marker-end="url(#ar3)"/>
+
+        <rect x="470" y="22" width="166" height="56" rx="6" class="d-moss"/>
+        <text x="553" y="49" class="d-t" text-anchor="middle">run_rbda()</text>
+        <text x="553" y="67" class="d-ts" text-anchor="middle">nguyên vẹn, không sửa</text>
+        <rect x="470" y="94" width="166" height="56" rx="6" class="d-moss"/>
+        <text x="553" y="121" class="d-t" text-anchor="middle">run_rbda()</text>
+        <text x="553" y="139" class="d-ts" text-anchor="middle">nguyên vẹn, không sửa</text>
+        <rect x="470" y="166" width="166" height="56" rx="6" class="d-moss"/>
+        <text x="553" y="199" class="d-tb" text-anchor="middle">…</text>
+        <rect x="470" y="238" width="166" height="56" rx="6" class="d-moss"/>
+        <text x="553" y="265" class="d-t" text-anchor="middle">run_rbda()</text>
+        <text x="553" y="283" class="d-ts" text-anchor="middle">nguyên vẹn, không sửa</text>
+
+        <path d="M636,50 L668,50 L668,140" class="d-arrow"/>
+        <path d="M636,122 L668,122" class="d-arrow"/>
+        <path d="M636,194 L668,194" class="d-arrow"/>
+        <path d="M636,266 L668,266 L668,186" class="d-arrow"/>
+        <path d="M668,163 L700,163" class="d-arrow" marker-end="url(#ar3)"/>
+        <text x="684" y="152" class="d-ts" text-anchor="middle">ghép</text>
+
+        <rect x="702" y="120" width="132" height="86" rx="6" class="d-gold"/>
+        <text x="768" y="150" class="d-tb" text-anchor="middle">KetQuaTuan</text>
+        <text x="768" y="170" class="d-ts" text-anchor="middle">{em: {buổi: CLB}}</text>
+        <text x="768" y="186" class="d-ts" text-anchor="middle">pipeline:792</text>
+
+        <rect x="20" y="304" width="814" height="30" rx="5" class="d-fill-sunk d-stroke"/>
+        <text x="427" y="323" class="d-t" text-anchor="middle">Hệ quả: mọi tính chất đã đo cho một buổi — ổn định, tối ưu cho học sinh, khai thật có lợi nhất — tự động đúng cho cả tuần.</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="measure">
+    <h3>Chỗ tinh tế nhất của cả tệp — nguyện vọng được lọc, không đánh số lại</h3>
+    <p>Chính chú thích trong mã gọi đây là "chỗ tinh tế nhất". Khi cắt dữ liệu xuống một buổi, danh sách nguyện vọng của một em được <strong>lọc</strong>:</p>
+    <figure class="code">
+      <figcaption><span>rbda_priority_pipeline.py:683–686</span></figcaption>
+<pre>prefs_b = {
+    sid: <span class="hl">[cid for cid in ds if cid in tap]</span>
+    for sid, ds in preferences.items()
+}</pre>
+    </figure>
+    <p>Chỉ giữ lại CLB thuộc buổi này, <strong>không đánh số thứ hạng lại</strong>. Vì sao thế là đủ: <em>lọc một dãy đã sắp thì phần còn lại vẫn đúng thứ tự</em>. Nhờ vậy cách này cho đúng thứ tự nguyện vọng trong buổi, bất kể cột <code>rank</code> trong cơ sở dữ liệu đang là thứ hạng toàn cục (dữ liệu nhập bằng bản cũ) hay thứ hạng trong buổi (bộ cột mới) — <strong>không cần di trú dữ liệu</strong>, và hai kiểu dữ liệu sống chung được trong cùng một CSDL <span class="cite">:665–677</span>.</p>
+
+    <h3>Ba thiết kế bốc thăm — một để dùng, hai để đo</h3>
+    <p>Khi có nhiều buổi, câu hỏi mới xuất hiện: <em>dùng chung một bộ thăm cho cả tuần, hay bốc lại mỗi buổi?</em> Phần mềm chạy <strong>duy nhất</strong> một thiết kế, và lựa chọn ấy dựa trên phép đo chứ không dựa trên cảm tính.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Thiết kế</th><th>Làm gì</th><th>Trạng thái</th><th>Vì sao</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>stb_ngay</code></td>
+          <td>Hoán vị vị trí trong dàn số, mỗi buổi một hoán vị riêng</td>
+          <td><strong class="ok">ĐANG DÙNG</strong></td>
+          <td>May rủi <strong>san đều</strong> qua các ngày. Không thua thiết kế kia ở ô nào đã đo</td>
+        </tr>
+        <tr>
+          <td><code>stb_tuan</code></td>
+          <td>Dùng thẳng một bộ số cho mọi buổi</td>
+          <td>chỉ để đối chứng</td>
+          <td>Em số xấu đứng cuối Tầng 2 ở <em>mọi</em> buổi — may rủi <strong>cộng dồn</strong></td>
+        </tr>
+        <tr>
+          <td><code>stb_co_bu</code></td>
+          <td>Em đang có ít CLB hơn được lên trước</td>
+          <td><strong class="bad">ĐÃ BỊ LOẠI</strong></td>
+          <td>Mở kênh khai gian có thật: <strong>113/300</strong> em giấu bớt buổi thì có lợi</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>Chi tiết đáng chú ý ở dòng cuối bảng: <code>stb_co_bu</code> <em>nghe rất công bằng</em> — ai đang thiệt thì được ưu tiên. Nhưng nó làm ưu tiên buổi sau phụ thuộc <strong>kết cục</strong> buổi trước, mà kết cục lại phụ thuộc nguyện vọng đã khai. Tức là nó mở đúng cái kênh mà cả dự án được dựng lên để bịt: <em>một em có thể cố ý bỏ trống buổi đầu để giành ưu tiên buổi sau</em>. Chú thích trong mã viết thẳng: <strong>"ĐỪNG NHẦM ĐÂY LÀ MỘT CẢI TIẾN"</strong> <span class="cite">rbda_priority_pipeline.py:775–785</span>.</p>
+    <p>Hai thiết kế bị loại vẫn còn trong mã, nhưng <strong>không có đường nào từ giao diện gọi tới chúng</strong>, và hàm <code>run_pipeline</code> thậm chí không nhận tham số chế độ. Có test canh chính chữ ký hàm đó <span class="cite">tests/test_nhieu_buoi.py::TestMotThietKeDuyNhat</span>. Chúng ở lại vì chúng là <strong>dụng cụ đo</strong>: không có chúng thì không chạy lại được phép đo đã dùng để chọn thiết kế đang dùng.</p>
+
+    <h3>Hai lỗi im lặng đã bị bắt ở tính năng này</h3>
+    <ol>
+      <li><strong>Trần nguyện vọng từng đếm cho cả tuần.</strong> Em nào chọn 2 CLB mỗi buổi qua sáu buổi là 12 nguyện vọng, vượt trần 10, và bước nạp <strong>bỏ qua trọn em đó</strong>. Đo được: <strong>31 trên 180 em</strong> bị gạt khỏi đợt xếp mà nhìn màn hình Kết quả thì y như em trượt <span class="cite">rbda_priority_pipeline.py:64–80</span>. Nay đếm theo từng buổi.</li>
+      <li><strong>Dùng <code>hash()</code> của Python để sinh hạt giống cho mỗi buổi.</strong> Từ Python 3.3, <code>hash()</code> của chuỗi được ngẫu nhiên hoá theo <em>từng tiến trình</em> — cùng dữ liệu cùng hạt giống cho hai kết quả khác nhau ở hai lần mở máy. Với một phần mềm mà tính minh bạch dựa trên "chạy lại ra đúng số cũ" thì đó là lỗi chí mạng, và là loại lỗi im lặng. Nay dùng <code>crc32</code>, cho cùng một số trên mọi máy <span class="cite">rbda_priority_pipeline.py:690–704</span>.</li>
+    </ol>
+  </div>
+
+  <div class="box judge">
+    <p class="box-title">Giám khảo hỏi — trả lời thế này</p>
+    <p style="margin-bottom:0"><em>"Trường tôi chỉ sinh hoạt một buổi thì có phải dùng phần mềm khác không?"</em> — Không, và kết quả <strong>trùng khít</strong> phần mềm trước khi có tính năng nhiều buổi. Khi chỉ có một buổi, hàm sinh bộ số bốc thăm đi vào nhánh ngắn mạch và trả về đúng bộ số đã khoá <span class="cite">rbda_priority_pipeline.py:749–751</span>, còn <code>run_rbda_nhieu_buoi</code> gọi <code>run_rbda</code> đúng một lần. Có test canh sự trùng khít ấy trên <strong>ba bộ dữ liệu × 20 hạt giống</strong> <span class="cite">tests/test_nhieu_buoi.py::TestTrungKhit</span>.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 5 ==================== -->
+<section class="chapter" id="c5">
+  <span class="chapnum">Chương 5</span>
+  <h2>Dữ liệu vào và ra</h2>
+  <p class="deck">Chín cái bảng trong một tệp <code>app.db</code>. Biết chín bảng này là biết phần mềm nhớ những gì.</p>
+
+  <div class="measure">
+    <p>Toàn bộ dữ liệu nằm trong <strong>một tệp duy nhất</strong> tên <code>app.db</code>, đặt cạnh tệp chạy. Chép tệp đó sang USB là chép được cả đợt phân bổ. Định nghĩa của chín bảng nằm trong một chuỗi văn bản duy nhất <span class="cite">rbda_priority_pipeline.py:1173–1271</span>, và chính chú thích đầu tệp tuyên bố đó là <strong>"nguồn sự thật duy nhất"</strong>, không có tệp schema nào khác <span class="cite">:9–12</span>.</p>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-head">
+      <strong>Sơ đồ 4 · Chín bảng của app.db</strong>
+      <span>Bên trái: đường dữ liệu chính. Bên phải: ba bảng phục vụ kiểm toán, không tham gia tính toán.</span>
+    </div>
+    <div class="diagram-body">
+      <svg viewBox="0 0 860 480" width="860" role="img" aria-label="Sơ đồ chín bảng cơ sở dữ liệu: students, clubs, club_test_selection, club_scores, preferences, match_results, run_meta, run_history, stb_lock">
+        <defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--slate)"/></marker></defs>
+
+        <text x="20" y="22" class="d-ts">TRƯỜNG KHAI BÁO</text>
+        <rect x="20" y="30" width="258" height="92" rx="6" class="d-gold"/>
+        <text x="34" y="52" class="d-tb">students</text>
+        <text x="34" y="72" class="d-ts">student_id · name</text>
+        <text x="34" y="89" class="d-ts">stb_number ← số bốc thăm</text>
+        <text x="34" y="106" class="d-ts">reserve_group ← nhãn diện ưu tiên</text>
+
+        <rect x="298" y="30" width="262" height="92" rx="6" class="d-gold"/>
+        <text x="312" y="52" class="d-tb">clubs</text>
+        <text x="312" y="72" class="d-ts">club_id · name · capacity</text>
+        <text x="312" y="89" class="d-ts">reserve_capacity · reserve_group</text>
+        <text x="312" y="106" class="d-ts">buoi ← NULL = trường một buổi</text>
+
+        <path d="M149,122 L149,152" class="d-arrow" marker-end="url(#ar4)"/>
+        <path d="M429,122 L429,152" class="d-arrow" marker-end="url(#ar4)"/>
+
+        <text x="20" y="146" class="d-ts">HỌC SINH KHAI · THẦY CÔ CHẤM</text>
+        <rect x="20" y="154" width="170" height="80" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="32" y="176" class="d-tb">club_test_selection</text>
+        <text x="32" y="196" class="d-ts">em tick "muốn thi"</text>
+        <text x="32" y="213" class="d-ts">khoá: (em, CLB)</text>
+        <text x="32" y="229" class="d-ts">trần 5 CLB/buổi</text>
+
+        <rect x="200" y="154" width="170" height="80" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="212" y="176" class="d-tb">club_scores</text>
+        <text x="212" y="196" class="d-ts">điểm chấm mù</text>
+        <text x="212" y="213" class="d-ts">CÓ ở đây = Tầng 1</text>
+        <text x="212" y="229" class="d-ts">VẮNG = Tầng 2</text>
+
+        <rect x="380" y="154" width="180" height="80" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="392" y="176" class="d-tb">preferences</text>
+        <text x="392" y="196" class="d-ts">nguyện vọng đã xếp hạng</text>
+        <text x="392" y="213" class="d-ts">cột rank</text>
+        <text x="392" y="229" class="d-ts">trần 10 NV/buổi</text>
+
+        <path d="M105,234 L105,262 L290,262 L290,300" class="d-arrow"/>
+        <path d="M285,234 L285,262" class="d-arrow"/>
+        <path d="M470,234 L470,262 L290,262" class="d-arrow"/>
+        <path d="M290,262 L290,302" class="d-arrow" marker-end="url(#ar4)"/>
+        <text x="300" y="284" class="d-ts">run_pipeline() tính ra</text>
+
+        <text x="140" y="296" class="d-ts">KẾT QUẢ</text>
+        <rect x="140" y="304" width="300" height="86" rx="6" class="d-moss"/>
+        <text x="154" y="326" class="d-tb">match_results</text>
+        <text x="154" y="346" class="d-ts">KHOÁ CHÍNH: (student_id, buoi)</text>
+        <text x="154" y="363" class="d-ts">club_id (NULL = không có suất buổi đó)</text>
+        <text x="154" y="380" class="d-ts">matched_tier · rank_in_student_pref</text>
+
+        <rect x="140" y="414" width="300" height="50" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="290" y="435" class="d-t" text-anchor="middle">Khoá chính đôi TỰ NÓ canh ràng buộc</text>
+        <text x="290" y="453" class="d-t" text-anchor="middle">"mỗi em tối đa MỘT CLB mỗi buổi"</text>
+        <path d="M290,390 L290,412" class="d-arrow" marker-end="url(#ar4)"/>
+
+        <line x1="586" y1="20" x2="586" y2="464" class="d-stroke" stroke-dasharray="4 5"/>
+
+        <text x="606" y="22" class="d-ts">DẤU VẾT KIỂM TOÁN</text>
+        <rect x="606" y="30" width="236" height="66" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="618" y="52" class="d-tb">run_meta</text>
+        <text x="618" y="72" class="d-ts">ĐÚNG 1 dòng, luôn ghi đè</text>
+        <text x="618" y="89" class="d-ts">= lần chạy GẦN NHẤT</text>
+
+        <rect x="606" y="112" width="236" height="82" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="618" y="134" class="d-tb">run_history</text>
+        <text x="618" y="154" class="d-ts">THÊM dòng mỗi lần chạy,</text>
+        <text x="618" y="171" class="d-ts">KHÔNG BAO GIỜ xoá/ghi đè</text>
+        <text x="618" y="188" class="d-ts">reset_data cũng không xoá</text>
+
+        <rect x="606" y="210" width="236" height="82" rx="6" class="d-rust"/>
+        <text x="618" y="232" class="d-tb">stb_lock</text>
+        <text x="618" y="252" class="d-ts">khoá bộ số bốc thăm</text>
+        <text x="618" y="269" class="d-ts">đã khoá = KHÔNG được vẽ lại</text>
+        <text x="618" y="286" class="d-ts">trừ khi xác nhận 2 bước</text>
+
+        <rect x="606" y="312" width="236" height="152" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="618" y="334" class="d-t"><tspan font-weight="600">Vì sao tách run_meta và</tspan></text>
+        <text x="618" y="352" class="d-t"><tspan font-weight="600">run_history làm hai bảng</tspan></text>
+        <text x="618" y="376" class="d-ts">Giao diện Kết quả cần biết</text>
+        <text x="618" y="392" class="d-ts">"lần chạy mới nhất" → run_meta.</text>
+        <text x="618" y="414" class="d-ts">Kiểm toán cần biết "đã chạy</text>
+        <text x="618" y="430" class="d-ts">những lần nào, ai, khi nào"</text>
+        <text x="618" y="446" class="d-ts">→ run_history. Gộp một bảng</text>
+        <text x="618" y="462" class="d-ts">là chạy lần 2 xoá dấu lần 1.</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="measure">
+    <h3>Một chi tiết đáng khoe: ràng buộc nằm ở tầng cơ sở dữ liệu</h3>
+    <p>Bảng <code>match_results</code> có khoá chính là <strong>cặp</strong> <code>(student_id, buoi)</code>. Chú thích ngay trên chỗ định nghĩa nói vì sao:</p>
+    <blockquote style="border-left:3px solid var(--hairline-strong); padding-left:16px; margin:0 0 17px; color:var(--ink-soft);">
+      "Khoá chính (student_id, buoi) TỰ NÓ canh ràng buộc 'mỗi em tối đa MỘT CLB mỗi buổi' ở tầng CSDL. Mã có lỗi cũng không tạo nổi một thời khoá biểu trùng giờ — đây là chỗ đặt ràng buộc đúng nhất, không phải trong vòng lặp Python." <span class="cite">rbda_priority_pipeline.py:1210–1213</span>
+    </blockquote>
+    <p>Đây là một nguyên tắc hay: đặt ràng buộc ở nơi <strong>không thể vi phạm</strong>, thay vì ở nơi phải nhớ kiểm tra.</p>
+
+    <h3>Dữ liệu vào bằng đường nào</h3>
+    <p>Trường thu phiếu bằng Microsoft Forms, tải về tệp <code>.xlsx</code>. Người vận hành <strong>kéo cả ba tệp thả vào một vùng duy nhất</strong> — không phải chọn loại tệp, không phải chọn dạng "rộng"/"dài", không phải chọn dấu phân cách.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Bước</th><th>Hàm</th><th>Việc</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><code>xlsx_to_csv_text</code> <span class="cite">api.py:1277</span></td><td>Nếu là Excel: đọc bằng <code>openpyxl</code>, đổi thành văn bản CSV. Phần còn lại của luồng không cần biết tệp đến từ đâu.</td></tr>
+        <tr><td>2</td><td><code>detect_csv_kind</code> <span class="cite">api.py:1336</span></td><td>Đọc dòng tiêu đề để biết đây là tệp gì. <strong>Không chắc thì hỏi, không đoán.</strong></td></tr>
+        <tr><td>3</td><td><code>THU_TU_NHAP</code> (trong <code>app.js</code>)</td><td>Tự xếp thứ tự nạp: <strong>danh sách CLB trước</strong>, rồi mới tới tệp học sinh.</td></tr>
+        <tr><td>4</td><td><code>import_csv_auto</code> <span class="cite">api.py:1382</span></td><td>Ghi vào cơ sở dữ liệu, kèm cảnh báo cho mọi dòng bị bỏ qua.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>Bước 3 quan trọng hơn vẻ ngoài: học sinh tham chiếu tới <code>club_id</code>, nên nạp ngược thứ tự thì <strong>cả học sinh bị bỏ qua</strong>. Thả cả ba tệp cùng lúc là tránh được hoàn toàn <span class="cite">README.md:311–316</span>.</p>
+
+    <h4>Vì sao bước 2 thà hỏi còn hơn đoán</h4>
+    <p>Giao diện trước có hai ô riêng, người dùng tự chọn đúng ô. Kéo nhầm ô <strong>không hề báo lỗi</strong>: tệp nguyện vọng dạng dài có đủ cột của ô "chọn CLB muốn thi", nên nó ghi thẳng vào bảng sai và báo <em>"thành công 5 học sinh"</em>. Nguyện vọng thật mất sạch, không một cảnh báo.</p>
+    <p>Chú thích trong README gọi thẳng: <em>"Với phần mềm phân bổ học sinh, đó là lỗi làm sai kết quả cả trường mà không ai biết."</em> <span class="cite">README.md:318–328</span> Nên khi bộ cột có thể hiểu theo hai cách, phần mềm <strong>dừng lại và hiện ô cho người dùng chọn</strong> — vì "đoán bừa ở đây là dựng lại đúng cái lỗi vừa chữa".</p>
+
+    <h3>Tám cảnh báo sức khoẻ dữ liệu — loại lỗi nguy hiểm nhất</h3>
+    <p>Có một nhóm tình huống mà dữ liệu <strong>vẫn hợp lệ</strong>, phần mềm <strong>vẫn chạy</strong>, kết quả <strong>vẫn trông bình thường</strong> — trong khi ai được vào CLB đã bị đổi bởi một thiếu sót không ai nhìn thấy. Ví dụ nguy hiểm nhất:</p>
+    <blockquote style="border-left:3px solid var(--rust); padding-left:16px; margin:0 0 17px; color:var(--ink-soft);">
+      Giáo viên mới chấm 1/3 danh sách → em được 4,0 điểm chiếm chắc một suất, còn 2 em chưa chấm bị đẩy xuống Tầng 2 và chỉ được xét bằng số bốc thăm. <strong>Kết quả trông hoàn toàn bình thường.</strong> <span class="cite">README.md:77–79</span>
+    </blockquote>
+    <p>Hàm <code>get_data_health_report</code> <span class="cite">api.py:325</span> rà soát 8 tình huống như vậy và hiện chúng <strong>ngay phía trên nút "Chạy pipeline"</strong>, chia ba mức. Đây là <strong>cảnh báo, không phải lỗi</strong> — không chặn chạy, chỉ bắt buộc hiện ra để người vận hành tự quyết định.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="num">#</th><th>Tình huống</th><th>Hậu quả âm thầm</th><th>Mức</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>Club có người đăng ký thi nhưng <strong>chưa chấm ai</strong></td><td>Cả club rơi xuống Tầng 2, vòng thi vô nghĩa</td><td class="bad">Nghiêm trọng</td></tr>
+        <tr><td class="num">2</td><td><strong>Chấm dở dang</strong> (mới chấm một phần)</td><td>Em chưa chấm bị xếp dưới cả em thấp điểm nhất</td><td class="bad">Nghiêm trọng</td></tr>
+        <tr><td class="num">3</td><td><strong>Thi nhưng không xếp nguyện vọng</strong> club đó</td><td>Điểm bị bỏ phí, không bao giờ được xếp vào đó</td><td class="bad">Nghiêm trọng</td></tr>
+        <tr><td class="num">4</td><td>Nhãn dự trữ của học sinh <strong>không club nào dùng</strong> (gõ sai)</td><td>Học sinh mất quyền ưu tiên ở mọi nơi</td><td class="bad">Nghiêm trọng</td></tr>
+        <tr><td class="num">5</td><td>Club có suất dự trữ nhưng <strong>chưa đặt nhãn</strong></td><td>Suất dự trữ âm thầm thành suất phổ thông</td><td class="bad">Nghiêm trọng</td></tr>
+        <tr><td class="num">6</td><td>Học sinh <strong>chưa xếp nguyện vọng nào</strong></td><td>Chắc chắn không được xếp vào đâu</td><td>Cần lưu ý</td></tr>
+        <tr><td class="num">7</td><td>Club dành suất cho nhãn <strong>chưa ai mang</strong></td><td>Suất dự trữ không dùng đến</td><td>Cần lưu ý</td></tr>
+        <tr><td class="num">8</td><td><strong>Tổng chỗ ít hơn số học sinh</strong></td><td>Ít nhất N em chắc chắn không có chỗ</td><td>Thông tin</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>README ghi rõ đây không phải phỏng đoán: <em>"Đã kiểm chứng bằng thực nghiệm: cả 6 tình huống dưới đây trước đây đều im lặng hoàn toàn."</em> <span class="cite">README.md:74–75</span> Bộ dữ liệu <code>TEST_04_CO_LOI_CO_Y.xlsx</code> cố ý sai 6 chỗ và <strong>phải</strong> làm phần mềm hiện đủ 6 cảnh báo; thiếu cảnh báo nào là lỗi phần mềm <span class="cite">README.md:294–299</span>.</p>
+
+    <h3>Dữ liệu ra: hai thứ cùng lúc</h3>
+    <p>Nút <strong>Xuất CSV</strong> tạo ra:</p>
+    <ol>
+      <li><strong>Một tệp tổng</strong> — <code>ket_qua_phan_bo.csv</code>, đặt <em>cạnh</em> <code>app.db</code>, với đủ tên học sinh, tên CLB, nguyện vọng thứ mấy, diện Thường/Dự trữ.</li>
+      <li><strong>Một thư mục theo CLB</strong> — mỗi CLB một tệp để phát cho giáo viên phụ trách, kèm <code>_chua_duoc_xep.csv</code> liệt kê các em chưa vào CLB nào.</li>
+    </ol>
+    <p>Hai chi tiết nhỏ mà đúng: tệp ghi bằng <code>utf-8-sig</code> để Excel mở đúng dấu tiếng Việt, và <code>club_id</code> được <strong>làm sạch trước khi làm tên tệp</strong> — một mã như <code>../ngoai</code> không thể làm tệp rơi ra ngoài thư mục kết quả <span class="cite">README.md:404–407</span>.</p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 6 ==================== -->
+<section class="chapter" id="c6">
+  <span class="chapnum">Chương 6</span>
+  <h2>Khi mọi thứ hỏng</h2>
+  <p class="deck">Phần mềm chạy trên máy trường, không có kỹ thuật viên ngồi cạnh. Nên nó phải <strong>không bao giờ chết ngầm</strong>.</p>
+
+  <div class="measure">
+    <p>Trước đây, nếu <code>app.db</code> hỏng hoặc mất, dòng khởi tạo ném lỗi <strong>trước khi có bất kỳ cửa sổ nào được tạo</strong>. Tiến trình thoát với mã lỗi 1 và <strong>không cửa sổ nào hiện ra</strong>. Trên bản đóng gói cho Windows ở chế độ không có cửa sổ dòng lệnh, người vận hành bấm đúp và... không có gì xảy ra. Không thông báo, không manh mối <span class="cite">main.py:129–138</span>.</p>
+    <p>Nay bước đó được bọc lại, và lỗi mở ra một <strong>màn hình phục hồi riêng</strong>:</p>
+
+    <figure class="code">
+      <figcaption><span>main.py:139–148</span></figcaption>
+<pre>    try:
+        api = PipelineAPI(db_path)
+    <span class="hl">except Exception as e:</span>
+        _show_ui(APP_TITLE + " — Phục hồi dữ liệu",
+                 <span class="hl">"recovery.html"</span>,
+                 RecoveryAPI(db_path, f"{e}\n\n{traceback.format_exc()}"),
+                 width=900, height=700, min_size=(700, 560))
+        return</pre>
+    </figure>
+  </div>
+
+  <div class="diagram">
+    <div class="diagram-head">
+      <strong>Sơ đồ 5 · Cây quyết định lúc khởi động</strong>
+      <span>Mỗi nhánh hỏng đều dẫn tới một màn hình, không nhánh nào dẫn tới im lặng.</span>
+    </div>
+    <div class="diagram-body">
+      <svg viewBox="0 0 820 430" width="820" role="img" aria-label="Cây quyết định khởi động: kiểm tra app.db, nếu hỏng mở màn hình phục hồi, nếu được thì thử pywebview rồi tới trình duyệt">
+        <defs><marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--slate)"/></marker></defs>
+
+        <rect x="300" y="12" width="220" height="40" rx="6" class="d-fill-sunk d-stroke"/>
+        <text x="410" y="37" class="d-tb" text-anchor="middle">Bấm đúp tệp chạy</text>
+        <path d="M410,52 L410,74" class="d-arrow" marker-end="url(#ar5)"/>
+
+        <path d="M410,76 L560,116 L410,156 L260,116 Z" class="d-gold"/>
+        <text x="410" y="112" class="d-tb" text-anchor="middle">app.db mở được không?</text>
+        <text x="410" y="130" class="d-ts" text-anchor="middle">PipelineAPI → init_db</text>
+
+        <path d="M260,116 L150,116 L150,180" class="d-arrow-bad" marker-end="url(#arr2)"/>
+        <text x="172" y="108" class="d-ts" fill="var(--rust)">KHÔNG</text>
+        <path d="M410,156 L410,180" class="d-arrow" marker-end="url(#ar5)"/>
+        <text x="420" y="172" class="d-ts">CÓ</text>
+
+        <rect x="20" y="182" width="260" height="72" rx="6" class="d-rust"/>
+        <text x="150" y="206" class="d-tb" text-anchor="middle">Màn hình PHỤC HỒI</text>
+        <text x="150" y="225" class="d-ts" text-anchor="middle">recovery.html + RecoveryAPI</text>
+        <text x="150" y="242" class="d-ts" text-anchor="middle">hiện lỗi kỹ thuật + danh sách bản sao lưu</text>
+
+        <path d="M90,254 L90,286" class="d-arrow" marker-end="url(#ar5)"/>
+        <path d="M212,254 L212,286" class="d-arrow" marker-end="url(#ar5)"/>
+
+        <rect x="14" y="288" width="150" height="96" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="26" y="310" class="d-t">Khôi phục từ</text>
+        <text x="26" y="328" class="d-t">bản sao lưu</text>
+        <text x="26" y="350" class="d-ts">thử PRAGMA quick_check;</text>
+        <text x="26" y="366" class="d-ts">bản mới nhất cũng hỏng</text>
+        <text x="26" y="380" class="d-ts">thì LÙI sang bản kế trước</text>
+
+        <rect x="176" y="288" width="150" height="96" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="188" y="310" class="d-t">Bắt đầu với</text>
+        <text x="188" y="328" class="d-t">CSDL mới</text>
+        <text x="188" y="350" class="d-ts">tệp hỏng ĐỔI TÊN thành</text>
+        <text x="188" y="366" class="d-ts">app.db.corrupt-&lt;thời điểm&gt;</text>
+        <text x="188" y="380" class="d-ts">KHÔNG xoá, vẫn gửi đi kiểm được</text>
+
+        <path d="M300,182 L470,182 L470,186" class="d-arrow" stroke-dasharray="4 4"/>
+        <text x="352" y="176" class="d-ts">cả hai xong đều yêu cầu mở lại app</text>
+
+        <path d="M410,190 L560,230 L410,270 L260,230 Z" class="d-gold"/>
+        <text x="410" y="226" class="d-tb" text-anchor="middle">pywebview mở được không?</text>
+        <text x="410" y="244" class="d-ts" text-anchor="middle">sau khi gỡ dấu "tải từ Internet"</text>
+
+        <path d="M410,270 L410,296" class="d-arrow" marker-end="url(#ar5)"/>
+        <text x="420" y="288" class="d-ts">CÓ</text>
+        <path d="M560,230 L660,230 L660,296" class="d-arrow" marker-end="url(#ar5)"/>
+        <text x="600" y="222" class="d-ts">KHÔNG</text>
+
+        <rect x="316" y="298" width="188" height="66" rx="6" class="d-moss"/>
+        <text x="410" y="322" class="d-tb" text-anchor="middle">Cửa sổ pywebview</text>
+        <text x="410" y="341" class="d-ts" text-anchor="middle">cửa sổ gốc của hệ điều hành</text>
+        <text x="410" y="357" class="d-ts" text-anchor="middle">ĐƯỜNG ĐANG CHẠY</text>
+
+        <rect x="548" y="298" width="224" height="66" rx="6" class="d-fill-paper d-stroke"/>
+        <text x="660" y="322" class="d-tb" text-anchor="middle">Cửa sổ trình duyệt</text>
+        <text x="660" y="341" class="d-ts" text-anchor="middle">browser_host.serve() · --app=</text>
+        <text x="660" y="357" class="d-ts" text-anchor="middle">TOÀN BỘ tính năng giữ nguyên</text>
+
+        <rect x="316" y="392" width="456" height="30" rx="5" class="d-fill-sunk d-stroke"/>
+        <text x="544" y="411" class="d-t" text-anchor="middle">Góc dưới thanh bên của app nói rõ đang chạy đường nào</text>
+        <path d="M410,364 L410,390" class="d-arrow" marker-end="url(#ar5)"/>
+        <path d="M660,364 L660,390" class="d-arrow" marker-end="url(#ar5)"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="measure">
+    <h3>Bốn lỗ hổng đã tìm ra và vá</h3>
+    <p>Xuất phát từ một buổi rà soát riêng: mô phỏng mất điện giữa chừng, tệp CSDL bị cắt cụt, hai tiến trình cùng mở một tệp. Tìm thấy <strong>bốn lỗ hổng thật, cả bốn đều đã vá</strong> <span class="cite">README.md:99–147</span>.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="num">#</th><th>Lỗ hổng</th><th>Cách vá</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="num">1</td>
+          <td>Crash giữa chừng để lại "số bốc thăm đã khoá nhưng không kết quả nào đi kèm"</td>
+          <td><strong>Một giao dịch duy nhất</strong>, một lệnh <code>commit()</code>. Huỷ là huỷ sạch, kể cả số vừa vẽ. Xuất CSV chuyển sang xảy ra <em>sau</em> commit.</td>
+        </tr>
+        <tr>
+          <td class="num">2</td>
+          <td>Không có bản sao nào để quay về</td>
+          <td><strong>Tự sao lưu trước mỗi lần chạy</strong>, dùng SQLite Backup API chứ <em>không</em> copy tệp thô — an toàn kể cả khi tiến trình khác đang mở tệp. Giữ 10 bản gần nhất <span class="cite">api.py:615–646</span>.</td>
+        </tr>
+        <tr>
+          <td class="num">3</td>
+          <td>app.db hỏng → tiến trình chết ngầm, không cửa sổ nào hiện</td>
+          <td><strong>Màn hình phục hồi</strong> (sơ đồ trên). Khôi phục thì thử lần lượt từng bản sao lưu bằng <code>PRAGMA quick_check</code>, không dừng ở bản đầu tiên gặp lỗi.</td>
+        </tr>
+        <tr>
+          <td class="num">4</td>
+          <td>Hai tiến trình cùng mở → lỗi "database is locked" ngay lập tức</td>
+          <td><code>busy_timeout = 15000</code> (15 giây thay vì 5) → <strong>chờ</strong> thay vì báo lỗi. Cộng <code>synchronous = FULL</code> <span class="cite">rbda_priority_pipeline.py:1284–1296</span>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box proof">
+    <p class="box-title">Một quyết định ngược trực giác, và lý do rất cụ thể</p>
+    <p style="margin-bottom:0">Phần mềm <strong>cố tình KHÔNG bật</strong> chế độ <code>journal_mode = WAL</code> — thứ mà hầu hết hướng dẫn SQLite khuyên dùng vì nó nhanh hơn. Lý do đã thử nghiệm trực tiếp: WAL tạo một tệp phụ <code>app.db-wal</code> chứa dữ liệu <em>đã commit</em>. Quy trình sao lưu bằng USB — thầy cô copy tay tệp <code>app.db</code> — mà không biết tới tệp <code>-wal</code> sẽ tạo ra <strong>bản sao lưu THIẾU dữ liệu mới nhất mà không hề báo lỗi</strong>. Giữ mặc định để tệp <code>.db</code> vẫn là bản sao <em>duy nhất</em> cần copy <span class="cite">README.md:141–147</span>.</p>
+  </div>
+
+  <div class="measure">
+    <p>Đây là kiểu quyết định đáng nói với giám khảo: <strong>tối ưu cho quy trình thật của người dùng, không tối ưu cho con số benchmark.</strong></p>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 7 ==================== -->
+<section class="chapter" id="c7">
+  <span class="chapnum">Chương 7</span>
+  <h2>Bằng chứng</h2>
+  <p class="deck">Mọi con số dưới đây <strong>do đo mà có</strong>, và mỗi dòng kèm lệnh để giám khảo tự chạy lại.</p>
+
+  <div class="measure">
+    <p>Nguồn sự thật là bốn tệp <code>du_lieu_test/so_lieu_*.json</code>. Mỗi tệp mở đầu bằng một dòng ghi chú: <em>"Sinh bởi … — KHÔNG sửa tay."</em> Không con số nào trong bảng dưới được gõ bằng tay.</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Câu hỏi</th><th>Trả lời</th><th>Số đo</th></tr></thead>
+      <tbody>
+        <tr><td>Có cách ghép ổn định nào học sinh thích hơn không?</td><td class="ok">Không</td><td><strong>0</strong> phản ví dụ trên <strong>2 088</strong> thể hiện vét cạn</td></tr>
+        <tr><td>Kể cả khi có suất dự trữ?</td><td class="ok">Không</td><td><strong>1 073 / 1 073</strong> thể hiện có dự trữ</td></tr>
+        <tr><td>Khai gian nguyện vọng có lợi không?</td><td class="ok">Không</td><td><strong>0 / 1 400</strong> em, vét cạn mọi cách khai</td></tr>
+        <tr><td>Cơ chế Boston (nhiều nơi dùng) thì sao?</td><td class="bad">Có lợi</td><td><strong>258 / 1 400</strong> em — 18,43 %</td></tr>
+        <tr><td>Em đang trượt có được cứu bởi cơ chế ổn định khác không?</td><td>Không</td><td>tập em có suất <strong>bất biến</strong> ở mọi ma trận ổn định</td></tr>
+        <tr><td>Nhiễu dữ liệu có làm mất ổn định không?</td><td class="ok">Không</td><td><strong>0</strong> cặp phá vỡ trên <strong>392</strong> phép thử</td></tr>
+        <tr><td>Có cách nào Pareto tốt hơn không?</td><td>Có</td><td><strong>16</strong> chu trình · <strong>32/140</strong> em cùng lên hạng</td></tr>
+        <tr><td>Giá phải trả cho cách đó?</td><td class="bad">Mất ổn định</td><td>0 → <strong>92</strong> cặp phá vỡ</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <h3>Một phép đo đáng mang ra bảo vệ: điểm quan trọng hơn bốc thăm</h3>
+    <p>Câu hỏi giám khảo rất dễ hỏi: <em>"Bốc thăm có làm kết quả trở nên may rủi không?"</em> Câu trả lời đo được, trên bộ 140 em, quét 20 hạt giống mỗi mức:</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Rung cái gì</th><th class="num">Số em đổi CLB</th><th class="num">Tỉ lệ</th><th class="num">Cặp phá vỡ</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Nhiễu điểm ±0,5</strong></td><td class="num">21,2 / 140</td><td class="num bad">15,14 %</td><td class="num ok">0</td></tr>
+        <tr><td>Nhiễu điểm ±0,1</td><td class="num">6,65 / 140</td><td class="num">4,75 %</td><td class="num ok">0</td></tr>
+        <tr><td><strong>Đổi hạt giống bốc thăm</strong></td><td class="num">6,1 / 140</td><td class="num ok">4,36 %</td><td class="num ok">0</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p><strong>Đọc ra:</strong> rung điểm thi ±0,5 xáo <strong>gấp hơn ba lần</strong> so với đổi toàn bộ bộ thăm (15,14 % so với 4,36 %). Nghĩa là <strong>điểm mới là thứ quyết định chính, bốc thăm chỉ đứng sau</strong> — đúng như thiết kế Lớp 4 (Tầng 1 luôn đứng trọn trước Tầng 2). Và ở <em>mọi</em> mức rung, số cặp phá vỡ vẫn là 0: kết quả có thể đổi, nhưng không bao giờ trở thành sai.</p>
+    <p>Nguồn: <code>du_lieu_test/so_lieu_ben_vung.json</code>, khoá <code>bo_sach → diem_0_5 / doi_seed</code>.</p>
+
+    <h3>Bộ test tự động</h3>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Chỉ số</th><th class="num">Giá trị</th><th>Ghi chú</th></tr></thead>
+      <tbody>
+        <tr><td>Tệp test</td><td class="num">47</td><td><code>ls tests/test_*.py | wc -l</code></td></tr>
+        <tr><td>Tổng ca test thu thập được</td><td class="num">757</td><td><code>pytest tests/ --collect-only</code></td></tr>
+        <tr><td>Ca test chạy qua — <strong>có cài Playwright</strong></td><td class="num ok">756</td><td>chạy đầy đủ, kể cả test mở trình duyệt thật</td></tr>
+        <tr><td>Ca test bỏ qua trong lần đó</td><td class="num">1</td><td>—</td></tr>
+        <tr><td>Ca test chạy qua — <strong>không cài Playwright</strong></td><td class="num ok">679</td><td>các tệp test cần trình duyệt thật tự bỏ qua trọn tệp (11 ca nữa báo bỏ qua); phần còn lại vẫn chạy đủ</td></tr>
+        <tr><td>Ca test hỏng</td><td class="num ok">0</td><td>ở cả hai lần chạy</td></tr>
+        <tr><td>Thời gian chạy</td><td class="num">72 s / 241 s</td><td><code>python3 -m pytest tests/ -q</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="measure">
+    <p>Điều đáng nói không phải con số 679, mà là <strong>loại việc mà các test đó làm</strong>. Một số test không kiểm mã — chúng <strong>khoá tài liệu vào mã</strong>:</p>
+    <ul>
+      <li><code>tests/test_i18n_sync.py</code> — khoá hai danh mục thông báo (Python và JavaScript) luôn khớp nhau tuyệt đối. Sửa một bên mà quên bên kia là test đỏ ngay, không đợi phát hiện bằng mắt <span class="cite">README.md:56–58</span>.</li>
+      <li><code>tests/test_csv_mau.py</code>, <code>tests/test_upload_tu_nhan_dien.py</code> — khoá mọi quy tắc trong tệp hướng dẫn CSV. "Tài liệu và mã không thể lệch nhau mà không làm đỏ test" <span class="cite">README.md:368–371</span>.</li>
+      <li><code>tests/test_hai_canh_du_tru.py</code> (11 ca), <code>tests/test_danh_doi_on_dinh.py</code> (24 ca) — khoá chính các bảng số liệu được trích trong tài liệu.</li>
+    </ul>
+    <p>Đây là câu trả lời mạnh cho <em>"làm sao biết báo cáo nói đúng về phần mềm?"</em>: với những phần này, <strong>nói sai là test đỏ</strong>.</p>
+
+    <h3>Bốn lệnh để chạy lại toàn bộ số liệu</h3>
+    <figure class="code">
+      <figcaption><span>NGHIEN_CUU_TOI_UU.md:11–17</span></figcaption>
+<pre>python3 du_lieu_test/do_toi_uu_on_dinh.py     <span class="cm"># TN1, TN2, TN4, TN5</span>
+python3 du_lieu_test/do_khai_that.py          <span class="cm"># TN3 — khai thật có lợi nhất</span>
+python3 du_lieu_test/do_ben_vung.py           <span class="cm"># TN6 — rung dữ liệu</span>
+python3 du_lieu_test/do_boc_tham.py           <span class="cm"># TN7 — chọn thiết kế bốc thăm</span></pre>
+    </figure>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 8 ==================== -->
+<section class="chapter" id="c8">
+  <span class="chapnum">Chương 8 · phụ lục</span>
+  <h2>Hai mươi câu giám khảo có thể hỏi</h2>
+  <p class="deck">Cột giữa là câu trả lời ngắn để nói ra miệng. Cột phải là chỗ mở mã ra nếu bị hỏi tiếp.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th class="num">#</th><th>Câu hỏi</th><th>Trả lời</th><th>Mở ở đâu</th></tr></thead>
+      <tbody>
+        <tr><td class="num">1</td><td>Thuật toán gốc là gì?</td><td>Deferred Acceptance do học sinh đề xuất, cộng ba lớp riêng: dự trữ mềm, bốc thăm dùng chung, ưu tiên hai tầng.</td><td><span class="cite">pipeline:275</span></td></tr>
+        <tr><td class="num">2</td><td>Vì sao không dùng Gale–Shapley thuần?</td><td>Vì có CLB thi và CLB không thi cùng tồn tại trong một đợt, và có CLB cần để dành suất. Mô hình thuần không có chỗ cho hai tình huống đó.</td><td><span class="cite">pipeline:116</span></td></tr>
+        <tr><td class="num">3</td><td>"Trì hoãn" nghĩa là gì?</td><td>CLB <em>giữ tạm</em> chứ chưa chốt. Mỗi vòng, em đang được giữ lại bị xét lại cùng người mới đến.</td><td><span class="cite">pipeline:352</span></td></tr>
+        <tr><td class="num">4</td><td>Bốc thăm có công bằng không?</td><td>Có. Một số duy nhất mỗi em, dùng chung mọi CLB, sinh từ hoán vị ngẫu nhiên đều. Không phụ thuộc thứ tự nhập liệu.</td><td><span class="cite">pipeline:1037</span></td></tr>
+        <tr><td class="num">5</td><td>Số bốc thăm có dựa trên mã học sinh không?</td><td><strong>Không.</strong> Sắp xếp chỉ là bước chuẩn bị; xáo xong mã không còn vai trò. Tương quan mã ↔ số đổi dấu qua 8 khối hạt giống.</td><td><span class="cite">pipeline:1053–1055</span></td></tr>
+        <tr><td class="num">6</td><td>Kết quả có tái lập được không?</td><td>Có. Cùng dữ liệu, cùng hạt giống → cùng kết quả, trên mọi máy và mọi phiên bản Python (dùng <code>crc32</code>, không dùng <code>hash()</code>).</td><td><span class="cite">pipeline:690–704</span></td></tr>
+        <tr><td class="num">7</td><td>Làm sao biết kết quả không sai?</td><td>Trước khi ghi, phần mềm tự quét <em>mọi</em> cặp (em, CLB) xem có cặp nào cả hai cùng muốn đổi không. Có một cặp là huỷ toàn bộ.</td><td><span class="cite">pipeline:410</span></td></tr>
+        <tr><td class="num">8</td><td>Kiểm bằng cách nào?</td><td>Thêm em nghi vấn vào tập CLB đang giữ rồi <em>gọi lại chính hàm lựa chọn của CLB</em>. Không suy luận, thử thật.</td><td><span class="cite">pipeline:464–468</span></td></tr>
+        <tr><td class="num">9</td><td>Có em nào khai gian mà có lợi không?</td><td>Không, 0/1 400 lượt vét cạn. Cùng phép dò, cơ chế Boston cho 258/1 400.</td><td><span class="cite">so_lieu_khai_that.json</span></td></tr>
+        <tr><td class="num">10</td><td>Vì sao khai gian không có lợi?</td><td>Vì hàm tính ưu tiên của CLB <strong>bị cấm nhận thứ hạng nguyện vọng</strong>. CLB không biết em xếp mình thứ mấy nên không thưởng cho việc đặt cược.</td><td><span class="cite">pipeline:131–137</span></td></tr>
+        <tr><td class="num">11</td><td>Chỗ nào phần mềm <em>không</em> tối ưu?</td><td><strong>Không tối ưu Pareto.</strong> Có 85 cặp học sinh mà đổi chỗ cho nhau thì cả hai cùng lên hạng — thuật toán không cho, vì đổi thế phá mất tính ổn định.</td><td>Ch.3 · Lớp 5</td></tr>
+        <tr><td class="num">12</td><td>Đó có phải lỗi không?</td><td>Không. Là đánh đổi bắt buộc của <em>mọi</em> thuật toán giữ tính ổn định. Và đã đo: không quy được cho bốc thăm.</td><td><span class="cite">CO_CHE_THUAT_TOAN.md:277–283</span></td></tr>
+        <tr><td class="num">13</td><td>Suất dự trữ hoạt động ra sao?</td><td>Hai lượt: lượt dự trữ trước (chỉ em thuộc diện), lượt chung sau (tất cả còn lại). Suất thừa tự chuyển sang lượt chung.</td><td><span class="cite">pipeline:236–248</span></td></tr>
+        <tr><td class="num">14</td><td>Trường không dùng dự trữ thì sao?</td><td>Đặt <code>reserve_capacity = 0</code>, thuật toán thu về Deferred Acceptance thuần tuý. 0 cặp phá vỡ ở cả hai cấu hình.</td><td><span class="cite">do_khong_du_tru.py</span></td></tr>
+        <tr><td class="num">15</td><td>Điểm hay bốc thăm quyết định nhiều hơn?</td><td><strong>Điểm.</strong> Rung điểm ±0,5 xáo 15,14 % số em; đổi cả bộ thăm chỉ xáo 4,36 %.</td><td><span class="cite">so_lieu_ben_vung.json</span></td></tr>
+        <tr><td class="num">16</td><td>Nếu mất điện giữa chừng?</td><td>Cơ sở dữ liệu quay về đúng trạng thái trước khi bấm nút. Một giao dịch, một lệnh chốt duy nhất.</td><td><span class="cite">api.py:1104</span></td></tr>
+        <tr><td class="num">17</td><td>Nếu tệp dữ liệu hỏng hẳn?</td><td>Mở màn hình phục hồi, chọn khôi phục từ bản sao lưu (thử lần lượt tới khi tìm được bản đọc được) hoặc bắt đầu lại. Tệp hỏng được đổi tên, không xoá.</td><td><span class="cite">main.py:139–148</span></td></tr>
+        <tr><td class="num">18</td><td>Chạy lại lần hai có xoá dấu lần một không?</td><td>Không. <code>run_history</code> chỉ thêm dòng, không bao giờ ghi đè — kể cả lệnh xoá dữ liệu cũng không đụng tới nó.</td><td><span class="cite">pipeline:1241–1258</span></td></tr>
+        <tr><td class="num">19</td><td>Xếp cả tuần có khó hơn không?</td><td>Không. Các buổi hoàn toàn độc lập, nên bài toán tuần là N bản sao của bài toán đã giải. Chỉ cắt — gọi — ghép.</td><td><span class="cite">pipeline:485–503</span></td></tr>
+        <tr><td class="num">20</td><td>Có trích dẫn học thuật nào không?</td><td>Đúng một: Kominers &amp; Sonmez 2016, cho phần dự trữ mềm. Do chính học sinh viết, có trong commit đầu tiên.</td><td><span class="cite">pipeline:6</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================== CHƯƠNG 9 ==================== -->
+<section class="chapter" id="c9">
+  <span class="chapnum">Chương 9</span>
+  <h2>Ranh giới trung thực</h2>
+  <p class="deck">Những chỗ báo cáo này <strong>không</strong> nói, và những chỗ phần mềm <strong>chưa</strong> kiểm chứng được.</p>
+
+  <div class="measure">
+    <h3>Báo cáo này không làm ba việc</h3>
+    <ol>
+      <li><strong>Không thêm trích dẫn học thuật.</strong> Cả dự án chỉ có đúng một tên tài liệu được nêu — Kominers &amp; Sonmez 2016, ở <span class="cite">rbda_priority_pipeline.py:6</span> và <span class="cite">:214</span>, cho phần dự trữ mềm. Dòng đó do chính học sinh viết, có trong commit đầu tiên. Việc khảo sát tài liệu là của học sinh <span class="cite">CO_CHE_THUAT_TOAN.md:409–419</span>.</li>
+      <li><strong>Không đánh giá tính mới.</strong> Báo cáo này mô tả <em>phần mềm làm gì</em> và <em>chỗ nào trong mã kiểm chứng được</em>. Phần diễn giải ý nghĩa khoa học, phần Kết luận, phần Tính mới — học sinh tự viết.</li>
+      <li><strong>Không khuyến nghị chính sách.</strong> Trường <em>nên</em> hay <em>không nên</em> dùng suất dự trữ, cái giá của tính ổn định có chấp nhận được không — báo cáo chỉ <strong>đếm</strong>, không kết luận hộ.</li>
+    </ol>
+
+    <h3>Bốn chỗ phải nói thẳng</h3>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Chỗ</th><th>Sự thật</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Số dòng trong <code>CO_CHE_THUAT_TOAN.md</code></strong></td>
+          <td>Đã lỗi thời (ghi <code>run_rbda · 207</code>, thực tế <strong>275</strong>). Báo cáo này dùng số đã kiểm lại; tài liệu cũ chưa cập nhật.</td>
+        </tr>
+        <tr>
+          <td><strong>Báo cáo <code>.docx</code> gốc của dự án</strong></td>
+          <td>Mô tả Gale–Shapley nhiều-một thuần tuý. Quét cả hai bản: chữ "dự trữ" xuất hiện <strong>0</strong> lần, "bốc thăm"/"ngẫu nhiên" <strong>0</strong> lần. Tức <strong>ba lớp cơ chế khó nhất không có trong báo cáo ấy</strong> <span class="cite">CO_CHE_THUAT_TOAN.md:17–33</span>.</td>
+        </tr>
+        <tr>
+          <td><strong>Kịch bản ký số <code>ky_va_tin_cay.ps1</code></strong></td>
+          <td><strong>Chưa chạy thật lần nào.</strong> Viết theo tài liệu Microsoft; môi trường phát triển là Linux, không có công cụ ký của Windows. Đã kiểm được cú pháp và logic tìm tệp; phần còn lại cần chạy thử trên máy Windows <span class="cite">README.md:431–433</span>.</td>
+        </tr>
+        <tr>
+          <td><strong>Dữ liệu trong <code>du_lieu_test/</code></strong></td>
+          <td><strong>Dữ liệu mô phỏng</strong>, sinh bởi kịch bản với <code>seed = 2026</code> — <em>không phải học sinh có thật</em>, và <strong>cố ý thiết kế cho cạnh tranh cao</strong> để cơ chế lộ ra. Nó không mô phỏng phân bố nguyện vọng tự nhiên <span class="cite">README.md:301–304</span>.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box warn">
+    <p class="box-title">Điểm yếu nên chủ động nói trước khi bị hỏi</p>
+    <p style="margin-bottom:0">Nếu giám khảo mở mã nguồn ra, họ sẽ thấy ba lớp cơ chế mà báo cáo gốc không mô tả. Chủ động nói ra được <strong>hai cái lợi</strong>: được điểm cho phần khó nhất của phần mềm, và tránh rủi ro bị phát hiện chỗ lệch. Cách nói: <em>"Báo cáo mô tả lõi Gale–Shapley. Phần mềm cài thêm ba lớp sinh ra từ hoàn cảnh trường — em xin trình bày."</em></p>
+  </div>
+
+  <div class="measure" style="margin-top:36px; padding-top:26px; border-top:1px solid var(--hairline);">
+    <p style="color:var(--slate); font-size:14.5px; margin-bottom:0;">Báo cáo này mô tả phần mềm tại nhánh <code>claude/blissful-archimedes-hcg1cf</code>. Mọi số dòng được kiểm bằng <code>grep -n "^def " rbda_priority_pipeline.py</code> và <code>grep -n "^    def " api.py</code> tại đúng lần commit này. Mọi con số thực nghiệm truy ngược được về <code>du_lieu_test/so_lieu_*.json</code> hoặc về lệnh chạy ghi kèm. Bộ test chạy thật khi viết: <strong>756 qua, 1 bỏ qua, 0 hỏng</strong> (bản đầy đủ, có Playwright).</p>
+  </div>
+</section>
+
+</div><!-- /.wrap -->
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ MÔ PHỎNG 1 — vòng lặp ghép cặp trì hoãn ============
+     Kịch bản đã chạy qua run_rbda() thật; nhật ký từ chối khớp:
+     [(1,'Binh','bongro'), (2,'Dung','covua'), (3,'Dung','bongro')]        */
+
+  var S1 = [
+    {
+      t: "<b>Trước vòng 1.</b> Bốn em, hai CLB. Bóng rổ có 2 chỗ, Cờ vua có 1 chỗ. Chưa ai được giữ. Nguyện vọng: An, Bình, Chi đều thích Bóng rổ nhất; Dũng thích Cờ vua nhất.",
+      br: [], cv: [],
+      bench: [["An","NV1: Bóng rổ"],["Bình","NV1: Bóng rổ"],["Chi","NV1: Bóng rổ"],["Dũng","NV1: Cờ vua"]],
+      benchTitle: "Chưa ai có chỗ — cả bốn em sắp gửi đề xuất"
+    },
+    {
+      t: "<b>Vòng 1.</b> An, Bình, Chi cùng nộp vào Bóng rổ — 3 em tranh 2 chỗ. Xếp theo điểm: An 9,0 → Chi 8,5 → Bình 7,0. CLB <b>giữ tạm</b> An và Chi, <b>từ chối Bình</b>. Dũng nộp Cờ vua một mình, được giữ.",
+      br: [["An","giữ tạm · 9,0"],["Chi","giữ tạm · 8,5"]],
+      cv: [["Dũng","giữ tạm · 6,0"]],
+      bench: [["Bình","bị Bóng rổ từ chối → sang NV2: Cờ vua", true]],
+      benchTitle: "Bị từ chối, đi tiếp nguyện vọng sau"
+    },
+    {
+      t: "<b>Vòng 2 — đây là chỗ quan trọng nhất.</b> Bình nộp vào Cờ vua. Cờ vua gộp <i>em đang giữ</i> (Dũng) với <i>em vừa đến</i> (Bình) rồi chọn lại từ đầu. Bình 9,5 &gt; Dũng 6,0, mà chỉ có 1 chỗ. <b>Dũng bị đẩy ra dù đã được giữ từ vòng trước.</b>",
+      br: [["An","giữ tạm · 9,0"],["Chi","giữ tạm · 8,5"]],
+      cv: [["Bình","giữ tạm · 9,5"]],
+      bench: [["Dũng","bị Cờ vua đẩy ra → sang NV2: Bóng rổ", true]],
+      benchTitle: "Giữ tạm KHÔNG phải đã chốt"
+    },
+    {
+      t: "<b>Vòng 3.</b> Dũng nộp vào Bóng rổ. Nhưng Dũng <i>không thi</i> Bóng rổ nên em thuộc <b>Tầng 2</b> — đứng sau trọn vẹn An và Chi (Tầng 1, đã có điểm). Hai chỗ đã đầy bởi Tầng 1, Dũng bị từ chối. Dũng hết nguyện vọng.",
+      br: [["An","giữ tạm · 9,0"],["Chi","giữ tạm · 8,5"]],
+      cv: [["Bình","giữ tạm · 9,5"]],
+      bench: [["Dũng","hết nguyện vọng — không có suất", true]],
+      benchTitle: "Không còn nguyện vọng nào để đi tiếp"
+    },
+    {
+      t: "<b>Xong sau 3 vòng.</b> Không ai còn nguyện vọng chưa thử, vòng lặp dừng. Giờ những chỗ \"giữ tạm\" mới trở thành kết quả chính thức. An và Chi vào Bóng rổ (nguyện vọng 1), Bình vào Cờ vua (nguyện vọng 2), Dũng không có suất.",
+      br: [["An","CHÍNH THỨC · NV1"],["Chi","CHÍNH THỨC · NV1"]],
+      cv: [["Bình","CHÍNH THỨC · NV2"]],
+      bench: [["Dũng","không có suất", true]],
+      benchTitle: "Kết quả cuối cùng"
+    }
+  ];
+
+  /* ============ MÔ PHỎNG 2 — dự trữ mềm, hai cảnh ============
+     Khớp đầu ra thật của du_lieu_test/do_hai_canh_du_tru.py          */
+
+  var S2 = [
+    { t:"<b>Cảnh 1 — bốn em cùng nộp.</b> CLB có 3 chỗ, trong đó 1 suất để dành cho diện ưu tiên. Ưu tiên nền: A &gt; B &gt; C &gt; D. Chỉ <b>D</b> thuộc diện ưu tiên.",
+      pool:[["A",""],["B",""],["C",""],["D","diện ưu tiên"]], slots:[null,null,null],
+      model:["A","B","C"], cap:"4 em tranh 3 chỗ" },
+    { t:"<b>Cảnh 1 · Lượt 1 — lượt dự trữ.</b> CLB chỉ nhìn các em thuộc diện. Chỉ có D. Lấy tối đa 1 em (đúng bằng số suất để dành). <b>D vào chỗ dự trữ.</b>",
+      pool:[["A",""],["B",""],["C",""],["D","ĐÃ LẤY"]], slots:[["D","suất dự trữ"],null,null],
+      model:["A","B","C"], cap:"4 em tranh 3 chỗ" },
+    { t:"<b>Cảnh 1 · Lượt 2 — lượt chung.</b> Còn 3 − 1 = 2 chỗ. CLB nhìn <i>tất cả</i> em còn lại: A, B, C. Lấy 2 em ưu tiên cao nhất → <b>A và B</b>.",
+      pool:[["A","ĐÃ LẤY"],["B","ĐÃ LẤY"],["C","còn lại"],["D","ĐÃ LẤY"]], slots:[["D","suất dự trữ"],["A","suất chung"],["B","suất chung"]],
+      model:["A","B","C"], cap:"4 em tranh 3 chỗ" },
+    { t:"<b>Cảnh 1 · Kết quả: D, A, B — còn C TRƯỢT.</b> Hãy nhìn kỹ: <b>C xếp TRÊN D</b> (hạng 3 so với hạng 4), CLB lấy đủ 3 em — <b>mà D đỗ còn C trượt.</b> Theo mô hình \"một danh sách ưu tiên\" thì chuyện đó <i>không xảy ra được</i>.",
+      pool:[["A","ĐÃ LẤY"],["B","ĐÃ LẤY"],["C","TRƯỢT"],["D","ĐÃ LẤY"]], slots:[["D","suất dự trữ"],["A","suất chung"],["B","suất chung"]],
+      model:["A","B","C"], cap:"LỆCH với mô hình lý thuyết" },
+    { t:"<b>Cảnh 2 — y hệt, chỉ khác một điều: D vắng mặt</b> (giả sử D đã được giữ ở CLB khác). Ưu tiên nền <b>giữ nguyên</b> A &gt; B &gt; C. Sức chứa vẫn 3, suất dự trữ vẫn 1.",
+      pool:[["A",""],["B",""],["C",""]], slots:[null,null,null],
+      model:["A","B","C"], cap:"3 em, 3 chỗ" },
+    { t:"<b>Cảnh 2 · Lượt 1 — lượt dự trữ.</b> Không em nào thuộc diện ưu tiên. Lượt này lấy được <b>0 em</b>. Suất để dành <b>không bị khoá</b> — nó tự chuyển sang lượt chung. Đây chính là chữ \"mềm\".",
+      pool:[["A",""],["B",""],["C",""]], slots:[null,null,null],
+      model:["A","B","C"], cap:"3 em, 3 chỗ" },
+    { t:"<b>Cảnh 2 · Lượt 2 — lượt chung.</b> Còn 3 − 0 = <b>3</b> chỗ (không phải 2!). Lấy A, B, C. CLB tuyển đủ, không bỏ trống chỗ nào.",
+      pool:[["A","ĐÃ LẤY"],["B","ĐÃ LẤY"],["C","ĐÃ LẤY"]], slots:[["A","suất chung"],["B","suất chung"],["C","suất chung"]],
+      model:["A","B","C"], cap:"3 em, 3 chỗ" },
+    { t:"<b>Kết luận — và đây là điều đắt giá nhất.</b> Cảnh 2 cho A, B, C — <b>KHỚP</b> mô hình lý thuyết. Cảnh 1 cho D, A, B — <b>LỆCH</b>. Cùng em C, cùng thứ hạng, cùng CLB, cùng sức chứa: lúc trượt lúc đỗ. Cái đổi duy nhất là <b>D có mặt hay không</b>. Nghĩa là không viết ra được một danh sách ưu tiên cố định rồi đọc ra kết quả.",
+      pool:[["A","ĐÃ LẤY"],["B","ĐÃ LẤY"],["C","ĐÃ LẤY"]], slots:[["A","suất chung"],["B","suất chung"],["C","suất chung"]],
+      model:["A","B","C"], cap:"KHỚP mô hình lý thuyết" }
+  ];
+
+  function el(id){ return document.getElementById(id); }
+
+  function slotRow(item, cls){
+    if(!item) return '<div class="slot empty">— chỗ trống —</div>';
+    return '<div class="slot '+cls+'"><span>'+item[0]+'</span><span class="tag">'+item[1]+'</span></div>';
+  }
+  function chipRow(list){
+    return list.map(function(c){
+      var out = c[2] ? ' out' : '';
+      var sub = c[1] ? '<span class="sub">'+c[1]+'</span>' : '';
+      return '<span class="chip'+out+'">'+c[0]+sub+'</span>';
+    }).join('');
+  }
+  function pips(n, i){
+    var s = '';
+    for(var k=0;k<n;k++){ s += '<span class="pip'+(k<=i?' on':'')+'"></span>'; }
+    return s;
+  }
+
+  function wire(prefix, steps, render){
+    var i = 0;
+    function draw(){
+      render(steps[i]);
+      el(prefix+'-pips').innerHTML = pips(steps.length, i);
+      el(prefix+'-prev').disabled = (i === 0);
+      el(prefix+'-next').disabled = (i === steps.length - 1);
+      el(prefix+'-next').textContent = (i === steps.length - 1) ? 'Đã hết' : 'Bước tiếp →';
+    }
+    el(prefix+'-next').addEventListener('click', function(){ if(i < steps.length-1){ i++; draw(); } });
+    el(prefix+'-prev').addEventListener('click', function(){ if(i > 0){ i--; draw(); } });
+    el(prefix+'-reset').addEventListener('click', function(){ i = 0; draw(); });
+    draw();
+  }
+
+  if(el('sim1')){
+    wire('s1', S1, function(st){
+      el('s1-text').innerHTML = st.t;
+      el('s1-br-cap').textContent = st.br.length + '/2 chỗ';
+      el('s1-cv-cap').textContent = st.cv.length + '/1 chỗ';
+      var br = '', cv = '';
+      for(var a=0;a<2;a++){ br += slotRow(st.br[a] || null, 'filled'); }
+      for(var b=0;b<1;b++){ cv += slotRow(st.cv[b] || null, 'filled'); }
+      el('s1-br').innerHTML = br;
+      el('s1-cv').innerHTML = cv;
+      el('s1-bench').innerHTML = st.bench.length ? chipRow(st.bench) : '<span class="chip">— không còn ai —</span>';
+      el('s1-bench-title').textContent = st.benchTitle;
+    });
+  }
+
+  if(el('sim2')){
+    wire('s2', S2, function(st){
+      el('s2-text').innerHTML = st.t;
+      el('s2-pool-cap').textContent = st.cap;
+      el('s2-pool').innerHTML = chipRow(st.pool.map(function(p){
+        return [p[0], p[1], p[1] === 'TRƯỢT'];
+      }));
+      var out = '';
+      for(var k=0;k<3;k++){
+        var s = st.slots[k];
+        out += slotRow(s, (s && s[1] === 'suất dự trữ') ? 'reserved' : 'filled');
+      }
+      el('s2-slots').innerHTML = out;
+      el('s2-model').innerHTML = chipRow(st.model.map(function(m){ return [m, '', false]; }));
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

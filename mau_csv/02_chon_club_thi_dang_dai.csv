@@ -1,0 +1,12 @@
+student_id,name,club_id,score
+HS001,Nguyễn Văn An,clb_bongro,8.5
+HS001,Nguyễn Văn An,clb_tienganh,9
+HS001,Nguyễn Văn An,clb_amnhac,7.5
+HS002,Trần Thị Bình,clb_tienganh,6.5
+HS003,Lê Minh Cường,clb_robotics,9.5
+HS003,Lê Minh Cường,clb_mythuat,8
+HS004,Phạm Thu Dung,clb_amnhac,7
+HS004,Phạm Thu Dung,clb_bongro,6
+HS004,Phạm Thu Dung,clb_mythuat,8.5
+HS004,Phạm Thu Dung,clb_tienganh,9
+HS005,Hoàng Văn Em,clb_mythuat,5.5

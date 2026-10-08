@@ -1,0 +1,287 @@
+<title>Ngưỡng chịu tải RB-DA</title>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+
+  :root {
+    --muc: #1C2321;          /* mực — chữ chính */
+    --muc-nhat: #4A5350;
+    --xam: #5B6570;
+    --giay: #F3F4F1;         /* nền, hơi ngả xanh — không phải kem */
+    --the: #FFFFFF;
+    --ke: #DBDCD5;
+    --ke-mo: #E9EAE4;
+    --cam: #CC785C;          /* màu của logo phần mềm */
+    --reu: #3F6B52;
+    --vang: #C98A1F;
+    --gach: #B84A3E;
+    --reu-nhat: #DCE9E0;
+    --gach-nhat: #F3DCD9;
+    --vang-nhat: #F1DFB8;
+    --f-hien: "Be Vietnam Pro", "Segoe UI", sans-serif;
+    --f-than: "IBM Plex Sans", "Segoe UI", sans-serif;
+    --f-so: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --muc: #E8EAE6; --muc-nhat: #B4BAB6; --xam: #929A9E;
+      --giay: #161A19; --the: #1F2422; --ke: #333A37; --ke-mo: #262C2A;
+      --cam: #E39A80; --reu: #7FB393; --vang: #E0AF52; --gach: #E08074;
+      --reu-nhat: #23342A; --gach-nhat: #382422; --vang-nhat: #33291A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --muc: #E8EAE6; --muc-nhat: #B4BAB6; --xam: #929A9E;
+    --giay: #161A19; --the: #1F2422; --ke: #333A37; --ke-mo: #262C2A;
+    --cam: #E39A80; --reu: #7FB393; --vang: #E0AF52; --gach: #E08074;
+    --reu-nhat: #23342A; --gach-nhat: #382422; --vang-nhat: #33291A;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--giay); color: var(--muc);
+    font-family: var(--f-than); font-size: 16px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .khung { max-width: 1000px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  h1 { font-family: var(--f-hien); font-weight: 700; font-size: clamp(30px, 5vw, 44px);
+       line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 14px; text-wrap: balance; }
+  h2 { font-family: var(--f-hien); font-weight: 600; font-size: 24px; letter-spacing: -0.01em;
+       margin: 64px 0 6px; display: flex; align-items: baseline; gap: 14px; text-wrap: balance; }
+  h2 .stt { font-family: var(--f-so); font-size: 13px; color: var(--cam);
+            border: 1px solid var(--cam); border-radius: 4px; padding: 1px 7px; flex: none; }
+  h3 { font-family: var(--f-hien); font-weight: 600; font-size: 17px; margin: 34px 0 8px; }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .dan { color: var(--xam); font-size: 15px; margin-bottom: 30px; max-width: 68ch; }
+  code { font-family: var(--f-so); font-size: 0.9em; background: var(--ke-mo);
+         padding: 1px 5px; border-radius: 3px; }
+  strong { font-weight: 600; }
+
+  .canh-bao { border: 1px solid var(--gach); background: var(--gach-nhat);
+    border-radius: 8px; padding: 16px 20px; margin: 0 0 34px; }
+  .canh-bao p { margin: 0; font-size: 14.5px; color: var(--muc); }
+  .canh-bao .tieu { font-family: var(--f-so); font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--gach); display: block; margin-bottom: 6px; }
+
+  .doc-so { display: grid; gap: 14px; margin: 26px 0 8px;
+    grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+  .o-so { background: var(--the); border: 1px solid var(--ke); border-radius: 10px; padding: 16px 18px; }
+  .o-so .con-so { font-family: var(--f-so); font-weight: 500; font-size: 30px;
+    line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .o-so .nhan { font-family: var(--f-so); font-size: 10.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--xam); margin-top: 7px; display: block; }
+  .o-so.tot .con-so { color: var(--reu); }
+  .o-so.canh .con-so { color: var(--gach); }
+
+  .bang-cuon { overflow-x: auto; margin: 22px 0; border: 1px solid var(--ke); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--the); }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--ke-mo); }
+  th { font-family: var(--f-so); font-size: 10.5px; letter-spacing: .08em;
+       text-transform: uppercase; color: var(--xam); font-weight: 500;
+       background: var(--ke-mo); white-space: nowrap; }
+  td.so { font-family: var(--f-so); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  .dam { font-weight: 600; }
+
+  .the-do-thi { background: var(--the); border: 1px solid var(--ke); border-radius: 10px;
+    padding: 22px 20px 14px; margin: 22px 0; overflow-x: auto; }
+  .do-thi { width: 100%; height: auto; min-width: 480px; display: block; }
+  .luoi { stroke: var(--ke); stroke-width: 1; }
+  .nhan-truc { font-family: var(--f-so); font-size: 11px; fill: var(--xam); }
+  .nhan-y { text-anchor: end; }
+  .nhan-x { text-anchor: middle; }
+  .chu-thich { list-style: none; padding: 0; margin: 6px 0 0; display: flex;
+    flex-wrap: wrap; gap: 8px 20px; font-family: var(--f-so); font-size: 12px; color: var(--muc-nhat); }
+  .chu-thich li { display: flex; align-items: center; gap: 7px; }
+  .cham { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+
+  .ket { border-left: 3px solid var(--cam); padding: 2px 0 2px 18px; margin: 20px 0; }
+  .ket p:last-child { margin-bottom: 0; }
+  .doan-cuoi { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--ke);
+    color: var(--xam); font-size: 14px; }
+  .doan-cuoi p { max-width: none; }
+  .sai { color: var(--gach); font-weight: 600; }
+  .dung { color: var(--reu); font-weight: 600; }
+</style>
+
+<div class="khung">
+<h1>Ngưỡng chịu tải của thuật toán RB-DA</h1>
+<p class="dan">Đo phần mềm phân bổ câu lạc bộ ở 204 cấu hình khác nhau — từ 200 tới 5 000 học sinh, từ 10 tới 100 câu lạc bộ. Ba tầng đều được đo: thuật toán, truy vấn cơ sở dữ liệu, và thời gian vẽ giao diện.</p>
+<div class="canh-bao"><span class="tieu">Dữ liệu mô phỏng</span><p>Toàn bộ số liệu dưới đây đo trên <strong>dữ liệu do máy sinh theo tham số</strong>, không phải khảo sát học sinh có thật. Trang này chỉ chứa <strong>số đo và cơ chế kỹ thuật</strong> — phần diễn giải, nhận xét và kết luận nghiên cứu do học sinh tự viết.</p></div>
+<h2><span class="stt">TL</span>Câu trả lời ngắn</h2>
+<p>Ở quy mô <strong>2 000 học sinh và 50 câu lạc bộ</strong>, mỗi em xếp 5 nguyện vọng và dự thi 4 câu lạc bộ:</p>
+<div class="doc-so">
+<div class="o-so tot"><div class="con-so">0,70 s</div><span class="nhan">chạy phân bổ</span></div>
+<div class="o-so "><div class="con-so">15</div><span class="nhan">số vòng lặp</span></div>
+<div class="o-so "><div class="con-so">90,0%</div><span class="nhan">được xếp</span></div>
+<div class="o-so "><div class="con-so">16 ms</div><span class="nhan">truy vấn chậm nhất</span></div>
+<div class="o-so "><div class="con-so">59 ms</div><span class="nhan">vẽ bảng kết quả</span></div>
+<div class="o-so "><div class="con-so">4,0 MB</div><span class="nhan">đỉnh bộ nhớ</span></div>
+</div>
+<div class="ket"><p>Cả ba tầng cộng lại: <strong>0,78 giây</strong> từ lúc bấm nút tới lúc bảng kết quả hiện ra. Lần chạy <strong>lâu nhất trong cả 204 cấu hình</strong> — 5.000 học sinh, 10 câu lạc bộ, mỗi em 10 nguyện vọng — mất <strong>7,65 giây</strong>.</p><p style="margin-top:10px">Tỉ lệ 90% ở trên là trường hợp <strong>chỉ tiêu vừa khít</strong> (tổng chỗ đúng bằng số học sinh) và mọi câu lạc bộ chỉ tiêu bằng nhau. Dư 8% chỗ thì con số này lên <strong>92,7%</strong>.</p></div>
+<h2><span class="stt">1</span>Tầng thuật toán</h2>
+<p>Thời gian chạy phân bổ theo số học sinh, mỗi đường là một số câu lạc bộ. Mỗi em 5 nguyện vọng, chỉ tiêu chia đều, dư 8%.</p>
+<div class="the-do-thi">
+<svg viewBox="0 0 760 300" class="do-thi" role="img">
+<line x1="62" y1="256.0" x2="736" y2="256.0" class="luoi"/>
+<text x="52" y="260.0" class="nhan-truc nhan-y">0.0s</text>
+<line x1="62" y1="197.0" x2="736" y2="197.0" class="luoi"/>
+<text x="52" y="201.0" class="nhan-truc nhan-y">1.3s</text>
+<line x1="62" y1="138.0" x2="736" y2="138.0" class="luoi"/>
+<text x="52" y="142.0" class="nhan-truc nhan-y">2.6s</text>
+<line x1="62" y1="79.0" x2="736" y2="79.0" class="luoi"/>
+<text x="52" y="83.0" class="nhan-truc nhan-y">4.0s</text>
+<line x1="62" y1="20.0" x2="736" y2="20.0" class="luoi"/>
+<text x="52" y="24.0" class="nhan-truc nhan-y">5.3s</text>
+<text x="62.0" y="278" class="nhan-truc nhan-x">200</text>
+<text x="230.5" y="278" class="nhan-truc nhan-x">500</text>
+<text x="399.0" y="278" class="nhan-truc nhan-x">1000</text>
+<text x="567.5" y="278" class="nhan-truc nhan-x">2000</text>
+<text x="736.0" y="278" class="nhan-truc nhan-x">5000</text>
+<path d="M62.0 253.9 L230.5 250.3 L399.0 241.2 L567.5 213.7 L736.0 50.8" fill="none" stroke="var(--cam)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="62.0" cy="253.9" r="4" fill="var(--cam)"/>
+<circle cx="230.5" cy="250.3" r="4" fill="var(--cam)"/>
+<circle cx="399.0" cy="241.2" r="4" fill="var(--cam)"/>
+<circle cx="567.5" cy="213.7" r="4" fill="var(--cam)"/>
+<circle cx="736.0" cy="50.8" r="4" fill="var(--cam)"/>
+<path d="M62.0 253.0 L230.5 250.1 L399.0 241.8 L567.5 222.0 L736.0 103.9" fill="none" stroke="var(--reu)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="62.0" cy="253.0" r="4" fill="var(--reu)"/>
+<circle cx="230.5" cy="250.1" r="4" fill="var(--reu)"/>
+<circle cx="399.0" cy="241.8" r="4" fill="var(--reu)"/>
+<circle cx="567.5" cy="222.0" r="4" fill="var(--reu)"/>
+<circle cx="736.0" cy="103.9" r="4" fill="var(--reu)"/>
+<path d="M62.0 256.0 L230.5 248.9 L399.0 241.9 L567.5 225.1 L736.0 136.2" fill="none" stroke="var(--vang)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="62.0" cy="256.0" r="4" fill="var(--vang)"/>
+<circle cx="230.5" cy="248.9" r="4" fill="var(--vang)"/>
+<circle cx="399.0" cy="241.9" r="4" fill="var(--vang)"/>
+<circle cx="567.5" cy="225.1" r="4" fill="var(--vang)"/>
+<circle cx="736.0" cy="136.2" r="4" fill="var(--vang)"/>
+<path d="M62.0 256.0 L230.5 256.0 L399.0 241.0 L567.5 226.1 L736.0 154.1" fill="none" stroke="var(--gach)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="62.0" cy="256.0" r="4" fill="var(--gach)"/>
+<circle cx="230.5" cy="256.0" r="4" fill="var(--gach)"/>
+<circle cx="399.0" cy="241.0" r="4" fill="var(--gach)"/>
+<circle cx="567.5" cy="226.1" r="4" fill="var(--gach)"/>
+<circle cx="736.0" cy="154.1" r="4" fill="var(--gach)"/>
+</svg>
+<ul class="chu-thich">
+<li><span class="cham" style="background:var(--cam)"></span>10 CLB</li>
+<li><span class="cham" style="background:var(--reu)"></span>25 CLB</li>
+<li><span class="cham" style="background:var(--vang)"></span>50 CLB</li>
+<li><span class="cham" style="background:var(--gach)"></span>100 CLB</li>
+</ul>
+</div>
+<p>Đường cong gần thẳng: thời gian tăng gần tuyến tính theo số học sinh, không bùng nổ. Số câu lạc bộ ảnh hưởng ít hơn số học sinh.</p>
+<div class="bang-cuon"><table><thead><tr><th>Quy mô</th><th>Nạp dữ liệu</th><th>Chạy phân bổ</th><th>Xuất kết quả</th><th>Số vòng</th><th>Bộ nhớ</th><th>Tệp .db</th></tr></thead><tbody>
+<tr><td class="so">200 em / 25 CLB</td><td class="so">0,13 s</td><td class="so dam">0,07 s</td><td class="so">0,01 s</td><td class="so">13</td><td class="so">0,5 MB</td><td class="so">0,2 MB</td></tr>
+<tr><td class="so">500 em / 50 CLB</td><td class="so">0,30 s</td><td class="so dam">0,16 s</td><td class="so">0,02 s</td><td class="so">12</td><td class="so">1,1 MB</td><td class="so">0,4 MB</td></tr>
+<tr><td class="so">1000 em / 50 CLB</td><td class="so">0,65 s</td><td class="so dam">0,32 s</td><td class="so">0,04 s</td><td class="so">12</td><td class="so">2,0 MB</td><td class="so">0,7 MB</td></tr>
+<tr><td class="so">2000 em / 50 CLB</td><td class="so">1,23 s</td><td class="so dam">0,69 s</td><td class="so">0,07 s</td><td class="so">16</td><td class="so">3,9 MB</td><td class="so">1,4 MB</td></tr>
+<tr><td class="so">5000 em / 50 CLB</td><td class="so">3,23 s</td><td class="so dam">2,69 s</td><td class="so">0,21 s</td><td class="so">16</td><td class="so">10,4 MB</td><td class="so">3,3 MB</td></tr>
+</tbody></table></div>
+<h2><span class="stt">2</span>Tầng cơ sở dữ liệu và giao diện</h2>
+<p>Trước khi đo, tôi đọc mã và <strong>đoán trước hai chỗ sẽ nghẽn</strong>: cơ sở dữ liệu không có một chỉ mục phụ nào, và màn hình Kết quả vẽ thẳng mọi dòng ra DOM không phân trang. <span class="sai">Cả hai dự đoán đều sai.</span></p>
+<div class="bang-cuon"><table><thead><tr><th>Phép đo ở 2 000 em / 50 CLB</th><th>Kết quả</th><th>Dự đoán trước khi đo</th></tr></thead><tbody><tr><td>Truy vấn chậm nhất (Cảnh báo dữ liệu)</td><td class="so dam">15,7 ms</td><td>nghẽn vì thiếu chỉ mục — <span class="sai">sai</span></td></tr><tr><td>Thêm chỉ mục vào bản sao thì nhanh hơn</td><td class="so">1,0–2,0×</td><td>trên truy vấn vốn đã dưới 2 ms — không đáng</td></tr><tr><td>Vẽ bảng Kết quả 2 000 dòng</td><td class="so dam">59 ms</td><td>nghẽn vì không phân trang — <span class="sai">sai</span></td></tr><tr><td>Vẽ bảng 200 dòng, để so sánh</td><td class="so">18 ms</td><td>—</td></tr></tbody></table></div>
+<div class="ket"><p>Ở quy mô này, <strong>thuật toán chiếm gần như toàn bộ thời gian chờ</strong>: 701 phần nghìn giây so với 15,7 ms của cơ sở dữ liệu và 59 ms của giao diện. Hai chỗ tôi nghi ngờ trước khi đo đều không phải vấn đề — chúng chỉ trở thành vấn đề ở quy mô lớn hơn nhiều so với một trường trung học.</p></div>
+<h2><span class="stt">3</span>Nên cho học sinh xếp mấy nguyện vọng?</h2>
+<p>Đây mới là câu ảnh hưởng tới học sinh thật. Với 2 000 em, mỗi em <strong>chỉ dự thi 4 câu lạc bộ</strong> (không thể bắt một em thi 50 kỳ thi), tổng chỉ tiêu vừa đủ 100%%. Trục đứng là <strong>tỉ lệ em không được xếp vào đâu cả</strong>.</p>
+<h3>Khi mọi câu lạc bộ chỉ tiêu bằng nhau — giống trường thật</h3>
+<div class="the-do-thi">
+<svg viewBox="0 0 760 280" class="do-thi" role="img">
+<line x1="52" y1="236.0" x2="736" y2="236.0" class="luoi"/>
+<text x="42" y="240.0" class="nhan-truc nhan-y">0%</text>
+<line x1="52" y1="182.0" x2="736" y2="182.0" class="luoi"/>
+<text x="42" y="186.0" class="nhan-truc nhan-y">7%</text>
+<line x1="52" y1="128.0" x2="736" y2="128.0" class="luoi"/>
+<text x="42" y="132.0" class="nhan-truc nhan-y">14%</text>
+<line x1="52" y1="74.0" x2="736" y2="74.0" class="luoi"/>
+<text x="42" y="78.0" class="nhan-truc nhan-y">21%</text>
+<line x1="52" y1="20.0" x2="736" y2="20.0" class="luoi"/>
+<text x="42" y="24.0" class="nhan-truc nhan-y">28%</text>
+<text x="52.0" y="258" class="nhan-truc nhan-x">10 CLB</text>
+<text x="280.0" y="258" class="nhan-truc nhan-x">25 CLB</text>
+<text x="508.0" y="258" class="nhan-truc nhan-x">50 CLB</text>
+<text x="736.0" y="258" class="nhan-truc nhan-x">100 CLB</text>
+<path d="M52.0 184.6 L280.0 134.0 L508.0 95.0 L736.0 56.0" fill="none" stroke="var(--cam)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="184.6" r="4" fill="var(--cam)"/>
+<circle cx="280.0" cy="134.0" r="4" fill="var(--cam)"/>
+<circle cx="508.0" cy="95.0" r="4" fill="var(--cam)"/>
+<circle cx="736.0" cy="56.0" r="4" fill="var(--cam)"/>
+<path d="M52.0 222.9 L280.0 188.5 L508.0 158.4 L736.0 129.8" fill="none" stroke="var(--reu)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="222.9" r="4" fill="var(--reu)"/>
+<circle cx="280.0" cy="188.5" r="4" fill="var(--reu)"/>
+<circle cx="508.0" cy="158.4" r="4" fill="var(--reu)"/>
+<circle cx="736.0" cy="129.8" r="4" fill="var(--reu)"/>
+<path d="M52.0 236.0 L280.0 215.1 L508.0 202.4 L736.0 188.9" fill="none" stroke="var(--vang)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="236.0" r="4" fill="var(--vang)"/>
+<circle cx="280.0" cy="215.1" r="4" fill="var(--vang)"/>
+<circle cx="508.0" cy="202.4" r="4" fill="var(--vang)"/>
+<circle cx="736.0" cy="188.9" r="4" fill="var(--vang)"/>
+</svg>
+<ul class="chu-thich">
+<li><span class="cham" style="background:var(--cam)"></span>3 nguyện vọng</li>
+<li><span class="cham" style="background:var(--reu)"></span>5 nguyện vọng</li>
+<li><span class="cham" style="background:var(--vang)"></span>10 nguyện vọng</li>
+</ul>
+</div>
+<h3>Khi câu lạc bộ đông người thích được chia nhiều chỗ hơn</h3>
+<div class="the-do-thi">
+<svg viewBox="0 0 760 280" class="do-thi" role="img">
+<line x1="52" y1="236.0" x2="736" y2="236.0" class="luoi"/>
+<text x="42" y="240.0" class="nhan-truc nhan-y">0%</text>
+<line x1="52" y1="182.0" x2="736" y2="182.0" class="luoi"/>
+<text x="42" y="186.0" class="nhan-truc nhan-y">7%</text>
+<line x1="52" y1="128.0" x2="736" y2="128.0" class="luoi"/>
+<text x="42" y="132.0" class="nhan-truc nhan-y">14%</text>
+<line x1="52" y1="74.0" x2="736" y2="74.0" class="luoi"/>
+<text x="42" y="78.0" class="nhan-truc nhan-y">21%</text>
+<line x1="52" y1="20.0" x2="736" y2="20.0" class="luoi"/>
+<text x="42" y="24.0" class="nhan-truc nhan-y">28%</text>
+<text x="52.0" y="258" class="nhan-truc nhan-x">10 CLB</text>
+<text x="280.0" y="258" class="nhan-truc nhan-x">25 CLB</text>
+<text x="508.0" y="258" class="nhan-truc nhan-x">50 CLB</text>
+<text x="736.0" y="258" class="nhan-truc nhan-x">100 CLB</text>
+<path d="M52.0 234.1 L280.0 232.5 L508.0 225.6 L736.0 218.6" fill="none" stroke="var(--cam)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="234.1" r="4" fill="var(--cam)"/>
+<circle cx="280.0" cy="232.5" r="4" fill="var(--cam)"/>
+<circle cx="508.0" cy="225.6" r="4" fill="var(--cam)"/>
+<circle cx="736.0" cy="218.6" r="4" fill="var(--cam)"/>
+<path d="M52.0 235.2 L280.0 234.8 L508.0 232.9 L736.0 227.5" fill="none" stroke="var(--reu)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="235.2" r="4" fill="var(--reu)"/>
+<circle cx="280.0" cy="234.8" r="4" fill="var(--reu)"/>
+<circle cx="508.0" cy="232.9" r="4" fill="var(--reu)"/>
+<circle cx="736.0" cy="227.5" r="4" fill="var(--reu)"/>
+<path d="M52.0 236.0 L280.0 235.6 L508.0 231.4 L736.0 229.0" fill="none" stroke="var(--vang)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="52.0" cy="236.0" r="4" fill="var(--vang)"/>
+<circle cx="280.0" cy="235.6" r="4" fill="var(--vang)"/>
+<circle cx="508.0" cy="231.4" r="4" fill="var(--vang)"/>
+<circle cx="736.0" cy="229.0" r="4" fill="var(--vang)"/>
+</svg>
+<ul class="chu-thich">
+<li><span class="cham" style="background:var(--cam)"></span>3 nguyện vọng</li>
+<li><span class="cham" style="background:var(--reu)"></span>5 nguyện vọng</li>
+<li><span class="cham" style="background:var(--vang)"></span>10 nguyện vọng</li>
+</ul>
+</div>
+<div class="bang-cuon"><table><thead><tr><th>2 000 em, chỉ tiêu vừa đủ</th><th>3 nguyện vọng</th><th>5 nguyện vọng</th><th>10 nguyện vọng</th></tr></thead><tbody>
+<tr><td>Chỉ tiêu chia đều (giống trường thật) — số em không được xếp</td><td class="so dam">365</td><td class="so dam">201</td><td class="so dam">87</td></tr>
+<tr><td>Chỉ tiêu chia theo nhu cầu — số em không được xếp</td><td class="so dam">27</td><td class="so dam">8</td><td class="so dam">12</td></tr>
+<tr><td>Được xếp vào CLB <strong>không dự thi</strong> (chỉ nhờ bốc thăm)</td>
+<td class="so">0</td>
+<td class="so">42</td>
+<td class="so">132</td>
+</tr></tbody></table></div>
+<div class="ket"><p>Hai đồ thị trên khác nhau ở đúng một điều: <strong>cách nhà trường chia chỉ tiêu</strong>. Cùng số học sinh, cùng số nguyện vọng, cùng thuật toán.</p></div>
+<h2><span class="stt">4</span>Nhanh, nhưng có còn đúng không?</h2>
+<p>Chạy nhanh mà kết quả sai thì không tính là chạy được. Thuật toán họ Gale–Shapley bảo đảm kết quả <strong>ổn định</strong>: không tồn tại cặp (học sinh, câu lạc bộ) nào mà cả hai đều muốn đổi cho nhau. <code>kiem_on_dinh.py</code> kiểm trực tiếp lời bảo đảm đó ở quy mô lớn.</p>
+<div class="bang-cuon"><table><thead><tr><th>Quy mô</th><th>Số vòng</th><th>Cặp phá vỡ tìm được</th><th>Thời gian kiểm</th></tr></thead><tbody><tr><td class="so">500 em / 25 CLB</td><td class="so">12</td><td class="so dung">0</td><td class="so">0,01 s</td></tr><tr><td class="so">2 000 em / 50 CLB</td><td class="so">16</td><td class="so dung">0</td><td class="so">0,08 s</td></tr><tr><td class="so">5 000 em / 100 CLB</td><td class="so">12</td><td class="so dung">0</td><td class="so">0,31 s</td></tr></tbody></table></div>
+<h2><span class="stt">5</span>Chỗ nào gãy trước</h2>
+<div class="bang-cuon"><table><thead><tr><th>Chỗ</th><th>Đo được</th><th>Khi nào thành vấn đề</th></tr></thead><tbody><tr><td>Thuật toán duyệt <strong>mọi</strong> câu lạc bộ ở mỗi vòng, kể cả câu lạc bộ không nhận đề nghị nào — và mỗi lần đều sắp xếp lại danh sách</td><td class="so">7,65 s ở 5.000 em / 10 CLB</td><td>Chi phí ≈ số vòng × số CLB × cỡ danh sách. Đây là lần chạy lâu nhất trong cả 204 cấu hình.</td></tr><tr><td>Trần cứng <strong>10 nguyện vọng</strong> mỗi học sinh</td><td class="so">10</td><td>Với 50–100 câu lạc bộ, học sinh chỉ xếp được 10–20% số lựa chọn.</td></tr><tr><td>Cơ sở dữ liệu không có chỉ mục phụ</td><td class="so">15,7 ms</td><td>Chưa thành vấn đề ở 2 000 em. Thêm chỉ mục chỉ lợi 1–2× trên truy vấn vốn đã nhanh.</td></tr><tr><td>Bảng Kết quả vẽ thẳng mọi dòng, không phân trang</td><td class="so">59 ms</td><td>Chưa thành vấn đề ở 2 000 dòng.</td></tr></tbody></table></div>
+<h2><span class="stt">PP</span>Cách đo</h2>
+<p>Mọi phép đo đi <strong>đúng con đường người dùng đi</strong>: nạp tệp qua <code>import_csv_auto</code>, chạy qua <code>run_pipeline</code>, xuất qua <code>export_csv</code>. Không gọi thẳng vào trong thuật toán — gọi thẳng cho ra con số đẹp hơn nhưng không phải con số người dùng gặp.</p>
+<p>Trước khi tin bất cứ số nào, bộ đo phải đo lại một thứ <strong>đã biết kết quả</strong>: bộ 120 học sinh thật của dự án, phải ra đúng 108/120 và 7 vòng. <code>doi_chung.py</code> làm việc đó và dừng hẳn nếu lệch.</p>
+<p>Nhu cầu sinh theo trọng số Zipf (câu lạc bộ thứ <em>i</em> hút khoảng 1/<em>i</em>), seed cố định nên chạy lại luôn ra đúng bộ đó. Đo trên máy Linux ảo; máy khác sẽ cho con số tuyệt đối khác, nhưng <strong>tỉ lệ giữa các quy mô thì giữ nguyên</strong>.</p>
+<p>Tái lập: <code>./.venv/bin/python du_lieu_test/thu_tai/chay_thu_tai.py</code>. Số liệu thô đầy đủ 204 dòng trong <code>ket_qua_thu_tai.csv</code>.</p>
+<div class="doan-cuoi"><p>Trang này chỉ chứa số đo và mô tả cơ chế kỹ thuật. <strong>Phần diễn giải, nhận xét và kết luận nghiên cứu do học sinh tự viết.</strong> Dữ liệu là mô phỏng do máy sinh, không phải khảo sát học sinh có thật.</p></div>
+</div>

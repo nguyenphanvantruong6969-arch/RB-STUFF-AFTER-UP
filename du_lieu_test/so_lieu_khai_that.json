@@ -1,0 +1,193 @@
+{
+  "_ghi_chu": "Sinh bởi du_lieu_test/do_khai_that.py — KHÔNG sửa tay.",
+  "giay_chay": 171.44,
+  "so_em_mau": 40,
+  "so_the_hien": 200,
+  "tn3a_vet_can": {
+    "Boston / nhận ngay": {
+      "muc_loi_tb": 2.51,
+      "so_the_hien": 200,
+      "so_the_hien_co_em_khai_gian_duoc": 160,
+      "ti_le_phan_tram": 18.43,
+      "tong_em_khai_gian_duoc": 258,
+      "tong_em_thu": 1400,
+      "vi_du": {
+        "hang_khi_khai_gian": 2,
+        "hang_khi_khai_that": 5,
+        "khai_gian": [
+          "C3"
+        ],
+        "nguyen_vong_that": [
+          "C1",
+          "C3",
+          "C0"
+        ],
+        "student_id": "E02"
+      }
+    },
+    "RB-DA (phần mềm)": {
+      "muc_loi_tb": 0.0,
+      "so_the_hien": 200,
+      "so_the_hien_co_em_khai_gian_duoc": 0,
+      "ti_le_phan_tram": 0.0,
+      "tong_em_khai_gian_duoc": 0,
+      "tong_em_thu": 1400,
+      "vi_du": null
+    },
+    "TTC": {
+      "muc_loi_tb": 0.0,
+      "so_the_hien": 200,
+      "so_the_hien_co_em_khai_gian_duoc": 0,
+      "ti_le_phan_tram": 0.0,
+      "tong_em_khai_gian_duoc": 0,
+      "tong_em_thu": 1400,
+      "vi_du": null
+    },
+    "Xét theo bốc thăm": {
+      "muc_loi_tb": 0.0,
+      "so_the_hien": 200,
+      "so_the_hien_co_em_khai_gian_duoc": 0,
+      "ti_le_phan_tram": 0.0,
+      "tong_em_khai_gian_duoc": 0,
+      "tong_em_thu": 1400,
+      "vi_du": null
+    }
+  },
+  "tn3b_bo_that": {
+    "TEST_0*          (120 em / 10 CLB)": {
+      "Boston / nhận ngay": {
+        "giay": 0.6,
+        "muc_loi_lon_nhat": 3,
+        "muc_loi_tb": 2.22,
+        "so_em_khai_gian_duoc": 9,
+        "so_em_thu": 40,
+        "vi_du": {
+          "hang_khi_khai_gian": 2,
+          "hang_khi_khai_that": 5,
+          "khai_gian": [
+            "clb_tienganh"
+          ],
+          "nguyen_vong_that": [
+            "clb_tinhoc",
+            "clb_tienganh",
+            "clb_mythuat"
+          ],
+          "student_id": "HS006"
+        }
+      },
+      "RB-DA (phần mềm)": {
+        "giay": 1.3,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 40,
+        "vi_du": null
+      },
+      "TTC": {
+        "giay": 4.4,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 40,
+        "vi_du": null
+      },
+      "Xét theo bốc thăm": {
+        "giay": 0.0,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 40,
+        "vi_du": null
+      }
+    },
+    "bo_sach          (140 em / 12 CLB)": {
+      "Boston / nhận ngay": {
+        "giay": 3.6,
+        "muc_loi_lon_nhat": 6,
+        "muc_loi_tb": 2.62,
+        "so_em_khai_gian_duoc": 8,
+        "so_em_thu": 40,
+        "vi_du": {
+          "hang_khi_khai_gian": 2,
+          "hang_khi_khai_that": 4,
+          "khai_gian": [
+            "clb_mythuat",
+            "clb_tinhnguyen",
+            "clb_tinhoc",
+            "clb_bongda",
+            "clb_covua",
+            "clb_robotics"
+          ],
+          "nguyen_vong_that": [
+            "clb_tinhoc",
+            "clb_mythuat",
+            "clb_bongda",
+            "clb_robotics",
+            "clb_tinhnguyen",
+            "clb_covua"
+          ],
+          "student_id": "HS004"
+        }
+      },
+      "RB-DA (phần mềm)": {
+        "giay": 20.6,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 40,
+        "vi_du": null
+      },
+      "TTC": {
+        "giay": 136.9,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 40,
+        "vi_du": null
+      },
+      "Xét theo bốc thăm": {
+        "giay": 0.5,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 40,
+        "vi_du": null
+      }
+    },
+    "vi_du_huong_dan  (10 em / 4 CLB)": {
+      "Boston / nhận ngay": {
+        "giay": 0.0,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 10,
+        "vi_du": null
+      },
+      "RB-DA (phần mềm)": {
+        "giay": 0.0,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 10,
+        "vi_du": null
+      },
+      "TTC": {
+        "giay": 0.0,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 10,
+        "vi_du": null
+      },
+      "Xét theo bốc thăm": {
+        "giay": 0.0,
+        "muc_loi_lon_nhat": 0,
+        "muc_loi_tb": 0.0,
+        "so_em_khai_gian_duoc": 0,
+        "so_em_thu": 10,
+        "vi_du": null
+      }
+    }
+  },
+  "tran_khai": 600
+}

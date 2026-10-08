@@ -1,0 +1,542 @@
+<title>Biểu mẫu 6 phần</title>
+<meta name="description" content="Bản thiết kế biểu mẫu đăng ký CLB và thi tuyển gồm 6 phần: thông tin học sinh và 5 buổi từ Thứ Hai tới Thứ Sáu, có chạy thử.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#e9efee; --card:#ffffff; --ink:#1b2523; --muted:#56655f; --line:#d3dddb;
+  --accent:#0d6964; --accent-ink:#ffffff; --accent-soft:#dbecea; --band:#0d6964;
+  --ok:#1d7439; --ok-soft:#e0f1e5; --bad:#b0271d; --bad-soft:#fbe6e3; --warn:#8a5a00; --warn-soft:#fff2d6;
+  --field:#f6f9f8; --shadow:0 1px 2px rgba(18,40,38,.08),0 2px 8px rgba(18,40,38,.05);
+  --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101816; --card:#18221f; --ink:#e3ecea; --muted:#9aaba7; --line:#2c3a37;
+    --accent:#4fb8ae; --accent-ink:#06201d; --accent-soft:#1c3633; --band:#0f4f4b;
+    --ok:#6fcf8c; --ok-soft:#173424; --bad:#f08a80; --bad-soft:#3a1c19; --warn:#f0c060; --warn-soft:#3a2f14;
+    --field:#121b19; --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101816; --card:#18221f; --ink:#e3ecea; --muted:#9aaba7; --line:#2c3a37;
+  --accent:#4fb8ae; --accent-ink:#06201d; --accent-soft:#1c3633; --band:#0f4f4b;
+  --ok:#6fcf8c; --ok-soft:#173424; --bad:#f08a80; --bad-soft:#3a1c19; --warn:#f0c060; --warn-soft:#3a2f14;
+  --field:#121b19; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);padding-inline:16px;padding-block:0 56px}
+.wrap{max-width:780px;margin:0 auto;display:grid;gap:18px}
+header.doc{padding-block:28px 4px;display:grid;gap:10px}
+.eyebrow{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{margin:0;font-size:30px;line-height:1.2;text-wrap:balance}
+h2{margin:0;font-size:21px;line-height:1.3;text-wrap:balance}
+h3{margin:0;font-size:16px}
+p{margin:0;max-width:66ch}
+.lead{font-size:16.5px;color:var(--muted)}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px}
+nav.toc a{font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px}
+nav.toc a:hover{border-color:var(--accent)}
+section.doc{display:grid;gap:12px;padding-top:10px}
+.card{background:var(--card);border-radius:10px;box-shadow:var(--shadow);padding:18px 20px}
+.muted{color:var(--muted)}
+ul.plain{margin:0;padding-left:20px;display:grid;gap:4px}
+.parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.part{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
+.part b{font-size:12px;color:var(--accent);letter-spacing:.05em;text-transform:uppercase}
+.part span{font-weight:600}
+.part small{color:var(--muted);font-size:12.5px}
+.flow{display:grid;gap:0;counter-reset:st}
+.step{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.step .dot{width:34px;height:34px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:700}
+.step .txt{padding-bottom:14px;border-left:2px solid var(--line);margin-left:-29px;padding-left:29px}
+.step:last-child .txt{border-left-color:transparent}
+.step .txt p{color:var(--muted);font-size:14px}
+.branch{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:12.5px;border-radius:6px;padding:2px 8px;background:var(--field);border:1px solid var(--line)}
+.chip b{color:var(--accent)}
+.new{font-size:11px;font-weight:700;color:var(--ok);background:var(--ok-soft);border-radius:4px;padding:1px 6px;margin-left:6px;letter-spacing:.03em}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--field);font-weight:600;color:var(--muted);font-size:12.5px;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+td.nw{white-space:nowrap}
+.note{font-size:13.5px;border-radius:8px;padding:10px 14px;background:var(--warn-soft);color:var(--warn)}
+
+/* ---- khung chạy thử ---- */
+.demo{border:2px solid var(--accent);border-radius:14px;padding:14px;display:grid;gap:12px;background:var(--bg)}
+.demo-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.demo-bar .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.band{background:var(--band);border-radius:10px;padding:20px;color:#fff;display:grid;gap:6px}
+.band h2{color:#fff;font-size:21px}
+.band p{opacity:.9}
+.steps{display:flex;gap:4px;margin-top:8px}
+.steps i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.28)}
+.steps i.on{background:#fff}
+.prog-txt{font-size:12px;opacity:.85}
+.sec-title{display:grid;gap:2px}
+.sec-kicker{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.q{display:grid;gap:10px}
+.q.err{box-shadow:inset 3px 0 0 var(--bad),var(--shadow)}
+.q.exam{border-left:4px solid var(--accent-soft)}
+.q-head{display:flex;gap:10px;align-items:flex-start}
+.q-num{font-weight:600;color:var(--muted);min-width:2.2em;font-variant-numeric:tabular-nums}
+.q-title{font-weight:600;flex:1}
+.req{color:var(--bad);margin-left:3px}
+.q-sub{font-size:12.5px;color:var(--muted);padding-left:calc(2.2em + 10px)}
+.body{padding-left:calc(2.2em + 10px);display:grid;gap:7px}
+input[type=text]{width:100%;font:15px var(--sans);color:var(--ink);background:var(--field);border:0;border-bottom:2px solid var(--line);padding:10px 12px;border-radius:4px 4px 0 0}
+input[type=text]:focus{outline:none;border-bottom-color:var(--accent)}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;border:1px solid transparent;cursor:pointer;background:var(--field)}
+.opt:hover{border-color:var(--line)}
+.opt input{accent-color:var(--accent);width:18px;height:18px;margin:0;flex:none}
+.opt.sel{background:var(--accent-soft);border-color:var(--accent)}
+.opt .go{margin-left:auto;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.errmsg{color:var(--bad);font-size:13px;font-weight:500}
+.hint{font-size:13px;color:var(--muted)}
+.rank{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.rank li{display:flex;align-items:center;gap:10px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px 6px 6px 10px;cursor:grab;user-select:none}
+.rank li.drag{opacity:.45}
+.rank li.over{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.rank.untouched li{color:var(--muted)}
+.rank .pos{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;background:var(--accent);color:var(--accent-ink);flex:none;font-variant-numeric:tabular-nums}
+.rank.untouched .pos{background:var(--line);color:var(--muted)}
+.rank .nm{flex:1}
+.iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;line-height:1}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.linkbtn{border:0;background:none;color:var(--accent);font:600 13px var(--sans);cursor:pointer;padding:0;justify-self:start}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{font:600 14px var(--sans);border-radius:6px;padding:9px 18px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--card);color:var(--accent)}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,.opt:focus-within,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tally{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.tally b{font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.score-big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.score-big b{font-size:38px;line-height:1;font-variant-numeric:tabular-nums}
+.review{display:grid;gap:5px;margin:0;padding:0;list-style:none}
+.review li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:14px}
+.review .mk{font-weight:700}
+.review .mk.ok{color:var(--ok)} .review .mk.bad{color:var(--bad)}
+.review .sub{grid-column:2;color:var(--muted);font-size:13px}
+.stack{display:grid;gap:10px}
+@media (max-width:520px){
+  h1{font-size:25px}
+  .card{padding:15px}
+  .body,.q-sub{padding-left:0}
+  .opt .go{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="doc">
+  <span class="eyebrow">Bản thiết kế để duyệt · bản nháp của tệp Word</span>
+  <h1>Biểu mẫu đăng ký CLB và thi tuyển gồm 6 phần</h1>
+  <p class="lead">Học sinh điền thông tin một lần, rồi đi qua từng buổi từ Thứ Hai tới Thứ Sáu. Ở mỗi buổi, em xếp hạng 10 CLB trước, sau đó chọn CLB muốn thi. Chọn CLB nào thì đề thi của CLB đó hiện ra ngay bên dưới.</p>
+  <nav class="toc" aria-label="Mục lục">
+    <a href="#y-tuong">Ý tưởng</a><a href="#mot-buoi">Một buổi đi thế nào</a><a href="#chay-thu">Chạy thử</a><a href="#re-nhanh">Bảng rẽ nhánh</a><a href="#cham-diem">Chấm điểm</a><a href="#so-sanh">So với bản cũ</a><a href="#can-biet">Cần biết</a>
+  </nav>
+</header>
+
+<section class="doc" id="y-tuong">
+  <h2>Ý tưởng: 6 phần, mỗi buổi một phần</h2>
+  <div class="parts" id="parts"></div>
+  <p class="muted" id="tong-so"></p>
+</section>
+
+<section class="doc" id="mot-buoi">
+  <h2>Một buổi đi thế nào</h2>
+  <p class="muted">Lấy Thứ Hai làm ví dụ. Bốn buổi còn lại giống hệt, chỉ khác danh sách CLB.</p>
+  <div class="card flow">
+    <div class="step"><span class="dot">1</span><div class="txt"><h3>Câu mở buổi<span class="new">Thêm để tiện hơn</span></h3>
+      <p>“Em có đăng ký sinh hoạt Thứ Hai không?” Em bận buổi này thì chọn Không và sang ngay Thứ Ba. Chỉ mất một lần bấm.</p>
+      <div class="branch"><span class="chip">Có → <b>câu xếp hạng</b></span><span class="chip">Không → <b>Phần 3 · Thứ Ba</b></span></div></div></div>
+    <div class="step"><span class="dot">2</span><div class="txt"><h3>Xếp hạng 10 CLB</h3>
+      <p>Kéo thả để xếp CLB em thích nhất lên đầu. Làm bước này trước khi chọn CLB để thi.</p></div></div>
+    <div class="step"><span class="dot">3</span><div class="txt"><h3>10 câu chọn CLB để thi</h3>
+      <p>Mỗi CLB một câu, theo đúng thứ tự trong danh sách. Mỗi câu có ba lựa chọn.</p>
+      <div class="branch"><span class="chip">Có → <b>hiện 2 câu đề thi</b></span><span class="chip">Không → <b>câu của CLB kế tiếp</b></span><span class="chip">Không thi thêm <span class="new">Thêm để tiện hơn</span> → <b>buổi sau</b></span></div></div></div>
+    <div class="step"><span class="dot">4</span><div class="txt"><h3>Đề thi hiện ngay bên dưới</h3>
+      <p>Mỗi đề 2 câu, mỗi câu 5 điểm. Làm xong 2 câu, biểu mẫu tự đi tiếp tới câu chọn của CLB kế tiếp.</p></div></div>
+  </div>
+</section>
+
+<section class="doc" id="chay-thu">
+  <h2>Chạy thử</h2>
+  <p class="muted">Đây là bản mô phỏng, không phải Microsoft Forms thật và không gửi dữ liệu đi đâu. Bấm “Điền nhanh” để đi nhanh qua từng phần.</p>
+  <div class="demo">
+    <div class="demo-bar"><span class="lbl">Bản mô phỏng biểu mẫu</span><button class="linkbtn" id="restart" type="button">Làm lại từ đầu</button></div>
+    <div id="view" class="stack"></div>
+  </div>
+</section>
+
+<section class="doc" id="re-nhanh">
+  <h2>Bảng rẽ nhánh của Phần 2 · Thứ Hai</h2>
+  <p class="muted">Rẽ nhánh đặt trên từng câu, ngay trong cùng một phần. Lựa chọn “Có” luôn để mặc định, vì câu kế tiếp chính là câu đề thi. Bốn buổi còn lại đặt theo cùng quy tắc.</p>
+  <div class="tbl-wrap"><table id="bang-re-nhanh"></table></div>
+</section>
+
+<section class="doc" id="cham-diem">
+  <h2>Chấm điểm</h2>
+  <div class="card stack">
+    <ul class="plain">
+      <li>Mỗi đề 2 câu, mỗi câu 5 điểm. Điểm mỗi CLB theo thang 10.</li>
+      <li>Chấm theo nội dung đáp án em chọn, không theo vị trí. Vì vậy có thể bật xáo trộn lựa chọn cho từng câu đề thi.</li>
+      <li>Sau khi nộp, giáo viên thấy điểm từng CLB và từng câu đúng sai. Không nên cho học sinh xem đáp án ngay, để em làm trước không báo đáp án cho em làm sau.</li>
+      <li>Bộ chuyển đổi đọc tệp Excel xuất từ Forms, chấm lại theo đáp án gốc, và báo nếu điểm Forms chấm khác đáp án gốc.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="doc" id="so-sanh">
+  <h2>So với bản cũ</h2>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th></th><th>Bản cũ</th><th>Bản 6 phần</th></tr></thead>
+    <tbody id="bang-so-sanh"></tbody>
+  </table></div>
+</section>
+
+<section class="doc" id="can-biet">
+  <h2>Những điều cần biết</h2>
+  <div class="card">
+    <ul class="plain">
+      <li><b>Microsoft Forms không cho tick nhiều ô rồi hiện đề.</b> Câu chọn nhiều không rẽ nhánh được. Vì vậy mỗi CLB là một câu chọn một: Có, Không, hoặc Không thi thêm.</li>
+      <li><b>Câu chọn CLB theo thứ tự cố định,</b> không theo thứ tự em vừa xếp hạng. Forms không đổi thứ tự câu hỏi theo câu trả lời.</li>
+      <li><b>Tối đa 5 CLB dự thi mỗi buổi.</b> Phần mềm xếp CLB chỉ nhận 5. Forms không tự chặn được, nên câu hỏi ghi rõ “tối đa 5” và bộ chuyển đổi sẽ báo nếu em chọn quá.</li>
+      <li><b>Câu chọn CLB và câu đề thi phải là câu bắt buộc.</b> Nếu bỏ trống, Forms coi như đi tiếp và đề thi vẫn hiện ra.</li>
+      <li><b>Câu xếp hạng buộc xếp đủ 10 CLB.</b> CLB em không muốn thì để cuối.</li>
+      <li><b>Việc cài tay nhiều hơn bản cũ.</b> Có <span id="so-re-nhanh"></span> chỗ rẽ nhánh và <span id="so-dap-an"></span> câu phải đánh dấu đáp án. Bỏ lựa chọn “Không thi thêm” thì còn <span id="so-re-nhanh-gon"></span> chỗ rẽ nhánh, đổi lại học sinh phải bấm nhiều hơn.</li>
+      <li><b>Giới hạn số câu.</b> Bản này có <span id="so-cau"></span> câu, dưới mức khoảng 200 câu mà Forms cho phép trong một biểu mẫu. Thêm CLB hoặc thêm câu đề thi thì phải tính lại.</li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<script>
+/* ============ Dữ liệu mẫu: 5 buổi × 10 CLB × 2 câu ============
+   Mỗi câu: [câu hỏi, [đáp án đúng, sai, sai, sai]]. Trang tự xáo thứ tự
+   lựa chọn khi hiển thị (cố định, không ngẫu nhiên mỗi lần mở). */
+const DIEM_CAU = 5, TRAN_THI = 5;
+const BUOI = [
+ ["thu_2","Thứ Hai",[
+  ["clb_covua","CLB Cờ vua",[["Quân nào đi theo hình chữ L?",["Mã","Xe","Tượng","Hậu"]],["Muốn nhập thành thì cần điều kiện nào?",["Vua chưa từng di chuyển","Vua đang bị chiếu","Có quân đứng giữa Vua và Xe","Xe đã di chuyển trước đó"]]]],
+  ["clb_vanhoc","CLB Văn học",[["Truyện Kiều là tác phẩm của ai?",["Nguyễn Du","Nguyễn Trãi","Hồ Xuân Hương","Nguyễn Đình Chiểu"]],["Câu “Mặt trời xuống biển như hòn lửa” dùng biện pháp tu từ nào?",["So sánh","Ẩn dụ","Hoán dụ","Nói quá"]]]],
+  ["clb_nhiepanh","CLB Nhiếp ảnh",[["Số khẩu độ nhỏ (ví dụ f/1.8) nghĩa là gì?",["Lỗ mở lớn, nhiều ánh sáng vào","Lỗ mở nhỏ, ít ánh sáng vào","Ảnh sẽ thành đen trắng","Máy chụp liên tục"]],["Quy tắc một phần ba giúp bức ảnh thế nào?",["Bố cục cân đối và dễ nhìn","Ảnh sáng hơn","Pin dùng lâu hơn","Ảnh có dung lượng nhỏ hơn"]]]],
+  ["clb_caulong","CLB Cầu lông",[["Một ván cầu lông thường chơi tới bao nhiêu điểm?",["21","11","15","25"]],["Quả cầu lông thi đấu thường làm từ lông gì?",["Lông ngỗng hoặc lông vịt","Lông gà","Lông công","Lông cừu"]]]],
+  ["clb_hungbien","CLB Hùng biện",[["Mở đầu bài nói nên làm gì?",["Gây chú ý và nêu chủ đề","Xin lỗi vì mình nói kém","Đọc nguyên văn tờ giấy","Nói thật nhanh cho xong"]],["Khi nói trước đông người nên nhìn vào đâu?",["Nhìn người nghe","Nhìn lên trần nhà","Nhìn xuống sàn","Nhắm mắt lại"]]]],
+  ["clb_sinhhoc","CLB Sinh học",[["Bộ phận nào của tế bào chứa vật chất di truyền?",["Nhân tế bào","Màng tế bào","Thành tế bào","Không bào"]],["Hồng cầu có nhiệm vụ chính là gì?",["Vận chuyển oxy","Chống vi khuẩn","Làm đông máu","Tiêu hoá thức ăn"]]]],
+  ["clb_guitar","CLB Guitar",[["Đàn guitar thông thường có mấy dây?",["6","4","7","12"]],["Hợp âm Đô trưởng được ký hiệu là gì?",["C","D","G","A"]]]],
+  ["clb_baochi","CLB Báo chí",[["Trước khi đăng một tin, việc cần làm đầu tiên là gì?",["Kiểm tra lại nguồn tin","Đăng ngay cho nhanh","Thêm chi tiết cho hấp dẫn","Xoá tên nguồn tin"]],["Một bản tin tốt phải trả lời được những câu nào?",["Ai, cái gì, ở đâu, khi nào, vì sao, như thế nào","Chỉ cần trả lời ai","Chỉ cần trả lời khi nào","Không cần trả lời câu nào"]]]],
+  ["clb_truyentranh","CLB Vẽ truyện tranh",[["Ô chứa lời nói của nhân vật trong truyện tranh gọi là gì?",["Bóng thoại","Khung tranh","Trang bìa","Mục lục"]],["Truyện tranh Nhật Bản thường được gọi là gì?",["Manga","Manhwa","Comic","Ngụ ngôn"]]]],
+  ["clb_boiloi","CLB Bơi lội",[["Kiểu bơi nào nằm ngửa trên mặt nước?",["Bơi ngửa","Bơi ếch","Bơi sải","Bơi bướm"]],["Trước khi xuống nước nên làm gì?",["Khởi động kỹ","Ăn thật no","Nhảy xuống ngay","Chạy quanh hồ bơi"]]]]
+ ]],
+ ["thu_3","Thứ Ba",[
+  ["clb_tienganh","CLB Tiếng Anh",[["She ___ to school every day.",["goes","go","going","gone"]],["Từ trái nghĩa với “ancient” là gì?",["modern","old","huge","quiet"]]]],
+  ["clb_mythuat","CLB Mỹ thuật",[["Ba màu cơ bản trong hội hoạ truyền thống là gì?",["Đỏ, vàng, lam","Đỏ, lục, lam","Cam, tím, lục","Đen, trắng, xám"]],["Màu bổ túc của màu đỏ là màu nào?",["Lục","Vàng","Cam","Tím"]]]],
+  ["clb_bongda","CLB Bóng đá",[["Mỗi đội bóng đá có bao nhiêu cầu thủ trên sân?",["11","9","10","12"]],["Cầu thủ nhận thẻ đỏ thì sao?",["Phải rời sân, không được thi đấu tiếp","Chỉ bị nhắc nhở","Được đá phạt","Được nghỉ giữa hiệp"]]]],
+  ["clb_tiengnhat","CLB Tiếng Nhật",[["Bảng chữ Hiragana dùng cho tiếng nước nào?",["Tiếng Nhật","Tiếng Hàn","Tiếng Trung","Tiếng Thái"]],["“Arigatou” nghĩa là gì?",["Cảm ơn","Xin chào","Tạm biệt","Xin lỗi"]]]],
+  ["clb_kich","CLB Kịch",[["Nhân vật nói một mình để bộc lộ suy nghĩ gọi là gì?",["Độc thoại","Đối thoại","Lời dẫn chuyện","Phụ đề"]],["Ai là người chỉ đạo diễn viên trong một vở kịch?",["Đạo diễn","Khán giả","Người soát vé","Nhạc công"]]]],
+  ["clb_hoahoc","CLB Hoá học",[["Công thức hoá học của nước là gì?",["H2O","CO2","O2","NaCl"]],["Dung dịch có độ pH nhỏ hơn 7 là loại gì?",["Axit","Bazơ","Trung tính","Nước cất"]]]],
+  ["clb_nauan","CLB Nấu ăn",[["Vì sao phải rửa tay trước khi nấu ăn?",["Để giữ vệ sinh, an toàn thực phẩm","Để tay đẹp hơn","Để nấu nhanh hơn","Không cần rửa tay"]],["Thịt sống và đồ ăn chín nên để thế nào?",["Để riêng, dùng thớt riêng","Để chung một thớt","Trộn lẫn với nhau","Rửa chung một chậu"]]]],
+  ["clb_thietke","CLB Thiết kế đồ hoạ",[["Hệ màu dùng cho màn hình máy tính là gì?",["RGB","CMYK","Pantone","Đen trắng"]],["Ảnh vector khác ảnh thường ở điểm nào?",["Phóng to không bị vỡ hình","Luôn có nhiều màu hơn","Chỉ có hai màu","Không in ra được"]]]],
+  ["clb_cotuong","CLB Cờ tướng",[["Quân Tượng trong cờ tướng có được qua sông không?",["Không","Có","Chỉ khi ăn quân","Chỉ ở nước đi đầu"]],["Quân Mã bị cản khi nào?",["Có quân đứng sát ngay hướng đi","Có quân ở cuối đường đi","Khi đi qua sông","Khi gặp quân Tướng"]]]],
+  ["clb_mua","CLB Múa",[["Múa sạp là điệu múa nổi tiếng của dân tộc nào?",["Dân tộc Thái","Dân tộc Chăm","Dân tộc Khmer","Dân tộc Hoa"]],["Khởi động trước khi tập múa giúp gì?",["Tránh chấn thương","Mệt nhanh hơn","Dễ quên động tác","Không có tác dụng"]]]]
+ ]],
+ ["thu_4","Thứ Tư",[
+  ["clb_robotics","CLB Robotics",[["Cảm biến siêu âm trên robot dùng để làm gì?",["Đo khoảng cách","Đo nhiệt độ","Nhận biết màu","Đo độ ẩm"]],["Vòng lặp trong lập trình dùng để làm gì?",["Lặp lại một nhóm lệnh","Dừng chương trình","Xoá biến","Nối dây điện"]]]],
+  ["clb_khoahoc","CLB Khoa học",[["Ở áp suất tiêu chuẩn, nước sôi ở bao nhiêu độ C?",["100","90","50","0"]],["Cây xanh tạo chất hữu cơ nhờ ánh sáng qua quá trình nào?",["Quang hợp","Hô hấp","Thoát hơi nước","Lên men"]]]],
+  ["clb_kynang","CLB Kỹ năng sống",[["Số điện thoại gọi cứu hoả ở Việt Nam là số nào?",["114","113","115","111"]],["Bị lạc ở nơi đông người, em nên làm gì?",["Đứng yên ở chỗ dễ thấy và nhờ người có trách nhiệm","Đi theo người lạ","Chạy khắp nơi để tìm","Ngồi khóc và chờ"]]]],
+  ["clb_thienvan","CLB Thiên văn",[["Hành tinh nào gần Mặt Trời nhất?",["Sao Thuỷ","Sao Kim","Trái Đất","Sao Hoả"]],["Trái Đất quay một vòng quanh Mặt Trời mất khoảng bao lâu?",["Một năm","Một ngày","Một tháng","Mười năm"]]]],
+  ["clb_dialy","CLB Địa lý",[["Đỉnh núi cao nhất Việt Nam là đỉnh nào?",["Fansipan","Bà Đen","Lang Biang","Tây Côn Lĩnh"]],["Đường xích đạo chia Trái Đất thành hai phần nào?",["Bán cầu Bắc và bán cầu Nam","Bán cầu Đông và bán cầu Tây","Lục địa và đại dương","Ngày và đêm"]]]],
+  ["clb_bongchuyen","CLB Bóng chuyền",[["Mỗi đội bóng chuyền có mấy người trên sân?",["6","5","7","11"]],["Một đội được chạm bóng tối đa mấy lần trước khi đưa bóng qua lưới?",["3","2","4","5"]]]],
+  ["clb_lamphim","CLB Làm phim",[["Kịch bản phân cảnh (vẽ trước từng cảnh) dùng để làm gì?",["Lên kế hoạch cho từng cảnh quay","Tính tiền vé","Chọn nhạc nền","Viết phụ đề"]],["Cảnh quay sát khuôn mặt nhân vật gọi là gì?",["Cận cảnh","Toàn cảnh","Viễn cảnh","Trung cảnh"]]]],
+  ["clb_moitruong","CLB Môi trường",[["Loại rác nào sau đây tái chế được?",["Chai nhựa đã rửa sạch","Vỏ chuối","Khăn giấy đã dùng","Thức ăn thừa"]],["Ngày Môi trường Thế giới là ngày nào?",["5 tháng 6","22 tháng 4","1 tháng 6","8 tháng 3"]]]],
+  ["clb_tienghan","CLB Tiếng Hàn",[["Bảng chữ cái tiếng Hàn gọi là gì?",["Hangul","Kanji","Pinyin","Katakana"]],["“Annyeonghaseyo” nghĩa là gì?",["Xin chào","Cảm ơn","Tạm biệt","Chúc ngủ ngon"]]]],
+  ["clb_khoinghiep","CLB Khởi nghiệp",[["Lợi nhuận được tính thế nào?",["Doanh thu trừ chi phí","Doanh thu cộng chi phí","Chỉ tính doanh thu","Chỉ tính chi phí"]],["Khách hàng mục tiêu là ai?",["Nhóm người mà sản phẩm hướng tới","Mọi người trên thế giới","Đối thủ cạnh tranh","Nhà cung cấp"]]]]
+ ]],
+ ["thu_5","Thứ Năm",[
+  ["clb_tinhoc","CLB Tin học",[["1 byte bằng bao nhiêu bit?",["8","2","10","16"]],["Hệ nhị phân dùng những chữ số nào?",["0 và 1","0 đến 9","1 và 2","A đến F"]]]],
+  ["clb_amnhac","CLB Âm nhạc",[["Có bao nhiêu tên nốt nhạc cơ bản?",["7","5","8","12"]],["Một nốt tròn dài bằng mấy nốt đen?",["4","1","2","8"]]]],
+  ["clb_tinhnguyen","CLB Tình nguyện",[["Hoạt động tình nguyện là gì?",["Tự nguyện giúp cộng đồng, không nhận tiền công","Làm thêm có lương","Bài tập bắt buộc có điểm","Hoạt động quảng cáo"]],["Quyên góp quần áo cũ thì nên làm gì?",["Giặt sạch và phân loại trước","Để nguyên đồ bẩn","Góp cả đồ đã rách nát","Nhét chung vào một túi"]]]],
+  ["clb_vatly","CLB Vật lý",[["Đơn vị đo điện trở là gì?",["Ôm","Vôn","Ampe","Oát"]],["Ánh sáng đi nhanh nhất trong môi trường nào?",["Chân không","Nước","Thuỷ tinh","Kim loại"]]]],
+  ["clb_hopxuong","CLB Hợp xướng",[["Giọng nữ cao nhất trong hợp xướng gọi là gì?",["Soprano","Alto","Tenor","Bass"]],["Giọng nam trầm nhất gọi là gì?",["Bass","Tenor","Alto","Soprano"]]]],
+  ["clb_tranhbien","CLB Tranh biện",[["Một lập luận tốt cần có những gì?",["Luận điểm, dẫn chứng và giải thích","Chỉ cần cảm xúc","Nói thật to","Chê bai người khác"]],["Khi phản bác, em nên nhắm vào đâu?",["Lập luận của đối phương","Ngoại hình đối phương","Giọng nói đối phương","Trường của đối phương"]]]],
+  ["clb_vothuat","CLB Võ thuật",[["Vovinam là võ thuật của nước nào?",["Việt Nam","Nhật Bản","Hàn Quốc","Thái Lan"]],["Karate bắt nguồn từ nước nào?",["Nhật Bản","Trung Quốc","Hàn Quốc","Brazil"]]]],
+  ["clb_game","CLB Lập trình game",[["Scratch là gì?",["Công cụ lập trình bằng cách kéo thả khối lệnh","Một máy chơi game","Một trình duyệt web","Một hệ điều hành"]],["Biến trong lập trình dùng để làm gì?",["Lưu một giá trị để dùng lại","Tắt máy tính","Vẽ hình tròn","Nối mạng"]]]],
+  ["clb_sach","CLB Đọc sách",[["Truyện ngắn “Lão Hạc” là của ai?",["Nam Cao","Tô Hoài","Kim Lân","Thạch Lam"]],["“Dế Mèn phiêu lưu ký” là của ai?",["Tô Hoài","Nam Cao","Nguyễn Nhật Ánh","Xuân Diệu"]]]],
+  ["clb_thucong","CLB Thủ công",[["Nghệ thuật gấp giấy của Nhật Bản gọi là gì?",["Origami","Ikebana","Bonsai","Sushi"]],["Keo nến thường dùng với dụng cụ nào?",["Súng bắn keo","Máy khâu","Kéo","Thước kẻ"]]]]
+ ]],
+ ["thu_6","Thứ Sáu",[
+  ["clb_toan","CLB Toán tư duy",[["Số tiếp theo của dãy 2, 4, 8, 16 là gì?",["32","18","20","24"]],["Lớp có 30 học sinh, 40% là nữ. Lớp có bao nhiêu bạn nữ?",["12","10","14","18"]]]],
+  ["clb_lichsu","CLB Lịch sử",[["Chiến thắng Điện Biên Phủ diễn ra năm nào?",["1954","1945","1968","1975"]],["Ngô Quyền đánh thắng quân Nam Hán trên sông nào?",["Sông Bạch Đằng","Sông Như Nguyệt","Sông Hồng","Sông Hương"]]]],
+  ["clb_bongro","CLB Bóng rổ",[["Một cú ném từ ngoài vạch ba điểm được mấy điểm?",["3","1","2","4"]],["Mỗi đội bóng rổ có mấy người trên sân?",["5","6","7","11"]]]],
+  ["clb_tiengtrung","CLB Tiếng Trung",[["Cách ghi âm tiếng Trung bằng chữ cái Latinh gọi là gì?",["Pinyin","Hangul","Romaji","Kanji"]],["“Nǐ hǎo” nghĩa là gì?",["Xin chào","Cảm ơn","Tạm biệt","Xin lỗi"]]]],
+  ["clb_socuu","CLB Sơ cứu",[["Số điện thoại cấp cứu y tế ở Việt Nam là số nào?",["115","113","114","116"]],["Bị bỏng nhẹ thì nên làm gì trước tiên?",["Xả nước mát lên chỗ bỏng","Bôi kem đánh răng","Chọc vỡ chỗ phồng","Chườm đá thật lâu"]]]],
+  ["clb_kinhte","CLB Kinh tế",[["Lạm phát là gì?",["Giá cả nói chung tăng lên theo thời gian","Giá cả nói chung giảm xuống","Lương tăng gấp đôi","Ngân hàng đóng cửa"]],["Tiết kiệm là gì?",["Để dành một phần tiền kiếm được","Tiêu hết số tiền có","Đi vay tiền","Mua thật nhiều đồ"]]]],
+  ["clb_dienkinh","CLB Điền kinh",[["Cự ly chạy ngắn phổ biến nhất là bao nhiêu?",["100 m","5 km","10 km","42 km"]],["Chạy marathon dài khoảng bao nhiêu?",["42 km","10 km","21 km","100 km"]]]],
+  ["clb_bongban","CLB Bóng bàn",[["Một ván bóng bàn chơi tới mấy điểm?",["11","15","21","25"]],["Bóng bàn còn được gọi là gì?",["Ping pong","Quần vợt","Cầu mây","Bóng ném"]]]],
+  ["clb_dangian","CLB Văn hoá dân gian",[["Tết Trung thu vào ngày nào âm lịch?",["Rằm tháng Tám","Mùng 1 tháng Giêng","Mùng 5 tháng Năm","Rằm tháng Giêng"]],["Bánh chưng gắn với dịp nào?",["Tết Nguyên đán","Tết Trung thu","Tết Đoan ngọ","Rằm tháng Bảy"]]]],
+  ["clb_truyenthong","CLB Truyền thông",[["Muốn dùng ảnh của người khác thì cần làm gì?",["Xin phép và ghi nguồn","Cứ dùng, không cần hỏi","Cắt bỏ tên tác giả","Đổi màu ảnh là được"]],["Bài đăng cho trang của trường nên thế nào?",["Rõ ràng, đúng thông tin, lời lẽ lịch sự","Càng nhiều chữ viết tắt càng tốt","Dùng ảnh mờ cho nhanh","Đăng tin chưa kiểm tra"]]]]
+ ]]
+];
+
+/* xáo lựa chọn theo một hạt giống cố định */
+function hash(s){ let h=2166136261; for(const c of s){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+function shuffled(arr,seed){ const a=[...arr]; let x=hash(seed)||1; for(let i=a.length-1;i>0;i--){ x^=x<<13; x^=x>>>17; x^=x<<5; const j=(x>>>0)%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const CLB = {};
+const DAYS = BUOI.map(([ma,ten,ds])=>({ma,ten,clubs:ds.map(([id,name,de])=>{
+  const c={id,name,buoi:ma,de:de.map(([q,ops],i)=>({q,correct:ops[0],opts:shuffled(ops,id+i)}))};
+  CLB[id]=c; return c; })}));
+
+const CO_BUOI="Có", KHONG_BUOI="Không, em bận buổi này";
+const CO="Có, em thi CLB này", KHONG="Không", DUNG="Em không thi thêm CLB nào buổi này";
+
+/* ============ Bố cục: 6 phần, câu đánh số liên tục như Forms ============ */
+let no=0;
+const PARTS=[{kicker:"Phần 1", title:"Thông tin học sinh", desc:"Ghi đúng mã trên thẻ học sinh.", items:[
+  {code:"student_id", type:"text", no:++no, title:"Mã học sinh", req:true, ph:"Ví dụ: HS024"},
+  {code:"name", type:"text", no:++no, title:"Họ và tên", req:true, ph:"Ví dụ: Nguyễn Minh An"},
+]}];
+DAYS.forEach((d,k)=>{
+  const items=[
+    {code:"di-"+d.ma, type:"choice", no:++no, title:`Em có đăng ký sinh hoạt ${d.ten} không?`, req:true, opts:[CO_BUOI,KHONG_BUOI], dayGate:d.ma},
+    {code:d.ma, type:"ranking", no:++no, title:`Xếp hạng các CLB ${d.ten}. Kéo CLB em thích nhất lên đầu.`, req:true, opts:d.clubs.map(c=>c.id)},
+  ];
+  d.clubs.forEach((c,i)=>{
+    items.push({code:"thi-"+c.id, type:"choice", no:++no, title:`Thi ${c.name}?`, req:true, opts:[CO,KHONG,DUNG], club:c.id, first:i===0});
+    c.de.forEach((q,j)=>items.push({code:`${c.id}-${j+1}`, type:"choice", no:++no, title:q.q, req:true, opts:q.opts, exam:c.id, points:DIEM_CAU}));
+  });
+  PARTS.push({kicker:"Phần "+(k+2), title:d.ten, day:d.ma, desc:`Xếp hạng 10 CLB trước, rồi chọn CLB muốn thi. Tối đa ${TRAN_THI} CLB.`, items});
+});
+const TONG_CAU=no;
+
+/* ============ Trạng thái chạy thử ============ */
+let st={part:0, hist:[], ans:{}, errs:{}, done:false, showKey:false};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s??"").trim().replace(/\s+/g," ").toLowerCase();
+
+/* Câu nào đang hiện trong một phần: đi từ trên xuống theo rẽ nhánh,
+   dừng ở câu bắt buộc chưa trả lời (Forms hiện dần như vậy). */
+function visibleItems(p){
+  const out=[], it=p.items; let i=0;
+  while(i<it.length){
+    const q=it[i]; out.push(q);
+    const v=st.ans[q.code];
+    if(q.dayGate){ if(v===KHONG_BUOI) break; if(!v) break; i++; continue; }
+    if(q.club){
+      if(!v) break;
+      if(v===DUNG) break;
+      if(v===KHONG){ i+=1+CLB[q.club].de.length; continue; }
+    }
+    i++;
+  }
+  return out;
+}
+
+function render(){
+  if(st.done) return renderDone();
+  const p=PARTS[st.part];
+  let h=`<div class="band"><h2>Đăng ký CLB và thi tuyển</h2><p>Phần ${st.part+1} / 6 · ${esc(p.title)}</p>
+    <div class="steps">${PARTS.map((_,i)=>`<i class="${i<=st.part?"on":""}"></i>`).join("")}</div></div>`;
+  h+=`<div class="card sec-title"><span class="sec-kicker">${esc(p.kicker)}</span><h2>${esc(p.title)}</h2><p class="muted">${esc(p.desc)}</p></div>`;
+  if(p.day && st.ans["di-"+p.day]===CO_BUOI){
+    const n=countExams(p.day);
+    h+=`<div class="tally">CLB đã chọn thi buổi này: <b>${n}</b> / ${TRAN_THI}${n>TRAN_THI?' <span class="pill bad">Quá '+TRAN_THI+'. Phần mềm sẽ bỏ cả buổi này.</span>':''}</div>`;
+  }
+  for(const q of visibleItems(p)) h+=renderQ(q);
+  const last=st.part===PARTS.length-1;
+  h+=`<div class="nav"><div class="row"><button class="btn ghost" id="back" ${st.hist.length?"":"disabled"}>Quay lại</button>
+      <button class="linkbtn" id="fill" type="button">Điền nhanh phần này</button></div>
+      <button class="btn" id="next">${last?"Gửi":"Tiếp"}</button></div>`;
+  $("#view").innerHTML=h;
+  bind();
+}
+
+function countExams(day){ return DAYS.find(d=>d.ma===day).clubs.filter(c=>st.ans["thi-"+c.id]===CO).length; }
+
+function renderQ(q){
+  const v=st.ans[q.code], err=st.errs[q.code];
+  let h=`<div class="card q${q.exam?" exam":""}${err?" err":""}" id="q-${q.code}">
+    <div class="q-head"><span class="q-num">${q.no}.</span><span class="q-title">${esc(q.title)}${q.req?'<span class="req" aria-label="bắt buộc">*</span>':""}</span></div>`;
+  if(q.exam) h+=`<div class="q-sub">Đề thi ${esc(CLB[q.exam].name)} · ${q.points} điểm</div>`;
+  if(q.first) h+=`<div class="q-sub">Chọn tối đa ${TRAN_THI} CLB trong buổi này.</div>`;
+  h+=`<div class="body">`;
+  if(q.type==="text"){
+    h+=`<input type="text" id="in-${q.code}" data-code="${q.code}" value="${esc(v||"")}" placeholder="${esc(q.ph)}" autocomplete="off">`;
+  }else if(q.type==="choice"){
+    q.opts.forEach((o,i)=>{
+      const go = q.club ? (o===CO?"hiện đề thi":o===KHONG?"CLB kế tiếp":"sang buổi sau") : q.dayGate ? (o===CO_BUOI?"xếp hạng":"sang buổi sau") : "";
+      h+=`<label class="opt${v===o?" sel":""}"><input type="radio" name="r-${q.code}" id="r-${q.code}-${i}" data-code="${q.code}" value="${esc(o)}" ${v===o?"checked":""}><span>${esc(o)}</span>${go?`<span class="go">→ ${go}</span>`:""}</label>`;
+    });
+  }else if(q.type==="ranking"){
+    const touched=Array.isArray(v), order=touched?v:q.opts;
+    h+=`<ol class="rank${touched?"":" untouched"}" data-code="${q.code}">`+order.map((id,i)=>
+      `<li draggable="true" data-id="${id}"><span class="pos">${touched?i+1:"?"}</span><span class="nm">${esc(CLB[id].name)}</span>
+       <button class="iconbtn" data-mv="-1" aria-label="Đưa ${esc(CLB[id].name)} lên" ${touched&&i===0?"disabled":""}>↑</button>
+       <button class="iconbtn" data-mv="1" aria-label="Đưa ${esc(CLB[id].name)} xuống" ${touched&&i===order.length-1?"disabled":""}>↓</button></li>`).join("")+`</ol>`;
+    if(!touched) h+=`<span class="hint">Chưa xếp. Kéo thả hoặc bấm mũi tên để bắt đầu.</span>`;
+  }
+  if(err) h+=`<div class="errmsg">${esc(err)}</div>`;
+  return h+`</div></div>`;
+}
+
+function keep(fn){ const y=window.scrollY; fn(); render(); window.scrollTo(0,y); }
+
+function bind(){
+  document.querySelectorAll('input[type=text][data-code]').forEach(el=>el.addEventListener("input",()=>{ st.ans[el.dataset.code]=el.value; }));
+  document.querySelectorAll('input[type=radio][data-code]').forEach(el=>el.addEventListener("change",()=>keep(()=>{ st.ans[el.dataset.code]=el.value; delete st.errs[el.dataset.code]; })));
+  document.querySelectorAll(".rank").forEach(ol=>{
+    const code=ol.dataset.code, cur=()=>[...ol.querySelectorAll("li")].map(li=>li.dataset.id);
+    const commit=a=>keep(()=>{ st.ans[code]=a; delete st.errs[code]; });
+    ol.querySelectorAll("[data-mv]").forEach(b=>b.addEventListener("click",()=>{
+      const a=cur(), i=a.indexOf(b.closest("li").dataset.id), j=i+Number(b.dataset.mv);
+      if(j>=0&&j<a.length) [a[i],a[j]]=[a[j],a[i]];
+      commit(a);
+    }));
+    let drag=null;
+    ol.querySelectorAll("li").forEach(li=>{
+      li.addEventListener("dragstart",e=>{ drag=li.dataset.id; li.classList.add("drag"); e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",drag);}catch(_){} });
+      li.addEventListener("dragend",()=>{ li.classList.remove("drag"); ol.querySelectorAll(".over").forEach(x=>x.classList.remove("over")); });
+      li.addEventListener("dragover",e=>{ e.preventDefault(); li.classList.add("over"); });
+      li.addEventListener("dragleave",()=>li.classList.remove("over"));
+      li.addEventListener("drop",e=>{ e.preventDefault(); if(!drag) return; const a=cur(), f=a.indexOf(drag), t=a.indexOf(li.dataset.id); a.splice(f,1); a.splice(t,0,drag); drag=null; commit(a); });
+    });
+  });
+  $("#back").addEventListener("click",()=>{ st.part=st.hist.pop(); st.errs={}; render(); $("#chay-thu").scrollIntoView(); });
+  $("#next").addEventListener("click",next);
+  $("#fill").addEventListener("click",()=>keep(()=>fill(PARTS[st.part])));
+}
+
+function next(){
+  const p=PARTS[st.part]; st.errs={};
+  for(const q of visibleItems(p)){
+    const v=st.ans[q.code];
+    if(q.req && (q.type==="text"?!String(v||"").trim():!v)) st.errs[q.code]=q.type==="ranking"?"Hãy xếp hạng các CLB trước khi đi tiếp.":"Câu hỏi này là bắt buộc.";
+  }
+  if(Object.keys(st.errs).length){ render(); const f=document.querySelector(".q.err"); if(f) f.scrollIntoView({block:"center"}); return; }
+  if(st.part===PARTS.length-1){ st.done=true; render(); $("#chay-thu").scrollIntoView(); return; }
+  st.hist.push(st.part); st.part++; render(); $("#chay-thu").scrollIntoView();
+}
+
+function fill(p){
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  if(!p.day){
+    if(!st.ans.student_id) st.ans.student_id="HS"+(100+Math.floor(Math.random()*900));
+    if(!st.ans.name) st.ans.name=pick(["Nguyễn","Trần","Lê","Vũ"])+" "+pick(["Minh","Thu","Gia","Bảo"])+" "+pick(["An","Linh","Nam","Vy"]);
+    return;
+  }
+  const d=DAYS.find(x=>x.ma===p.day);
+  if(!st.ans["di-"+d.ma]) st.ans["di-"+d.ma]=Math.random()<.7?CO_BUOI:KHONG_BUOI;
+  if(st.ans["di-"+d.ma]!==CO_BUOI) return;
+  if(!Array.isArray(st.ans[d.ma])) st.ans[d.ma]=shuffled(d.clubs.map(c=>c.id),String(Math.random()));
+  const top=st.ans[d.ma].slice(0,2);
+  let stopped=false;
+  for(const c of d.clubs){
+    const k="thi-"+c.id;
+    if(stopped) break;
+    if(!st.ans[k]){
+      if(top.every(id=>d.clubs.findIndex(x=>x.id===id)<=d.clubs.indexOf(c))) { st.ans[k]=top.includes(c.id)?CO:DUNG; }
+      else st.ans[k]=top.includes(c.id)?CO:KHONG;
+    }
+    if(st.ans[k]===DUNG) stopped=true;
+    if(st.ans[k]===CO) c.de.forEach((q,j)=>{ const kk=`${c.id}-${j+1}`; if(!st.ans[kk]) st.ans[kk]=Math.random()<.75?q.correct:pick(q.opts); });
+  }
+}
+
+function grade(){
+  const res=[];
+  for(const d of DAYS){
+    if(st.ans["di-"+d.ma]!==CO_BUOI) continue;
+    for(const c of d.clubs){
+      if(st.ans["thi-"+c.id]!==CO) continue;
+      const dung=c.de.map((q,j)=>norm(st.ans[`${c.id}-${j+1}`])===norm(q.correct));
+      res.push({c, day:d, dung, diem:DIEM_CAU*dung.filter(Boolean).length, hang:st.ans[d.ma].indexOf(c.id)+1});
+    }
+  }
+  return res;
+}
+
+function renderDone(){
+  const ex=grade(), tong=ex.reduce((a,e)=>a+e.diem,0);
+  let h=`<div class="band"><h2>Đã ghi nhận phản hồi</h2><p>${esc(st.ans.name)} (${esc(st.ans.student_id)}). Dưới đây là phần giáo viên thấy khi chấm.</p></div>`;
+  h+=`<div class="card stack"><div class="score-big"><b>${tong}</b><span class="muted">/ ${ex.length*10} điểm · ${ex.length} bài thi</span></div>`;
+  const buoi=DAYS.map(d=>{
+    if(st.ans["di-"+d.ma]!==CO_BUOI) return `<tr><td class="nw">${d.ten}</td><td class="muted">Bận, không đăng ký</td><td></td></tr>`;
+    const e=ex.filter(x=>x.day===d), over=e.length>TRAN_THI;
+    return `<tr><td class="nw">${d.ten}</td><td>1. ${esc(CLB[st.ans[d.ma][0]].name)}${over?` <span class="pill bad">thi ${e.length} CLB, quá ${TRAN_THI}</span>`:""}</td><td>${e.length?e.map(x=>`${esc(x.c.name.replace("CLB ",""))} <b>${x.diem}</b>`).join(" · "):'<span class="muted">không thi</span>'}</td></tr>`;
+  }).join("");
+  h+=`<div class="tbl-wrap"><table><thead><tr><th>Buổi</th><th>Nguyện vọng 1</th><th>Điểm thi (thang 10)</th></tr></thead><tbody>${buoi}</tbody></table></div>`;
+  if(ex.length){
+    h+=`<button class="linkbtn" id="key">${st.showKey?"Ẩn":"Xem"} từng câu đúng sai</button>`;
+    if(st.showKey) for(const e of ex){
+      h+=`<h3>${esc(e.c.name)} · ${e.day.ten}</h3><ul class="review">`+e.c.de.map((q,j)=>{
+        const mine=st.ans[`${e.c.id}-${j+1}`], ok=e.dung[j];
+        return `<li><span class="mk ${ok?"ok":"bad"}">${ok?"✓":"✗"}</span><span>${esc(q.q)}</span><span class="sub">Em chọn: ${esc(mine)}${ok?"":" · Đáp án: "+esc(q.correct)}</span></li>`;
+      }).join("")+`</ul>`;
+    }
+  }
+  h+=`</div><div class="nav"><span></span><button class="btn" id="again">Điền phiếu mới</button></div>`;
+  $("#view").innerHTML=h;
+  const k=$("#key"); if(k) k.addEventListener("click",()=>keep(()=>{ st.showKey=!st.showKey; }));
+  $("#again").addEventListener("click",restart);
+}
+
+function restart(){ st={part:0,hist:[],ans:{},errs:{},done:false,showKey:false}; render(); $("#chay-thu").scrollIntoView(); }
+$("#restart").addEventListener("click",restart);
+
+/* ============ Các phần tài liệu tính từ dữ liệu ============ */
+const soCauBuoi=PARTS[1].items.length;
+$("#parts").innerHTML=PARTS.map((p,i)=>`<div class="part"><b>Phần ${i+1}</b><span>${esc(p.title)}</span><small>${i===0?"Mã học sinh, họ tên":`10 CLB · ${p.items.length} câu`}</small></div>`).join("");
+$("#tong-so").textContent=`Tổng cộng ${TONG_CAU} câu hỏi: 2 câu thông tin, mỗi buổi ${soCauBuoi} câu (1 câu mở buổi, 1 câu xếp hạng, 10 câu chọn CLB, 20 câu đề thi). Học sinh chỉ thấy đề của CLB em chọn thi.`;
+
+(function(){
+  const p=PARTS[1], it=p.items, sau="Phần 3 · Thứ Ba";
+  const idx=code=>it.findIndex(q=>q.code===code);
+  let rows=`<thead><tr><th class="num">Câu</th><th>Nội dung</th><th>Có</th><th>Không</th><th>Không thi thêm</th></tr></thead><tbody>`;
+  rows+=`<tr><td class="num">${it[0].no}</td><td>Em có đăng ký sinh hoạt Thứ Hai không?</td><td>Câu ${it[1].no} (xếp hạng)</td><td><b>${sau}</b></td><td></td></tr>`;
+  rows+=`<tr><td class="num">${it[1].no}</td><td>Xếp hạng 10 CLB</td><td colspan="3" class="muted">Không rẽ nhánh, đi tiếp câu ${it[2].no}</td></tr>`;
+  DAYS[0].clubs.forEach((c,i)=>{
+    const g=it[idx("thi-"+c.id)], nextGate=DAYS[0].clubs[i+1];
+    const khong=nextGate?`Câu ${it[idx("thi-"+nextGate.id)].no}`:`<b>${sau}</b>`;
+    rows+=`<tr><td class="num">${g.no}</td><td>Thi ${esc(c.name)}?</td><td class="muted">Câu ${g.no+1} (để mặc định)</td><td>${khong}</td><td><b>${sau}</b></td></tr>`;
+  });
+  $("#bang-re-nhanh").innerHTML=rows+`</tbody>`;
+
+  const soReNhanh=DAYS.length*(1+10*2), soReGon=DAYS.length*(1+10);
+  $("#so-re-nhanh").textContent=soReNhanh;
+  $("#so-re-nhanh-gon").textContent=soReGon;
+  $("#so-dap-an").textContent=DAYS.length*10*2;
+  $("#so-cau").textContent=TONG_CAU;
+
+  const ss=[
+    ["Số phần","26","6"],
+    ["CLB mỗi buổi","3","10"],
+    ["CLB có thi","10 (2 mỗi buổi)","50 (cả 10 CLB mỗi buổi)"],
+    ["Số câu mỗi đề","5 câu × 2 điểm","2 câu × 5 điểm"],
+    ["Tổng số câu hỏi","67",String(TONG_CAU)],
+    ["Em bận một buổi","Bấm Không ở 2 câu dự thi của buổi đó","1 lần bấm “Không, em bận buổi này”"],
+    ["Em chỉ thi 1 CLB trong buổi","Bấm Không cho CLB còn lại","Bấm “Không thi thêm” là xong buổi"],
+    ["Chỗ rẽ nhánh phải cài tay","10",String(soReNhanh)],
+    ["Câu phải đánh dấu đáp án","50",String(DAYS.length*20)],
+  ];
+  $("#bang-so-sanh").innerHTML=ss.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+})();
+
+render();
+</script>

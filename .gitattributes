@@ -1,0 +1,5 @@
+# i18n_loi.js duoc SINH ra boi tao_i18n_js.py voi dau dong LF, va
+# tests/test_i18n_sync.py so sanh tung byte. Tren Windows, git mac dinh
+# (core.autocrlf=true) doi LF thanh CRLF khi checkout, lam test do du tep
+# van dung — chinh loi da chan ban build Windows. Ep giu LF o moi may.
+i18n_loi.js text eol=lf

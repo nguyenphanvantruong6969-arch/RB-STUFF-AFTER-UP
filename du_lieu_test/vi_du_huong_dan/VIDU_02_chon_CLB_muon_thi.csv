@@ -1,0 +1,11 @@
+﻿student_id,name,reserve_group,test_club_1,score_1,test_club_2,score_2
+HS01,Nguyễn Văn An,,clb_bongro,9.0,clb_tinhoc,7.5
+HS02,Trần Thị Bình,,clb_bongro,8.5,clb_mythuat,8.0
+HS03,Lê Minh Cường,,clb_bongro,8.0,clb_nauan,7.0
+HS04,Phạm Thu Dung,chinh_sach,clb_bongro,6.0,clb_mythuat,6.5
+HS05,Hoàng Văn Đức,,clb_bongro,7.5,clb_tinhoc,9.5
+HS06,Vũ Ngọc Giang,,clb_tinhoc,8.5,clb_nauan,8.0
+HS07,Đỗ Thị Hạnh,,clb_mythuat,9.0,clb_nauan,7.5
+HS08,Bùi Quang Khánh,,clb_mythuat,7.0,clb_nauan,8.5
+HS09,Ngô Phương Linh,,clb_nauan,9.0,clb_tinhoc,6.5
+HS10,Dương Bá Minh,,clb_bongro,7.0,,

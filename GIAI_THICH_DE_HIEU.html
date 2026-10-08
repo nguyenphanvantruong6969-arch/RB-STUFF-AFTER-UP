@@ -1,0 +1,1042 @@
+<title>Xếp Câu Lạc Bộ Thế Nào</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Bảng màu và bộ chữ lấy từ style.css của phần mềm, giống các trang tài liệu
+   khác trong thư mục này — để mọi trang gửi đi trông là một bộ. */
+:root{
+  --ink:#1C2321; --ink-soft:#3A423F; --slate:#5B6570;
+  --paper:#F3F4F1; --raised:#FFFFFF; --hairline:#DBDCD5;
+  --gold:#B07C15; --gold-soft:#F1DFB8;
+  --moss:#18704A; --moss-soft:#DCE9E0;
+  --rust:#B84A3E; --rust-soft:#F3DCD9;
+  --band:#E7E8E2;
+  --f-display:"Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"DejaVu Sans Mono",monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ink:#E9EAE4; --ink-soft:#C3C7C0; --slate:#949C96;
+    --paper:#141816; --raised:#1D2320; --hairline:#333B37;
+    --gold:#E0A93F; --gold-soft:#3A2F16;
+    --moss:#6FB58F; --moss-soft:#1B2B22;
+    --rust:#E08076; --rust-soft:#3A211E;
+    --band:#252C28;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#E9EAE4; --ink-soft:#C3C7C0; --slate:#949C96;
+  --paper:#141816; --raised:#1D2320; --hairline:#333B37;
+  --gold:#E0A93F; --gold-soft:#3A2F16;
+  --moss:#6FB58F; --moss-soft:#1B2B22;
+  --rust:#E08076; --rust-soft:#3A211E;
+  --band:#252C28;
+}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);
+  font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:44px 20px 96px}
+
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--moss);margin:0 0 12px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,6vw,46px);
+  line-height:1.08;letter-spacing:-.02em;margin:0 0 18px;text-wrap:balance}
+.standfirst{font-size:18.5px;color:var(--ink-soft);margin:0 0 26px;max-width:60ch}
+h2{font-family:var(--f-display);font-weight:700;font-size:25px;letter-spacing:-.015em;
+  margin:64px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--ink);
+  display:flex;gap:14px;align-items:baseline;text-wrap:balance}
+h2 .no{font-family:var(--f-mono);font-weight:500;font-size:14px;color:var(--moss);
+  flex:none;min-width:2.2em}
+h3{font-family:var(--f-display);font-weight:600;font-size:18px;margin:30px 0 10px}
+p{margin:0 0 15px;max-width:66ch}
+ul,ol{margin:0 0 16px;padding-left:22px;max-width:64ch}
+li{margin:0 0 7px}
+strong{font-weight:600}
+.muted{color:var(--slate)}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:.92em}
+
+/* Hộp "nói nôm na" — một câu so sánh đời thường cho mỗi cơ chế */
+.likeness{background:var(--gold-soft);border-radius:8px;padding:14px 18px;margin:4px 0 20px;
+  max-width:66ch}
+.likeness b{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);display:block;margin-bottom:4px;font-weight:500}
+.why{border-left:3px solid var(--moss);padding:4px 0 4px 16px;margin:6px 0 18px;max-width:64ch;
+  color:var(--ink-soft)}
+.why b{color:var(--ink)}
+
+/* Mục lục */
+.toc{background:var(--raised);border:1px solid var(--hairline);border-radius:10px;
+  padding:18px 22px;margin:0 0 10px}
+.toc p{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--slate);margin:0 0 8px}
+.toc ol{columns:2 260px;column-gap:28px;margin:0;padding-left:22px;font-size:15px}
+.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--hairline)}
+.toc a:hover,.toc a:focus-visible{border-bottom-color:var(--moss);color:var(--moss)}
+a:focus-visible{outline:2px solid var(--moss);outline-offset:2px}
+
+/* Lưu đồ */
+figure{margin:22px 0 26px}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.diagram{background:var(--raised);border:1px solid var(--hairline);border-radius:12px;padding:14px 8px}
+.diagram svg{display:block;width:100%;height:auto;margin:0 auto;color:var(--ink)}
+.diagram.big svg{min-width:540px;max-width:640px}
+.diagram.small svg{min-width:460px;max-width:620px}
+figcaption{font-size:14px;color:var(--slate);margin-top:10px;max-width:66ch}
+svg .band{fill:var(--band)}
+svg .band-core{fill:var(--moss-soft)}
+svg .bandlabel{fill:var(--slate);font-family:var(--f-mono);font-size:11px;letter-spacing:.12em}
+svg .bandlabel.core{fill:var(--moss)}
+svg .n{fill:var(--raised);stroke:var(--ink-soft);stroke-width:1.2}
+svg .n.core{stroke:var(--moss);stroke-width:1.8}
+svg .d{fill:var(--gold-soft);stroke:var(--gold);stroke-width:1.4}
+svg .bad{fill:var(--rust-soft);stroke:var(--rust);stroke-width:1.2}
+svg .t{fill:var(--ink);font-family:var(--f-display);font-weight:600;font-size:14.5px}
+svg .s{fill:var(--slate);font-family:var(--f-body);font-size:12px}
+svg .lbl{fill:var(--ink-soft);font-family:var(--f-mono);font-size:11.5px}
+svg .lbl.no{fill:var(--rust)}
+svg .ln{stroke:var(--ink-soft);stroke-width:1.4;fill:none}
+svg .ln.loop{stroke:var(--moss);stroke-dasharray:5 4}
+svg .ah{fill:var(--ink-soft)}
+svg .ah.loop{fill:var(--moss)}
+
+/* Bảng */
+.tablewrap{overflow-x:auto;margin:10px 0 22px}
+table{border-collapse:collapse;width:100%;font-size:15px;background:var(--raised);
+  border:1px solid var(--hairline);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--hairline);vertical-align:top}
+th{font-family:var(--f-mono);font-weight:500;font-size:11.5px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--slate);background:var(--band)}
+tr:last-child td{border-bottom:0}
+td .num{white-space:nowrap}
+
+/* Hàng người xếp ưu tiên */
+.queue{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 6px}
+.qlabel{font-family:var(--f-display);font-weight:600;font-size:15px;min-width:90px}
+.chip{display:inline-flex;align-items:baseline;gap:6px;background:var(--raised);
+  border:1px solid var(--hairline);border-radius:999px;padding:4px 12px;font-size:14.5px;white-space:nowrap}
+.chip small{font-family:var(--f-mono);font-size:11.5px;color:var(--slate)}
+.chip.t1{border-color:var(--moss);background:var(--moss-soft)}
+.chip.res{border-color:var(--gold);background:var(--gold-soft)}
+.chip.out{border-color:var(--rust);background:var(--rust-soft);text-decoration:line-through;
+  text-decoration-color:var(--rust)}
+.sep{font-family:var(--f-mono);font-size:11px;color:var(--slate);letter-spacing:.08em;padding:0 4px}
+.queues{background:var(--raised);border:1px solid var(--hairline);border-radius:10px;
+  padding:14px 18px;margin:12px 0 20px}
+.queues .row{padding:8px 0;border-bottom:1px dashed var(--hairline)}
+.queues .row:last-child{border-bottom:0}
+
+/* Từng vòng giữ tạm */
+.round{background:var(--raised);border:1px solid var(--hairline);border-radius:12px;
+  padding:16px 18px 18px;margin:0 0 14px}
+.round header{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;margin-bottom:10px}
+.round h4{font-family:var(--f-display);font-weight:700;font-size:17px;margin:0}
+.round .who{font-size:14.5px;color:var(--ink-soft)}
+.boards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.boards{grid-template-columns:1fr}}
+.board{border:1px solid var(--hairline);border-radius:8px;padding:10px 12px;background:var(--paper)}
+.board .name{font-family:var(--f-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--slate);margin-bottom:8px}
+.seats{display:flex;flex-direction:column;gap:6px}
+.seat{border:1px dashed var(--hairline);border-radius:6px;padding:4px 10px;font-size:14.5px;
+  min-height:32px;display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--raised)}
+.seat.full{border-style:solid;border-color:var(--moss)}
+.seat.full.res{border-color:var(--gold);background:var(--gold-soft)}
+.seat small{font-family:var(--f-mono);font-size:11px;color:var(--slate)}
+.seat.empty{color:var(--slate);font-size:13px}
+.back{margin-top:8px;font-size:13.5px;color:var(--rust)}
+.back.none{color:var(--slate)}
+.round .note{font-size:14.5px;color:var(--ink-soft);margin:12px 0 0}
+
+/* Hai cảnh suất dành riêng */
+.scenes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 18px}
+@media (max-width:620px){.scenes{grid-template-columns:1fr}}
+.scene{background:var(--raised);border:1px solid var(--hairline);border-radius:10px;padding:14px 16px}
+.scene h4{font-family:var(--f-display);font-size:15.5px;margin:0 0 8px}
+.scene ol{margin:6px 0 8px;padding-left:20px;font-size:14.5px}
+.scene .res-line{font-size:14.5px;margin:0}
+
+/* Lời hứa */
+.promises{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0 20px}
+@media (max-width:620px){.promises{grid-template-columns:1fr}}
+.promise{background:var(--raised);border:1px solid var(--hairline);border-radius:10px;padding:16px 18px}
+.promise h4{font-family:var(--f-display);font-weight:700;font-size:16.5px;margin:0 0 6px}
+.promise p{font-size:15px;margin:0;color:var(--ink-soft)}
+
+.gloss{font-size:15px}
+.gloss dt{font-family:var(--f-display);font-weight:600;margin-top:12px}
+.gloss dd{margin:2px 0 0;color:var(--ink-soft);max-width:64ch}
+.gloss dd i{font-family:var(--f-mono);font-style:normal;font-size:13px;color:var(--slate)}
+
+footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--hairline);font-size:13.5px;color:var(--slate)}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+
+<p class="eyebrow">Phần mềm xếp câu lạc bộ RB-DA · Bản giải thích cho người không làm kỹ thuật</p>
+<h1>Phần mềm xếp câu lạc bộ hoạt động thế nào</h1>
+<p class="standfirst">Trang này kể lại, theo đúng thứ tự, mọi việc phần mềm làm: từ lúc nhận danh sách
+đăng ký cho tới lúc in ra ai vào câu lạc bộ nào. Không cần biết lập trình. Suốt bài chỉ dùng một ví dụ
+nhỏ gồm <strong>6 học sinh</strong> và <strong>3 câu lạc bộ</strong>, để mỗi bước đều nhìn thấy được
+bằng tên người cụ thể.</p>
+
+<nav class="toc" aria-label="Mục lục">
+  <p>Đọc theo thứ tự</p>
+  <ol>
+    <li><a href="#bai-toan">Bài toán cần giải</a></li>
+    <li><a href="#luu-do">Toàn cảnh trong một lưu đồ</a></li>
+    <li><a href="#dau-vao">Ba tờ đăng ký</a></li>
+    <li><a href="#cham-mu">Giáo viên chấm điểm “mù”</a></li>
+    <li><a href="#canh-bao">Cảnh báo trước khi chạy</a></li>
+    <li><a href="#sao-luu">Sao lưu và soát lỗi</a></li>
+    <li><a href="#boc-tham">Số bốc thăm</a></li>
+    <li><a href="#xep-hang">Xếp hai tầng và điểm thi</a></li>
+    <li><a href="#giu-tam">Trái tim: các vòng “giữ tạm”</a></li>
+    <li><a href="#danh-rieng">Suất dành riêng</a></li>
+    <li><a href="#nhieu-buoi">Nhiều buổi trong tuần</a></li>
+    <li><a href="#kiem-tra">Tự kiểm tra lại kết quả</a></li>
+    <li><a href="#ghi-ket-qua">Ghi kết quả an toàn</a></li>
+    <li><a href="#doc-ket-qua">Đọc bảng kết quả</a></li>
+    <li><a href="#loi-hua">Bốn điều phần mềm bảo đảm</a></li>
+  </ol>
+</nav>
+
+<!-- ============================================================ 1 -->
+<h2 id="bai-toan"><span class="no">01</span>Bài toán cần giải</h2>
+
+<p>Trường có nhiều câu lạc bộ, mỗi câu lạc bộ chỉ nhận được một số chỗ. Mỗi học sinh viết ra danh sách
+câu lạc bộ mình muốn vào, xếp từ thích nhất trở xuống. Có câu lạc bộ tổ chức thi tuyển (ví dụ Cờ vua),
+có câu lạc bộ không thi.</p>
+
+<p>Việc cần làm: xếp mỗi em vào <strong>một</strong> câu lạc bộ, sao cho kết quả <strong>công bằng</strong>
+và <strong>không ai có lý do chính đáng để khiếu nại</strong>.</p>
+
+<p>Cách làm quen thuộc là “ai đăng ký trước được trước”, hoặc “xét nguyện vọng 1 cho hết rồi mới xét
+nguyện vọng 2”. Cả hai đều có chỗ hỏng. Cách thứ nhất thưởng cho em có mạng nhanh. Cách thứ hai ép học
+sinh phải đoán: em nào ghi một câu lạc bộ “hot” làm nguyện vọng 1 mà trượt thì các câu lạc bộ khác đã đầy,
+nên nhiều em đành ghi câu lạc bộ chắc ăn thay vì câu lạc bộ mình thật sự thích. Phần mềm này được làm ra
+để bỏ hẳn kiểu đoán đó.</p>
+
+<h3>Ví dụ dùng suốt bài</h3>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Câu lạc bộ</th><th>Số chỗ</th><th>Có thi tuyển?</th><th>Suất dành riêng</th></tr></thead>
+  <tbody>
+    <tr><td>Cờ vua</td><td class="num">2</td><td>Có, chấm điểm trên 10</td><td>Không</td></tr>
+    <tr><td>Bóng rổ</td><td class="num">2</td><td>Không</td><td>Không</td></tr>
+    <tr><td>Âm nhạc</td><td class="num">2</td><td>Không</td><td>1 chỗ cho em thuộc diện ưu tiên</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Học sinh</th><th>Nguyện vọng (thích nhất → ít nhất)</th><th>Điểm thi Cờ vua</th><th>Số bốc thăm</th></tr></thead>
+  <tbody>
+    <tr><td>An</td><td>Cờ vua → Âm nhạc</td><td class="num">7,5</td><td class="num">4</td></tr>
+    <tr><td>Bình</td><td>Cờ vua → Bóng rổ</td><td class="num">8,0</td><td class="num">2</td></tr>
+    <tr><td>Chi</td><td>Âm nhạc → Cờ vua → Bóng rổ</td><td class="num">7,5</td><td class="num">6</td></tr>
+    <tr><td>Dũng</td><td>Bóng rổ → Cờ vua</td><td class="num">6,0</td><td class="num">1</td></tr>
+    <tr><td>Hà</td><td>Cờ vua → Bóng rổ → Âm nhạc</td><td class="num">9,0</td><td class="num">5</td></tr>
+    <tr><td>Khoa <span class="muted">(thuộc diện ưu tiên)</span></td><td>Âm nhạc → Bóng rổ</td><td class="muted">không thi</td><td class="num">3</td></tr>
+  </tbody>
+</table>
+</div>
+<p class="muted" style="font-size:14.5px">Số bốc thăm: số <strong>nhỏ</strong> là may hơn. Cột này phần mềm
+tự tạo ở mục 07, đặt sẵn ở đây cho dễ theo dõi. Mọi kết quả trong bài là kết quả thật khi đưa đúng bộ dữ liệu
+này vào phần mềm.</p>
+
+<!-- ============================================================ 2 -->
+<h2 id="luu-do"><span class="no">02</span>Toàn cảnh trong một lưu đồ</h2>
+
+<p>Lưu đồ dưới đây là toàn bộ hành trình, đọc từ trên xuống. Ô vàng hình thoi là chỗ phần mềm phải trả lời
+“có” hoặc “không”. Vùng xanh ở giữa là phần thuật toán chính, lặp lại cho từng buổi sinh hoạt trong tuần.
+Các mục tiếp theo của bài đi lần lượt qua từng ô.</p>
+
+<figure>
+<div class="scroll"><div class="diagram big">
+<svg viewBox="0 0 600 1250" role="img" aria-label="Lưu đồ: nhập tệp, chấm điểm mù, xem cảnh báo, sao lưu, soát lỗi dữ liệu, bốc thăm, chia theo buổi, với mỗi buổi thì xếp hàng ưu tiên và chạy các vòng giữ tạm, kiểm tra lại, ghi kết quả hoặc hoàn tác, xuất tệp, hiện bảng kết quả.">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="ah"/>
+    </marker>
+    <marker id="ahl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="ah loop"/>
+    </marker>
+  </defs>
+
+  <!-- Vùng A: chuẩn bị -->
+  <rect class="band" x="8" y="6" width="584" height="252" rx="10"/>
+  <text class="bandlabel" x="22" y="26">A · NHÀ TRƯỜNG CHUẨN BỊ</text>
+
+  <rect class="n" x="60" y="40" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="62" text-anchor="middle">Nhập 3 tờ đăng ký</text>
+  <text class="s" x="210" y="81" text-anchor="middle">câu lạc bộ · đăng ký thi · nguyện vọng</text>
+
+  <rect class="n" x="60" y="118" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="140" text-anchor="middle">Giáo viên chấm điểm “mù”</text>
+  <text class="s" x="210" y="159" text-anchor="middle">chỉ thấy tên, không thấy nguyện vọng</text>
+
+  <rect class="n" x="60" y="196" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="218" text-anchor="middle">Xem cảnh báo trước khi chạy</text>
+  <text class="s" x="210" y="237" text-anchor="middle">nhắc chỗ thiếu sót, không chặn</text>
+
+  <line class="ln" x1="210" y1="94" x2="210" y2="116" marker-end="url(#ah)"/>
+  <line class="ln" x1="210" y1="172" x2="210" y2="194" marker-end="url(#ah)"/>
+
+  <!-- Vùng B: bấm chạy -->
+  <rect class="band" x="8" y="272" width="584" height="366" rx="10"/>
+  <text class="bandlabel" x="22" y="292">B · BẤM “CHẠY”</text>
+  <line class="ln" x1="210" y1="250" x2="210" y2="302" marker-end="url(#ah)"/>
+
+  <rect class="n" x="60" y="304" width="300" height="46" rx="8"/>
+  <text class="t" x="210" y="332" text-anchor="middle">Sao lưu toàn bộ dữ liệu</text>
+  <line class="ln" x1="210" y1="350" x2="210" y2="370" marker-end="url(#ah)"/>
+
+  <polygon class="d" points="210,372 330,414 210,456 90,414"/>
+  <text class="t" x="210" y="419" text-anchor="middle">Dữ liệu hợp lệ?</text>
+  <line class="ln" x1="330" y1="414" x2="398" y2="414" marker-end="url(#ah)"/>
+  <text class="lbl no" x="340" y="406">không</text>
+  <rect class="bad" x="400" y="390" width="180" height="48" rx="8"/>
+  <text class="t" x="490" y="410" text-anchor="middle">Dừng lại</text>
+  <text class="s" x="490" y="428" text-anchor="middle">chỉ ra dòng cần sửa</text>
+  <line class="ln" x1="210" y1="456" x2="210" y2="482" marker-end="url(#ah)"/>
+  <text class="lbl" x="218" y="474">có</text>
+
+  <rect class="n" x="60" y="484" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="506" text-anchor="middle">Bốc thăm rồi khoá số</text>
+  <text class="s" x="210" y="525" text-anchor="middle">đã khoá thì giữ, chỉ chèn em mới</text>
+  <line class="ln" x1="210" y1="538" x2="210" y2="562" marker-end="url(#ah)"/>
+
+  <rect class="n" x="60" y="564" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="586" text-anchor="middle">Chia câu lạc bộ theo buổi</text>
+  <text class="s" x="210" y="605" text-anchor="middle">thứ Hai, thứ Ba… mỗi buổi xếp riêng</text>
+  <line class="ln" x1="210" y1="618" x2="210" y2="684" marker-end="url(#ah)"/>
+
+  <!-- Vùng C: thuật toán, lặp theo buổi -->
+  <rect class="band-core" x="8" y="652" width="584" height="262" rx="10"/>
+  <text class="bandlabel core" x="22" y="672">C · LẶP LẠI CHO TỪNG BUỔI</text>
+
+  <rect class="n core" x="60" y="686" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="708" text-anchor="middle">Mỗi câu lạc bộ xếp hàng</text>
+  <text class="s" x="210" y="727" text-anchor="middle">em đã thi trước (theo điểm), rồi em khác</text>
+  <line class="ln" x1="210" y1="740" x2="210" y2="764" marker-end="url(#ah)"/>
+
+  <rect class="n core" x="60" y="766" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="788" text-anchor="middle">Các vòng “giữ tạm”</text>
+  <text class="s" x="210" y="807" text-anchor="middle">nộp đơn → giữ em tốt nhất → trả về</text>
+  <line class="ln" x1="210" y1="820" x2="210" y2="844" marker-end="url(#ah)"/>
+
+  <rect class="n core" x="60" y="846" width="300" height="46" rx="8"/>
+  <text class="t" x="210" y="874" text-anchor="middle">Chốt kết quả buổi này</text>
+
+  <path class="ln loop" d="M360,869 H440 V713 H364" marker-end="url(#ahl)"/>
+  <text class="lbl" x="450" y="786" style="fill:var(--moss)">còn buổi</text>
+  <text class="lbl" x="450" y="802" style="fill:var(--moss)">khác?</text>
+
+  <line class="ln" x1="210" y1="892" x2="210" y2="946" marker-end="url(#ah)"/>
+  <text class="lbl" x="218" y="908">đủ mọi buổi</text>
+
+  <!-- Vùng D: kết thúc -->
+  <rect class="band" x="8" y="928" width="584" height="314" rx="10"/>
+
+  <rect class="n" x="60" y="948" width="300" height="54" rx="8"/>
+  <text class="t" x="210" y="970" text-anchor="middle">Tự kiểm tra lại kết quả</text>
+  <text class="s" x="210" y="989" text-anchor="middle">có ai bị xếp sai luật không?</text>
+  <line class="ln" x1="210" y1="1002" x2="210" y2="1022" marker-end="url(#ah)"/>
+
+  <polygon class="d" points="210,1024 330,1066 210,1108 90,1066"/>
+  <text class="t" x="210" y="1071" text-anchor="middle">Ghi vào máy trót lọt?</text>
+  <line class="ln" x1="330" y1="1066" x2="398" y2="1066" marker-end="url(#ah)"/>
+  <text class="lbl no" x="340" y="1058">không</text>
+  <rect class="bad" x="400" y="1042" width="180" height="48" rx="8"/>
+  <text class="t" x="490" y="1062" text-anchor="middle">Hoàn tác toàn bộ</text>
+  <text class="s" x="490" y="1080" text-anchor="middle">như chưa từng bấm chạy</text>
+  <line class="ln" x1="210" y1="1108" x2="210" y2="1130" marker-end="url(#ah)"/>
+  <text class="lbl" x="218" y="1124">có</text>
+
+  <rect class="n" x="60" y="1132" width="300" height="42" rx="8"/>
+  <text class="t" x="210" y="1158" text-anchor="middle">Xuất tệp kết quả</text>
+  <line class="ln" x1="210" y1="1174" x2="210" y2="1190" marker-end="url(#ah)"/>
+
+  <rect class="n" x="60" y="1192" width="300" height="42" rx="8"/>
+  <text class="t" x="210" y="1218" text-anchor="middle">Bảng kết quả trên màn hình</text>
+
+  <text class="bandlabel" x="580" y="948" text-anchor="end">D · CHỐT VÀ CÔNG BỐ</text>
+</svg>
+</div></div>
+<figcaption>Toàn bộ quy trình. Chỉ có hai chỗ phần mềm dừng giữa chừng: dữ liệu sai (dừng trước khi bốc thăm,
+để không phí một lần bốc) và ghi kết quả hỏng (xoá sạch những gì vừa làm dở). Vòng mũi tên đứt nét là chỗ
+phần mềm quay lại xếp buổi tiếp theo.</figcaption>
+</figure>
+
+<!-- ============================================================ 3 -->
+<h2 id="dau-vao"><span class="no">03</span>Ba tờ đăng ký</h2>
+
+<p>Phần mềm nhận vào ba tệp Excel. Có thể hình dung chúng như ba chồng phiếu giấy:</p>
+<ol>
+  <li><strong>Phiếu câu lạc bộ.</strong> Mỗi câu lạc bộ một dòng: tên, số chỗ, sinh hoạt buổi nào trong
+    tuần, có bao nhiêu suất dành riêng và dành cho diện nào.</li>
+  <li><strong>Phiếu đăng ký thi.</strong> Em nào muốn dự thi tuyển câu lạc bộ nào. Phiếu này tách riêng với
+    nguyện vọng, vì dự thi và xếp nguyện vọng là hai việc khác nhau.</li>
+  <li><strong>Phiếu nguyện vọng.</strong> Mỗi em xếp các câu lạc bộ theo thứ tự mình thích, tối đa
+    <span class="num">10</span> câu lạc bộ. Nếu trường sinh hoạt nhiều buổi, mỗi buổi có một danh sách riêng.</li>
+</ol>
+<p>Khi tệp có dòng không đọc được (thiếu mã học sinh, số chỗ âm, câu lạc bộ không tồn tại…), phần mềm báo
+đúng dòng đó để sửa, thay vì im lặng bỏ qua.</p>
+
+<!-- ============================================================ 4 -->
+<h2 id="cham-mu"><span class="no">04</span>Giáo viên chấm điểm “mù”</h2>
+
+<p>Với câu lạc bộ có thi tuyển, giáo viên nhập điểm trong một màn hình riêng. Màn hình này chỉ hiện mã và
+họ tên học sinh. Nó cố ý <strong>giấu</strong> hai thứ: số bốc thăm của em, và việc em xếp câu lạc bộ này là
+nguyện vọng thứ mấy.</p>
+
+<div class="likeness"><b>Nói nôm na</b>Giống giám khảo chấm bài thi đã rọc phách: chấm theo bài làm, không
+biết bài đó của ai hay người đó có “thật lòng” muốn vào không.</div>
+
+<p class="why"><b>Vì sao phải giấu nguyện vọng?</b> Nếu giáo viên biết “em này chọn Cờ vua là nguyện vọng 1”
+và cộng thêm điểm vì thấy em nhiệt tình, học sinh sẽ học được mẹo: cứ ghi câu lạc bộ khó vào nguyện vọng 1 để
+được ưu ái. Lúc đó danh sách nguyện vọng không còn phản ánh mong muốn thật nữa. Giấu thông tin này đi là điều
+kiện để mục <a href="#loi-hua">15</a> đúng: khai thật luôn là cách tốt nhất.</p>
+
+<!-- ============================================================ 5 -->
+<h2 id="canh-bao"><span class="no">05</span>Cảnh báo trước khi chạy</h2>
+
+<p>Có những thiếu sót làm kết quả sai lệch mà <strong>không gây ra lỗi nào</strong>: phần mềm vẫn chạy, bảng
+kết quả vẫn trông bình thường. Vì vậy, ngay phía trên nút “Chạy”, phần mềm rà trước và liệt kê chúng, xếp
+theo mức độ nghiêm trọng:</p>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Tình huống</th><th>Nếu cứ chạy thì sao</th></tr></thead>
+  <tbody>
+    <tr><td>Câu lạc bộ có người đăng ký thi nhưng chưa chấm em nào</td><td>Vòng thi coi như không có, mọi em chỉ được xét bằng bốc thăm</td></tr>
+    <tr><td>Mới chấm được một phần danh sách</td><td>Em chưa được chấm bị xếp sau cả em điểm thấp nhất</td></tr>
+    <tr><td>Em đi thi câu lạc bộ nhưng không ghi nó vào nguyện vọng</td><td>Điểm thi bị bỏ phí, em không bao giờ được xếp vào đó</td></tr>
+    <tr><td>Nhãn diện ưu tiên của em bị gõ sai</td><td>Em mất quyền ưu tiên ở mọi câu lạc bộ</td></tr>
+    <tr><td>Câu lạc bộ có suất dành riêng nhưng chưa ghi dành cho diện nào</td><td>Suất đó lặng lẽ biến thành suất thường</td></tr>
+    <tr><td>Em chưa ghi nguyện vọng nào</td><td>Chắc chắn không được xếp</td></tr>
+    <tr><td>Câu lạc bộ dành suất cho một diện mà không em nào thuộc diện đó</td><td>Suất dành riêng không ai dùng</td></tr>
+    <tr><td>Tổng số chỗ ít hơn số học sinh</td><td>Chắc chắn có em không có chỗ</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Đây là lời nhắc, không phải lệnh cấm. Người vận hành đọc xong vẫn được quyền bấm chạy.</p>
+
+<!-- ============================================================ 6 -->
+<h2 id="sao-luu"><span class="no">06</span>Sao lưu và soát lỗi</h2>
+
+<p>Khi bấm “Chạy”, việc đầu tiên phần mềm làm là <strong>chụp lại một bản sao</strong> toàn bộ dữ liệu. Nếu
+sau này có sự cố, luôn có bản cũ để quay về. Sao lưu hỏng thì phần mềm ghi chú lại và vẫn chạy tiếp, vì mất
+bản sao còn đỡ hơn không xếp được câu lạc bộ.</p>
+
+<p>Việc thứ hai là <strong>soát lỗi dữ liệu</strong>: mọi em đều có mã, mọi câu lạc bộ có số chỗ hợp lệ,
+nguyện vọng chỉ nhắc tới câu lạc bộ có thật… Sai một chỗ là dừng ngay và chỉ ra chỗ sai.</p>
+
+<p class="why"><b>Vì sao soát lỗi đứng trước bốc thăm?</b> Số bốc thăm, một khi đã bốc, sẽ được khoá lại
+(xem mục sau). Bốc xong mới phát hiện dữ liệu hỏng thì đã tiêu mất một lần bốc, và lần bốc sau sẽ ra số khác.
+Soát trước thì lần bốc đầu tiên cũng là lần bốc duy nhất.</p>
+
+<!-- ============================================================ 7 -->
+
+<h2 id="boc-tham"><span class="no">07</span>Số bốc thăm</h2>
+
+<p>Rất nhiều em sẽ ngang nhau: cùng điểm thi, hoặc cùng không thi. Khi hai em ngang nhau mà chỉ còn một chỗ,
+phải có một cách phân định không thiên vị ai. Cách đó là bốc thăm. Mục này trả lời sáu câu: số bốc thăm là gì,
+được dùng khi nào, bốc ra sao, vì sao chỉ bốc một lần, vì sao khoá lại, và làm sao biết nó công bằng.</p>
+
+<h3>Số bốc thăm là gì</h3>
+<p>Mỗi học sinh nhận <strong>một</strong> con số. Số càng <strong>nhỏ</strong> càng may: em số
+<span class="num">1</span> đứng trước em số <span class="num">2</span> khi hai em ngang nhau. Không có hai em
+trùng số, nên bốc thăm luôn phân định được, không bao giờ “hoà tiếp”.</p>
+<p>Trong ví dụ: Dũng số <span class="num">1</span>, Bình <span class="num">2</span>, Khoa
+<span class="num">3</span>, An <span class="num">4</span>, Hà <span class="num">5</span>, Chi
+<span class="num">6</span>.</p>
+
+<h3>Được dùng đúng hai lúc</h3>
+<ol>
+  <li><strong>Hai em bằng điểm nhau</strong> ở một câu lạc bộ có thi. Ví dụ An và Chi cùng
+    <span class="num">7,5</span> ở Cờ vua: An số <span class="num">4</span>, Chi số <span class="num">6</span>,
+    nên An đứng trước.</li>
+  <li><strong>Em không có điểm</strong> ở câu lạc bộ đó (câu lạc bộ không thi, hoặc em không thi). Không có điểm
+    để so, nên chỉ còn số bốc thăm.</li>
+</ol>
+<p>Ngoài hai lúc đó, số bốc thăm <strong>không có tiếng nói</strong>. Em điểm cao hơn luôn đứng trước em điểm
+thấp hơn, dù số bốc thăm ra sao. Phép thử dựng riêng cho điều này (ba em, ba mức điểm khác nhau, tranh hai chỗ)
+đã chạy với <span class="num">100</span> mã bốc thăm khác nhau: kết quả đổi <span class="num">0</span> lần.</p>
+
+<h3>Bốc ra sao</h3>
+<p>Phần mềm làm như người ta xáo một bộ bài rồi chia:</p>
+<ol>
+  <li>Lấy danh sách mã học sinh, xếp theo thứ tự mã. Bước này chỉ để thứ tự <em>nhập vào máy</em> không ảnh hưởng
+    tới kết quả.</li>
+  <li>Xáo trộn cả danh sách. Cách xáo được quyết định bởi một con số gọi là <strong>mã bốc thăm</strong>
+    (mặc định <span class="num">42</span>).</li>
+  <li>Em đứng vị trí nào sau khi xáo thì đó là số bốc thăm của em.</li>
+</ol>
+<div class="likeness"><b>Nói nôm na</b>Mã bốc thăm giống như cách một người xáo bài cụ thể. Cùng một người, cùng
+một bộ bài, xáo theo đúng các động tác cũ thì ra đúng thứ tự cũ. Nhờ vậy ai cũng làm lại được và kiểm tra
+được, nhưng trước khi xáo thì không ai đoán được ai sẽ đứng đầu.</div>
+<p>Việc xếp theo mã trước khi xáo có làm em mã nhỏ được lợi không? Không. Sau khi xáo, mã không còn vai trò gì.
+Đo trên <span class="num">8</span> đợt, mỗi đợt <span class="num">10 000</span> lần bốc: có đợt em mã nhỏ
+hơi may hơn, có đợt hơi kém may hơn. Kiểu lên xuống ngẫu nhiên đó là nhiễu thống kê, không phải thiên vị.</p>
+<p>Bộ số chỉ phụ thuộc vào đúng hai thứ: <strong>danh sách học sinh</strong> và <strong>mã bốc thăm</strong>.
+Thứ tự nhập, máy tính nào, ai bấm: không thứ nào trong số đó thay đổi được kết quả.</p>
+
+<h3>Vì sao chỉ một số, dùng cho mọi câu lạc bộ</h3>
+<p>Có thể cho mỗi câu lạc bộ bốc một bộ số riêng. Phần mềm không làm vậy. Mỗi em bốc <strong>một lần</strong>,
+và con số đó theo em tới mọi câu lạc bộ.</p>
+<div class="likeness"><b>Nói nôm na</b>Như lấy số thứ tự ở ngân hàng: một tờ số dùng cho mọi quầy, chứ không
+phải mỗi quầy phát một số khác.</div>
+<ul>
+  <li><strong>Dễ kiểm tra:</strong> nhà trường chỉ cần công bố một danh sách số, thay vì một danh sách cho mỗi
+    câu lạc bộ.</li>
+  <li><strong>Nhất quán:</strong> mọi câu lạc bộ phân định hoà theo cùng một thứ tự. Không có chuyện một em “may”
+    ở Bóng rổ nhưng “xui” ở Âm nhạc chỉ vì hai lần bốc khác nhau.</li>
+</ul>
+
+<h3>Bốc xong thì khoá lại</h3>
+<p>Sau lần bốc đầu tiên, bộ số được <strong>khoá</strong>. Bấm chạy lại bao nhiêu lần cũng dùng đúng bộ số đó.
+Muốn bốc lại phải xác nhận hai lần, và việc bốc lại được ghi vào nhật ký, không xoá được. Như vậy không ai có
+thể lặng lẽ “bốc đi bốc lại tới khi ra kết quả mình thích”.</p>
+
+<h3>Em đến muộn không bị xếp cuối</h3>
+<p>Nếu sau khi khoá có thêm học sinh mới, em mới được <strong>chèn vào một vị trí ngẫu nhiên</strong> trong
+dãy, có thể đứng trước hoặc sau các em cũ. Thứ tự giữa các em cũ với nhau giữ nguyên tuyệt đối.</p>
+<p class="why"><b>Vì sao không cho em mới số tiếp theo?</b> Phiên bản đầu từng làm như vậy, và em mới luôn
+đứng sau mọi em cũ ở mọi câu lạc bộ. Khi đo thử 20 em cũ và 10 em mới tranh 10 chỗ, em mới được đúng
+<span class="num">0</span> chỗ. Sau khi sửa, em mới được trung bình <span class="num">3,5</span> chỗ, sát
+mức công bằng <span class="num">3,3</span>.</p>
+
+<h3>Làm sao biết nó công bằng</h3>
+<p>Đo trên <span class="num">100</span> học sinh, bốc <span class="num">10 000</span> lần. Nếu công bằng tuyệt
+đối, mỗi em lọt vào nhóm 10% may nhất đúng <span class="num">10%</span> số lần. Em ít lọt nhất đạt
+<span class="num">9,38%</span>, em hay lọt nhất đạt <span class="num">10,98%</span>. Không em nào được lợi
+hay bị thiệt một cách có hệ thống.</p>
+
+<h3>Khi trường có nhiều buổi</h3>
+<p>Vẫn chỉ bốc <strong>một</strong> lần. Với mỗi buổi, phần mềm xáo lại bộ số đã khoá theo một quy tắc cố định
+(dựa vào mã bốc thăm và tên buổi). Nếu dùng nguyên một bộ số cho cả tuần thì em rút phải số xấu sẽ đứng cuối ở
+<strong>mọi</strong> buổi, cái rủi cộng dồn lên một người. Xáo lại mỗi buổi làm may rủi rải đều ra các ngày.
+Vì quy tắc xáo cố định, ai có bộ số đã khoá và mã bốc thăm đều tính lại được thứ tự từng buổi.</p>
+
+<!-- ============================================================ 8 -->
+<h2 id="xep-hang"><span class="no">08</span>Xếp hai tầng và điểm thi</h2>
+
+<p>Trước khi xét ai vào, mỗi câu lạc bộ xếp tất cả các em muốn vào thành <strong>một hàng</strong>. Người đứng
+đầu hàng được ưu tiên nhất. Mục này giải thích hàng đó được xếp thế nào.</p>
+
+<h3>Ai có mặt trong hàng của một câu lạc bộ</h3>
+<p>Một em có mặt trong hàng của câu lạc bộ X nếu em <strong>đăng ký thi</strong> X, hoặc em <strong>ghi X vào
+danh sách nguyện vọng</strong>. Mỗi câu lạc bộ có một hàng riêng. Cùng một em có thể đứng đầu hàng Cờ vua mà
+lại đứng cuối hàng Bóng rổ.</p>
+
+<h3>Hai tầng</h3>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Tầng</th><th>Gồm những em nào</th><th>Xếp theo</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Tầng 1</strong></td><td>Đã có điểm thi ở <em>chính</em> câu lạc bộ này</td><td>Điểm cao trước.
+      Bằng điểm thì số bốc thăm nhỏ trước.</td></tr>
+    <tr><td><strong>Tầng 2</strong></td><td>Muốn vào nhưng <em>không có</em> điểm ở câu lạc bộ này</td><td>Chỉ theo số
+      bốc thăm, nhỏ trước.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Tầng 1 luôn đứng <strong>trọn vẹn trước</strong> Tầng 2, không xen kẽ. Em thi được
+<span class="num">3</span> điểm vẫn đứng trước em không thi, kể cả khi em không thi có số bốc thăm
+<span class="num">1</span>.</p>
+<div class="likeness"><b>Nói nôm na</b>Như xét tuyển có hai hàng: hàng những người đã nộp bài dự thi và hàng
+những người chưa nộp. Hàng đầu được xét hết rồi mới tới hàng sau. Trong hàng đầu, bài tốt hơn đứng trước. Trong
+hàng sau, không có bài để so, nên bốc thăm.</div>
+
+<h3>Luật so hai em</h3>
+<p>Mọi thứ ở trên gói lại thành một luật duy nhất. Muốn biết em nào đứng trước ở một câu lạc bộ, đi theo lưu đồ
+này:</p>
+
+<figure>
+<div class="scroll"><div class="diagram small">
+<svg viewBox="0 0 600 380" role="img" aria-label="Luật so hai em ở một câu lạc bộ: nếu chỉ một em có điểm thì em đó đứng trước; nếu cả hai có điểm thì điểm cao hơn đứng trước, bằng điểm thì số bốc thăm nhỏ hơn đứng trước; nếu cả hai không có điểm thì số bốc thăm nhỏ hơn đứng trước.">
+  <defs>
+    <marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="ah"/>
+    </marker>
+  </defs>
+  <rect class="n core" x="180" y="10" width="240" height="44" rx="8"/>
+  <text class="t" x="300" y="37" text-anchor="middle">So em P với em Q</text>
+  <line class="ln" x1="300" y1="54" x2="300" y2="74" marker-end="url(#ah3)"/>
+
+  <polygon class="d" points="300,76 440,116 300,156 160,116"/>
+  <text class="t" x="300" y="112" text-anchor="middle">Có điểm thi ở</text>
+  <text class="t" x="300" y="130" text-anchor="middle">câu lạc bộ này?</text>
+
+  <!-- chỉ một em -->
+  <text class="lbl" x="152" y="106" text-anchor="end">chỉ một em</text>
+  <rect class="n" x="10" y="140" width="150" height="54" rx="8"/>
+  <text class="t" x="85" y="163" text-anchor="middle">Em có điểm</text>
+  <text class="s" x="85" y="182" text-anchor="middle">đứng trước (Tầng 1)</text>
+  <path class="ln" d="M160,116 H85 V138" marker-end="url(#ah3)"/>
+
+  <!-- cả hai không -->
+  <path class="ln" d="M440,116 H515 V138" marker-end="url(#ah3)"/>
+  <text class="lbl" x="448" y="106">cả hai không</text>
+  <rect class="n" x="440" y="140" width="150" height="54" rx="8"/>
+  <text class="t" x="515" y="163" text-anchor="middle">Số bốc thăm</text>
+  <text class="s" x="515" y="182" text-anchor="middle">nhỏ hơn đứng trước</text>
+
+  <!-- cả hai có -->
+  <line class="ln" x1="300" y1="156" x2="300" y2="198" marker-end="url(#ah3)"/>
+  <text class="lbl" x="308" y="182">cả hai có</text>
+  <polygon class="d" points="300,200 420,238 300,276 180,238"/>
+  <text class="t" x="300" y="243" text-anchor="middle">Bằng điểm?</text>
+
+  <path class="ln" d="M180,238 H85 V300" marker-end="url(#ah3)"/>
+  <text class="lbl" x="170" y="228" text-anchor="end">không</text>
+  <rect class="n" x="10" y="302" width="150" height="54" rx="8"/>
+  <text class="t" x="85" y="325" text-anchor="middle">Điểm cao hơn</text>
+  <text class="s" x="85" y="344" text-anchor="middle">đứng trước</text>
+
+  <path class="ln" d="M420,238 H515 V300" marker-end="url(#ah3)"/>
+  <text class="lbl" x="428" y="228">có</text>
+  <rect class="n" x="440" y="302" width="150" height="54" rx="8"/>
+  <text class="t" x="515" y="325" text-anchor="middle">Số bốc thăm</text>
+  <text class="s" x="515" y="344" text-anchor="middle">nhỏ hơn đứng trước</text>
+</svg>
+</div></div>
+<figcaption>Luật so hai em ở một câu lạc bộ. Số bốc thăm chỉ được hỏi tới ở hai ô bên phải: khi bằng điểm, hoặc
+khi cả hai đều không có điểm. Nguyện vọng của em không xuất hiện ở bất kỳ ô nào.</figcaption>
+</figure>
+
+<h3>Hàng của ba câu lạc bộ trong ví dụ</h3>
+<div class="queues" role="group" aria-label="Hàng ưu tiên của ba câu lạc bộ trong ví dụ">
+  <div class="row queue">
+    <span class="qlabel">Cờ vua</span>
+    <span class="chip t1">Hà <small>9,0</small></span>
+    <span class="chip t1">Bình <small>8,0</small></span>
+    <span class="chip t1">An <small>7,5 · số 4</small></span>
+    <span class="chip t1">Chi <small>7,5 · số 6</small></span>
+    <span class="chip t1">Dũng <small>6,0</small></span>
+  </div>
+  <div class="row queue">
+    <span class="qlabel">Bóng rổ</span>
+    <span class="chip">Dũng <small>số 1</small></span>
+    <span class="chip">Bình <small>số 2</small></span>
+    <span class="chip">Khoa <small>số 3</small></span>
+    <span class="chip">Hà <small>số 5</small></span>
+    <span class="chip">Chi <small>số 6</small></span>
+  </div>
+  <div class="row queue">
+    <span class="qlabel">Âm nhạc</span>
+    <span class="chip res">Khoa <small>số 3 · diện ưu tiên</small></span>
+    <span class="chip">An <small>số 4</small></span>
+    <span class="chip">Hà <small>số 5</small></span>
+    <span class="chip">Chi <small>số 6</small></span>
+  </div>
+</div>
+<p class="muted" style="font-size:14.5px">Viền xanh: Tầng 1, đã thi. Viền xám: Tầng 2, xếp bằng bốc thăm.</p>
+<ul>
+  <li><strong>Cờ vua</strong> có thi, cả năm em đều có điểm nên đều ở Tầng 1. An và Chi cùng
+    <span class="num">7,5</span>: An lên trước nhờ số <span class="num">4</span>.</li>
+  <li><strong>Bóng rổ</strong> và <strong>Âm nhạc</strong> không thi, nên mọi em ở Tầng 2 và hàng chỉ theo số bốc
+    thăm.</li>
+  <li><strong>Hà</strong> đứng đầu Cờ vua nhờ <span class="num">9,0</span> điểm, nhưng ở Bóng rổ chỉ đứng thứ tư,
+    vì điểm Cờ vua không mang sang được câu lạc bộ khác.</li>
+</ul>
+
+<h3>Nếu Cờ vua có thêm em không thi</h3>
+<p>Giả sử có thêm Mai (số bốc thăm <span class="num">1</span>) ghi Cờ vua vào nguyện vọng nhưng không đi thi.
+Hàng Cờ vua sẽ là: Hà, Bình, An, Chi, Dũng, rồi mới tới <strong>Mai</strong>. Số bốc thăm tốt nhất trường cũng
+không đưa Mai lên trên Dũng <span class="num">6,0</span> điểm. Mai chỉ vào được Cờ vua nếu cả năm em có điểm
+đứng trước đã rời đi (vào câu lạc bộ các em thích hơn) mà vẫn còn chỗ.</p>
+
+<h3>Điểm thi được dùng thế nào</h3>
+<ul>
+  <li><strong>Điểm chỉ có giá trị ở câu lạc bộ đã chấm nó.</strong> Mỗi câu lạc bộ chỉ so điểm giữa các em thi
+    câu lạc bộ đó. Vì vậy mỗi câu lạc bộ được dùng thang điểm riêng (trên 10, trên 20, trên 100) mà không làm sai
+    lệch gì, miễn là trong một câu lạc bộ mọi em được chấm cùng một thang.</li>
+  <li><strong>Điểm lẻ được chấp nhận</strong> (<span class="num">7,5</span>, <span class="num">8,25</span>). Điểm
+    âm bị từ chối, vì một dấu trừ gõ nhầm sẽ đẩy em giỏi nhất xuống cuối hàng.</li>
+  <li><strong>“Bằng điểm” nghĩa là bằng đúng từng chữ số.</strong> <span class="num">7,5</span> với
+    <span class="num">7,49</span> không bằng nhau: em <span class="num">7,5</span> đứng trước, không cần bốc thăm.
+    Thang điểm càng thô (chỉ cho điểm nguyên) thì càng nhiều em bằng nhau, và bốc thăm càng được dùng nhiều.</li>
+  <li><strong>Đăng ký thi mà chưa có điểm thì vẫn ở Tầng 2.</strong> Phần mềm chỉ nhìn điểm đã nhập, không nhìn việc
+    em có đăng ký thi. Vì thế cảnh báo ở mục 05 báo ngay khi một câu lạc bộ mới chấm được một phần danh sách.</li>
+  <li><strong>Người chấm không thấy nguyện vọng hay số bốc thăm</strong> (mục 04), nên điểm phản ánh bài thi, không
+    phản ánh việc em có “thật lòng” muốn vào hay không.</li>
+</ul>
+
+<h3>Vì sao Tầng 1 phải đứng trọn trước Tầng 2</h3>
+<p>Một câu lạc bộ tổ chức thi vì muốn chọn người theo năng lực thể hiện trong bài thi. Em có điểm là em đã đưa ra
+bằng chứng đó. Em không có điểm thì không có gì để đặt lên bàn cân. Muốn xếp em không thi xen vào giữa các em có
+điểm thì phải tự bịa ra một điểm cho em, và không có cách bịa nào công bằng. Vì vậy phần mềm tách hẳn hai tầng.</p>
+<p>Đồng thời, không có em nào bị gạch tên chỉ vì không thi. Em ở Tầng 2 vẫn được xét, và vẫn vào được nếu còn
+chỗ. Với câu lạc bộ không thi, cả hàng là Tầng 2, nên mọi em có cơ hội ngang nhau.</p>
+
+<h3>Điểm nặng ký hơn bốc thăm rất nhiều</h3>
+<p>Đo trên bộ dữ liệu thử <span class="num">140</span> học sinh:</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Thay đổi</th><th>Tỉ lệ học sinh đổi câu lạc bộ</th></tr></thead>
+  <tbody>
+    <tr><td>Bốc thăm lại với mã bốc thăm khác</td><td class="num">4,36%</td></tr>
+    <tr><td>Mỗi điểm thi lệch ngẫu nhiên tối đa 0,1</td><td class="num">4,75%</td></tr>
+    <tr><td>Mỗi điểm thi lệch ngẫu nhiên tối đa 0,5</td><td class="num">15,14%</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Chấm lệch chưa tới nửa điểm đã làm số em đổi chỗ nhiều gấp ba lần so với bốc thăm lại toàn bộ. Nghĩa là ở
+câu lạc bộ có thi, <strong>người quyết định chính là người chấm</strong>, còn bốc thăm chỉ phân định phần sát nút.
+Chấm cẩn thận và cùng một thang là việc quan trọng nhất nhà trường làm được cho sự công bằng của kết quả.</p>
+
+<p class="why"><b>Điều câu lạc bộ không được biết.</b> Khi xếp hàng, câu lạc bộ không biết em ghi mình là nguyện
+vọng thứ mấy. Hàng chỉ dựa vào điểm thi và số bốc thăm. Đây là quy tắc cứng trong phần mềm, không phải tuỳ chọn.
+Nếu câu lạc bộ ưu tiên em ghi mình là nguyện vọng 1, học sinh sẽ phải đoán và khai theo chiến thuật, đúng cái
+phần mềm được làm ra để loại bỏ.</p>
+
+<!-- ============================================================ 9 -->
+
+<h2 id="giu-tam"><span class="no">09</span>Trái tim: các vòng “giữ tạm”</h2>
+
+<p>Đây là phần quyết định ai vào đâu. Nó chạy theo từng vòng, mỗi vòng gồm ba động tác:</p>
+<ol>
+  <li><strong>Nộp đơn.</strong> Mọi em đang chưa có chỗ nộp đơn vào câu lạc bộ kế tiếp trong danh sách
+    nguyện vọng của mình.</li>
+  <li><strong>Giữ tạm.</strong> Mỗi câu lạc bộ nhìn tất cả những em đang có mặt: người mới nộp cộng với
+    người mình đang giữ từ vòng trước. Câu lạc bộ giữ lại những em đứng đầu hàng, vừa đủ số chỗ.</li>
+  <li><strong>Trả về.</strong> Những em còn lại bị trả về. Vòng sau, các em này nộp vào nguyện vọng tiếp theo.</li>
+</ol>
+<p>Lặp lại cho tới khi không còn em nào bị trả về, hoặc em bị trả về đã hết nguyện vọng. Lúc đó mọi chỗ
+đang “giữ tạm” mới trở thành chính thức.</p>
+
+<div class="likeness"><b>Nói nôm na</b>Mỗi câu lạc bộ ghi danh sách bằng bút chì. Có người tốt hơn đến thì
+tẩy tên người kém nhất đi. Chỉ khi cả trường đã yên, không còn ai gõ cửa nữa, mới tô lại bằng bút mực.</div>
+
+<figure>
+<div class="scroll"><div class="diagram small">
+<svg viewBox="0 0 560 340" role="img" aria-label="Vòng lặp giữ tạm: em chưa có chỗ nộp vào nguyện vọng kế tiếp, câu lạc bộ gộp người đang giữ với người mới, giữ những em đứng đầu hàng và trả về số còn lại; nếu còn em bị trả về mà còn nguyện vọng thì lặp lại, không thì chốt kết quả.">
+  <defs>
+    <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="ah"/>
+    </marker>
+    <marker id="ahl2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" class="ah loop"/>
+    </marker>
+  </defs>
+  <rect class="n core" x="140" y="14" width="280" height="50" rx="8"/>
+  <text class="t" x="280" y="36" text-anchor="middle">Em chưa có chỗ nộp đơn</text>
+  <text class="s" x="280" y="54" text-anchor="middle">vào nguyện vọng kế tiếp của mình</text>
+  <line class="ln" x1="280" y1="64" x2="280" y2="84" marker-end="url(#ah2)"/>
+
+  <rect class="n core" x="140" y="86" width="280" height="50" rx="8"/>
+  <text class="t" x="280" y="108" text-anchor="middle">Câu lạc bộ gộp hai nhóm</text>
+  <text class="s" x="280" y="126" text-anchor="middle">người đang giữ + người mới nộp</text>
+  <line class="ln" x1="280" y1="136" x2="280" y2="156" marker-end="url(#ah2)"/>
+
+  <rect class="n core" x="140" y="158" width="280" height="50" rx="8"/>
+  <text class="t" x="280" y="180" text-anchor="middle">Giữ em đầu hàng, trả về số còn lại</text>
+  <text class="s" x="280" y="198" text-anchor="middle">suất dành riêng xét trước, suất chung sau</text>
+  <line class="ln" x1="280" y1="208" x2="280" y2="228" marker-end="url(#ah2)"/>
+
+  <polygon class="d" points="280,230 420,268 280,306 140,268"/>
+  <text class="t" x="280" y="265" text-anchor="middle">Còn em bị trả về</text>
+  <text class="t" x="280" y="283" text-anchor="middle">mà còn nguyện vọng?</text>
+
+  <path class="ln loop" d="M140,268 H60 V39 H136" marker-end="url(#ahl2)"/>
+  <text class="lbl" x="16" y="160" style="fill:var(--moss)">có:</text>
+  <text class="lbl" x="16" y="176" style="fill:var(--moss)">vòng</text>
+  <text class="lbl" x="16" y="192" style="fill:var(--moss)">mới</text>
+
+  <line class="ln" x1="420" y1="268" x2="448" y2="268" marker-end="url(#ah2)"/>
+  <text class="lbl" x="424" y="258">không</text>
+  <rect class="n" x="450" y="244" width="100" height="48" rx="8"/>
+  <text class="t" x="500" y="264" text-anchor="middle">Chốt</text>
+  <text class="s" x="500" y="282" text-anchor="middle">bút chì → mực</text>
+</svg>
+</div></div>
+<figcaption>Một vòng giữ tạm. Mỗi vòng, mỗi em chưa có chỗ tiến thêm đúng một nguyện vọng, nên số vòng
+không bao giờ vượt quá độ dài danh sách nguyện vọng dài nhất (tối đa 10).</figcaption>
+</figure>
+
+<h3>Chạy thử với 6 học sinh</h3>
+
+<div class="round">
+  <header><h4>Vòng 1</h4><span class="who">Cả 6 em nộp nguyện vọng 1: An, Bình, Hà → Cờ vua · Chi, Khoa → Âm nhạc · Dũng → Bóng rổ</span></header>
+  <div class="boards">
+    <div class="board"><div class="name">Cờ vua · 2 chỗ</div>
+      <div class="seats"><div class="seat full">Hà <small>9,0</small></div><div class="seat full">Bình <small>8,0</small></div></div>
+      <div class="back">Trả về: An (7,5 thấp hơn cả hai)</div></div>
+    <div class="board"><div class="name">Âm nhạc · 2 chỗ</div>
+      <div class="seats"><div class="seat full res">Khoa <small>suất dành riêng</small></div><div class="seat full">Chi <small>số 6</small></div></div>
+      <div class="back none">Không trả ai</div></div>
+    <div class="board"><div class="name">Bóng rổ · 2 chỗ</div>
+      <div class="seats"><div class="seat full">Dũng <small>số 1</small></div><div class="seat empty">còn trống</div></div>
+      <div class="back none">Không trả ai</div></div>
+  </div>
+</div>
+
+<div class="round">
+  <header><h4>Vòng 2</h4><span class="who">Chỉ An chưa có chỗ. An nộp nguyện vọng 2: Âm nhạc</span></header>
+  <div class="boards">
+    <div class="board"><div class="name">Cờ vua</div>
+      <div class="seats"><div class="seat full">Hà <small>9,0</small></div><div class="seat full">Bình <small>8,0</small></div></div>
+      <div class="back none">Không ai nộp mới</div></div>
+    <div class="board"><div class="name">Âm nhạc</div>
+      <div class="seats"><div class="seat full res">Khoa <small>suất dành riêng</small></div><div class="seat full">An <small>số 4</small></div></div>
+      <div class="back">Trả về: Chi (số 6 kém số 4 của An)</div></div>
+    <div class="board"><div class="name">Bóng rổ</div>
+      <div class="seats"><div class="seat full">Dũng <small>số 1</small></div><div class="seat empty">còn trống</div></div>
+      <div class="back none">Không ai nộp mới</div></div>
+  </div>
+  <p class="note"><strong>Đây là chỗ “tạm” thể hiện rõ nhất.</strong> Chi đã được giữ ở vòng 1, nhưng An đến
+  sau và đứng trước Chi trong hàng của Âm nhạc, nên Chi bị bật ra. Nếu câu lạc bộ chốt ngay ở vòng 1 thì An,
+  người đứng trước, lại mất chỗ vào tay người đứng sau.</p>
+</div>
+
+<div class="round">
+  <header><h4>Vòng 3</h4><span class="who">Chi nộp nguyện vọng 2: Cờ vua</span></header>
+  <div class="boards">
+    <div class="board"><div class="name">Cờ vua</div>
+      <div class="seats"><div class="seat full">Hà <small>9,0</small></div><div class="seat full">Bình <small>8,0</small></div></div>
+      <div class="back">Trả về: Chi (7,5 điểm)</div></div>
+    <div class="board"><div class="name">Âm nhạc</div>
+      <div class="seats"><div class="seat full res">Khoa <small>suất dành riêng</small></div><div class="seat full">An <small>số 4</small></div></div>
+      <div class="back none">Không ai nộp mới</div></div>
+    <div class="board"><div class="name">Bóng rổ</div>
+      <div class="seats"><div class="seat full">Dũng <small>số 1</small></div><div class="seat empty">còn trống</div></div>
+      <div class="back none">Không ai nộp mới</div></div>
+  </div>
+</div>
+
+<div class="round">
+  <header><h4>Vòng 4</h4><span class="who">Chi nộp nguyện vọng 3: Bóng rổ</span></header>
+  <div class="boards">
+    <div class="board"><div class="name">Cờ vua</div>
+      <div class="seats"><div class="seat full">Hà <small>9,0</small></div><div class="seat full">Bình <small>8,0</small></div></div>
+      <div class="back none">Không ai nộp mới</div></div>
+    <div class="board"><div class="name">Âm nhạc</div>
+      <div class="seats"><div class="seat full res">Khoa <small>suất dành riêng</small></div><div class="seat full">An <small>số 4</small></div></div>
+      <div class="back none">Không ai nộp mới</div></div>
+    <div class="board"><div class="name">Bóng rổ</div>
+      <div class="seats"><div class="seat full">Dũng <small>số 1</small></div><div class="seat full">Chi <small>số 6</small></div></div>
+      <div class="back none">Còn chỗ, nhận Chi</div></div>
+  </div>
+  <p class="note">Không còn ai bị trả về. Phần mềm dừng sau 4 vòng và chốt kết quả.</p>
+</div>
+
+<p class="why"><b>Vì sao cách này công bằng?</b> Mỗi em luôn thử câu lạc bộ mình thích nhất trước. Em chỉ đi
+xuống nguyện vọng sau khi câu lạc bộ phía trên <strong>đã có đủ người đứng trước mình</strong>. Không có chuyện
+trượt vì “ghi nhầm thứ tự” hay vì nộp muộn.</p>
+
+<!-- ============================================================ 10 -->
+<h2 id="danh-rieng"><span class="no">10</span>Suất dành riêng</h2>
+
+<p>Một câu lạc bộ có thể giữ lại vài chỗ cho một nhóm học sinh nhà trường muốn ưu tiên. Mỗi lần câu lạc bộ
+chọn người (tức là ở <strong>mọi</strong> vòng giữ tạm), nó chọn theo hai lượt:</p>
+<ol>
+  <li><strong>Lượt dành riêng:</strong> chỉ nhìn các em thuộc diện ưu tiên đang có mặt, lấy những em đứng đầu
+    hàng, tối đa bằng số suất dành riêng.</li>
+  <li><strong>Lượt chung:</strong> nhìn tất cả những em còn lại (kể cả em thuộc diện mà chưa được suất dành
+    riêng), lấp nốt số chỗ còn lại theo thứ tự hàng.</li>
+</ol>
+
+<p>Suất dành riêng là <strong>mềm</strong>: nếu không đủ em thuộc diện, chỗ thừa tự động nhường cho lượt chung.
+Câu lạc bộ không bao giờ phải để trống ghế chỉ vì chờ một nhóm không xuất hiện.</p>
+
+<p>Ví dụ: một câu lạc bộ có 3 chỗ, trong đó 1 suất dành riêng. Hàng ưu tiên là A, B, C, D. Chỉ D thuộc diện
+ưu tiên. Hai cảnh dưới đây chỉ khác nhau ở chỗ D có nộp đơn hay không:</p>
+
+<div class="scenes">
+  <div class="scene">
+    <h4>Cảnh 1 · D có mặt</h4>
+    <ol>
+      <li>Lượt dành riêng: D là em thuộc diện duy nhất → <strong>D</strong> vào.</li>
+      <li>Lượt chung còn 2 chỗ: A, B đứng đầu → <strong>A, B</strong> vào.</li>
+    </ol>
+    <div class="queue"><span class="chip res">D</span><span class="chip">A</span><span class="chip">B</span><span class="chip out">C</span></div>
+    <p class="res-line">C đứng trên D trong hàng mà vẫn trượt.</p>
+  </div>
+  <div class="scene">
+    <h4>Cảnh 2 · D vắng mặt</h4>
+    <ol>
+      <li>Lượt dành riêng: không có ai thuộc diện → suất nhường cho lượt chung.</li>
+      <li>Lượt chung có 3 chỗ → <strong>A, B, C</strong> vào.</li>
+    </ol>
+    <div class="queue"><span class="chip">A</span><span class="chip">B</span><span class="chip">C</span></div>
+    <p class="res-line">Suất dành riêng không bị bỏ trống.</p>
+  </div>
+</div>
+
+<p>Hai cảnh cho thấy: cùng em C, cùng thứ hạng, cùng câu lạc bộ, lúc được lúc không, tuỳ vào việc ai khác có
+mặt. Vì thế phần mềm <strong>tính lại</strong> hai lượt ở mỗi vòng theo đúng nhóm người đang có mặt lúc đó,
+thay vì xếp sẵn một danh sách cố định từ đầu. Phiên bản đầu làm theo kiểu danh sách cố định và đã cho kết quả
+sai, nên mới đổi sang cách này.</p>
+
+<p>Trong ví dụ 6 học sinh, Khoa thuộc diện ưu tiên nên chiếm suất dành riêng của Âm nhạc. Suất chung còn lại
+thuộc về người đứng đầu trong số còn lại.</p>
+
+<!-- ============================================================ 11 -->
+<h2 id="nhieu-buoi"><span class="no">11</span>Nhiều buổi trong tuần</h2>
+
+<p>Nếu trường cho câu lạc bộ sinh hoạt vào nhiều ngày, mỗi câu lạc bộ thuộc đúng một buổi, và mỗi em được vào
+tối đa một câu lạc bộ mỗi buổi. Không có giới hạn tổng số câu lạc bộ trong tuần.</p>
+
+<p>Với ba điều kiện đó, các buổi <strong>không ảnh hưởng gì đến nhau</strong>. Phần mềm tách dữ liệu ra theo
+buổi, rồi chạy nguyên cả quy trình ở mục 8, 9, 10 cho từng buổi một, như thể mỗi buổi là một trường riêng.
+Ghép các buổi lại là ra thời khoá biểu câu lạc bộ cả tuần của mỗi em.</p>
+
+<div class="likeness"><b>Nói nôm na</b>Như xếp lịch trực nhật cho từng ngày: xếp thứ Hai không làm thay đổi
+cách xếp thứ Ba.</div>
+
+<ul>
+  <li><strong>Bốc thăm được xáo lại cho mỗi buổi</strong>, dựa trên bộ số đã khoá. Nhờ vậy em kém may hôm
+    thứ Hai không phải chịu kém may cả tuần. Trường chỉ có một buổi thì dùng nguyên bộ số đã khoá, kết quả không
+    đổi gì.</li>
+  <li><strong>Chạy lại riêng một buổi</strong> được. Ví dụ câu lạc bộ thứ Năm đổi số chỗ: chỉ thứ Năm được xếp
+    lại, các ngày đã công bố giữ nguyên. Chạy riêng thứ Năm cho đúng kết quả thứ Năm của lần chạy cả tuần.</li>
+  <li>Khi chạy riêng một buổi, phần mềm <strong>không cho bốc thăm lại</strong>, vì bốc lại sẽ đổi thứ tự ở mọi
+    buổi, kể cả những buổi đang giữ kết quả cũ.</li>
+</ul>
+
+<p class="why"><b>Một cách đã bị loại.</b> Nhóm làm phần mềm từng thử cho em “thiệt” ở buổi trước được ưu tiên
+ở buổi sau. Nghe thì công bằng, nhưng đo thử thì 113 trên 300 em tìm được cách cố tình bỏ trống buổi đầu để
+giành lợi thế buổi sau. Cách đang dùng cho kết quả 0 trên 300. Vì vậy phần mềm không dùng cách kia.</p>
+
+<!-- ============================================================ 12 -->
+<h2 id="kiem-tra"><span class="no">12</span>Tự kiểm tra lại kết quả</h2>
+
+<p>Xếp xong, phần mềm tự hỏi lại một câu cho <strong>từng cặp</strong> học sinh và câu lạc bộ:</p>
+<p style="font-family:var(--f-display);font-weight:600;font-size:17.5px;max-width:60ch">“Em này có thích câu
+lạc bộ kia hơn chỗ hiện tại không? Nếu có, câu lạc bộ kia, theo đúng luật của nó, có nhận em không?”</p>
+<p>Nếu cả hai câu đều là “có”, em đó có một <strong>lời phàn nàn chính đáng</strong>: em muốn vào, câu lạc bộ
+cũng muốn nhận em, vậy mà em lại bị xếp chỗ khác. Kết quả tốt phải có <strong>không</strong> trường hợp nào
+như thế.</p>
+
+<p>Thử với Chi, người chỉ được nguyện vọng 3:</p>
+<ul>
+  <li>Chi thích Âm nhạc hơn. Âm nhạc đang giữ Khoa (suất dành riêng) và An (số bốc thăm 4, tốt hơn số 6 của Chi).
+    Âm nhạc sẽ không đổi An lấy Chi.</li>
+  <li>Chi thích Cờ vua hơn. Cờ vua đang giữ Hà (9,0) và Bình (8,0), đều cao điểm hơn Chi (7,5). Cờ vua cũng
+    không nhận.</li>
+</ul>
+<p>Chi thiệt, nhưng không có lời phàn nàn chính đáng nào. Kiểm tra tương tự cho mọi em trong ví dụ đều ra
+<span class="num">0</span> trường hợp. Trên các bộ dữ liệu thử lớn, qua 600 lần chạy với các mã bốc thăm
+khác nhau, cũng luôn là <span class="num">0</span>.</p>
+
+<p>Việc kiểm tra dùng chính luật chọn người của câu lạc bộ, gồm cả hai lượt dành riêng và chung, thay vì so với
+một danh sách cố định. Như mục 10 đã chỉ ra, danh sách cố định không mô tả đúng được một câu lạc bộ có suất
+dành riêng.</p>
+
+<h3>Điều khác cần phân biệt</h3>
+<p>Đôi khi có hai em mà nếu <strong>đổi chỗ cho nhau</strong> thì cả hai cùng vui hơn. Phần mềm không cho đổi,
+vì đổi xong sẽ có em thứ ba (người có điểm cao hơn) có lời phàn nàn chính đáng. Đây là cái giá đã biết của
+mọi cách xếp tôn trọng điểm thi, không phải lỗi. Đo trên dữ liệu thử cho thấy phần lớn các trường hợp này sinh
+ra do <strong>điểm thi</strong>, không phải do bốc thăm.</p>
+
+<!-- ============================================================ 13 -->
+<h2 id="ghi-ket-qua"><span class="no">13</span>Ghi kết quả an toàn</h2>
+
+<p>Mọi việc từ bốc thăm tới ghi kết quả được gói trong <strong>một lần ghi duy nhất</strong>: hoặc ghi được
+tất cả, hoặc không ghi gì. Nếu máy trục trặc giữa chừng (mất điện, lỗi ổ đĩa), phần mềm xoá sạch những gì
+vừa làm dở, kể cả bộ số vừa bốc. Lần bấm chạy tiếp theo bắt đầu lại từ trạng thái sạch.</p>
+
+<div class="likeness"><b>Nói nôm na</b>Như chuyển khoản ngân hàng: tiền hoặc đã sang tài khoản kia, hoặc vẫn
+nằm nguyên ở tài khoản này. Không bao giờ có chuyện tiền biến mất ở giữa đường.</div>
+
+<ul>
+  <li>Mỗi lần chạy được ghi vào <strong>nhật ký</strong>: lúc nào, mã bốc thăm nào, chạy những buổi nào. Không
+    lần chạy nào bị mất dấu.</li>
+  <li>Tệp Excel/CSV chỉ được xuất <strong>sau</strong> khi kết quả đã ghi xong. Xuất tệp hỏng thì kết quả vẫn còn
+    nguyên, bấm xuất lại là được.</li>
+</ul>
+
+<!-- ============================================================ 14 -->
+<h2 id="doc-ket-qua"><span class="no">14</span>Đọc bảng kết quả</h2>
+
+<p>Mỗi em một dòng, cho biết em vào câu lạc bộ nào, đó là nguyện vọng thứ mấy của em, và em vào bằng suất chung
+hay suất dành riêng. Ô câu lạc bộ để trống nghĩa là em chưa được xếp.</p>
+
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Học sinh</th><th>Câu lạc bộ</th><th>Nguyện vọng thứ</th><th>Vào bằng</th></tr></thead>
+  <tbody>
+    <tr><td>An</td><td>Âm nhạc</td><td class="num">2</td><td>Suất chung</td></tr>
+    <tr><td>Bình</td><td>Cờ vua</td><td class="num">1</td><td>Suất chung</td></tr>
+    <tr><td>Chi</td><td>Bóng rổ</td><td class="num">3</td><td>Suất chung</td></tr>
+    <tr><td>Dũng</td><td>Bóng rổ</td><td class="num">1</td><td>Suất chung</td></tr>
+    <tr><td>Hà</td><td>Cờ vua</td><td class="num">1</td><td>Suất chung</td></tr>
+    <tr><td>Khoa</td><td>Âm nhạc</td><td class="num">1</td><td>Suất dành riêng</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Màn hình kết quả còn có các mục trả lời những câu nhà trường hay bị hỏi: câu lạc bộ nào đầy và bao nhiêu em
+muốn vào, bao nhiêu em được nguyện vọng 1, suất dành riêng dùng tới đâu, và em nào chưa có chỗ kèm theo những
+gì em đã đăng ký.</p>
+
+<!-- ============================================================ 15 -->
+<h2 id="loi-hua"><span class="no">15</span>Bốn điều phần mềm bảo đảm</h2>
+
+<div class="promises">
+  <div class="promise">
+    <h4>Khai thật là cách tốt nhất</h4>
+    <p>Không em nào được lợi khi cố tình xếp sai thứ tự mình thích. Thử mọi cách khai gian có thể trên
+    <span class="num">1 400</span> lượt: <span class="num">0</span> lượt có lợi. Cách “xét hết nguyện vọng 1 rồi
+    mới tới nguyện vọng 2” thì có <span class="num">258</span> lượt.</p>
+  </div>
+  <div class="promise">
+    <h4>Không ai có lời phàn nàn chính đáng</h4>
+    <p>Không có cặp em và câu lạc bộ nào mà em muốn vào, câu lạc bộ cũng muốn nhận, mà lại bị xếp chỗ khác.
+    Phần mềm tự kiểm tra điều này sau mỗi lần chạy.</p>
+  </div>
+  <div class="promise">
+    <h4>Tốt nhất cho học sinh</h4>
+    <p>Trong mọi cách xếp không ai phàn nàn được, đây là cách mà <strong>mỗi em</strong> nhận được chỗ tốt nhất
+    có thể. Kiểm tra vét cạn trên <span class="num">2 088</span> trường hợp, kể cả khi có suất dành riêng:
+    không tìm thấy trường hợp ngược lại.</p>
+  </div>
+  <div class="promise">
+    <h4>Chạy lại ra đúng kết quả cũ</h4>
+    <p>Cùng dữ liệu, cùng mã bốc thăm thì luôn ra cùng một kết quả, bất kể máy nào hay thứ tự nhập liệu. Phụ
+    huynh hay giám khảo muốn kiểm tra đều làm lại được.</p>
+  </div>
+</div>
+
+<h3>Những điều phần mềm không làm</h3>
+<ul>
+  <li>Không xét theo thứ tự nộp đơn. Nộp sớm hay muộn không ảnh hưởng kết quả.</li>
+  <li>Không cho câu lạc bộ biết em xếp mình là nguyện vọng thứ mấy.</li>
+  <li>Không tạo thêm chỗ. Tổng số chỗ ít hơn số học sinh thì chắc chắn có em không có chỗ, và phần mềm báo trước
+    điều đó.</li>
+  <li>Không tự quyết định chính sách. Có dùng suất dành riêng không, dành cho ai, câu lạc bộ nào thi tuyển: đó là
+    quyết định của nhà trường, phần mềm chỉ thực hiện đúng.</li>
+</ul>
+
+<h3>Tên gọi chuyên môn</h3>
+<p class="muted" style="font-size:15px">Dành cho người muốn tra cứu thêm. Không cần biết những tên này để hiểu
+bài.</p>
+<dl class="gloss">
+  <dt>Các vòng “giữ tạm”</dt>
+  <dd>Thuật toán chấp nhận trì hoãn, học sinh đề xuất. <i>Student-proposing Deferred Acceptance (Gale–Shapley)</i></dd>
+  <dt>Suất dành riêng mềm, xét hai lượt</dt>
+  <dd>Dự trữ mềm với thứ tự xét. <i>Soft reserves, precedence ordering (Kominers &amp; Sönmez 2016)</i></dd>
+  <dt>Một số bốc thăm dùng chung</dt>
+  <dd>Phá hoà bằng một lần bốc duy nhất. <i>Single Tie-Breaking (STB)</i></dd>
+  <dt>Lời phàn nàn chính đáng</dt>
+  <dd>Cặp phá vỡ; kết quả không có cặp nào như vậy gọi là ổn định. <i>Blocking pair, stable matching</i></dd>
+  <dt>Mã bốc thăm</dt>
+  <dd>Hạt giống của máy sinh số ngẫu nhiên. <i>Random seed</i></dd>
+  <dt>Tên của cả hệ thống</dt>
+  <dd>RB-DA. <i>Reserve-Based Deferred Acceptance</i></dd>
+</dl>
+
+<footer>Mọi con số về ví dụ 6 học sinh được lấy bằng cách chạy chính thuật toán của phần mềm trên đúng bộ dữ liệu
+đó. Các con số đo trên dữ liệu lớn lấy từ tài liệu <span class="num">CO_CHE_THUAT_TOAN</span>,
+<span class="num">NGHIEN_CUU_TOI_UU</span> và <span class="num">KE_HOACH_NHIEU_BUOI</span> trong cùng thư mục.</footer>
+
+</div>

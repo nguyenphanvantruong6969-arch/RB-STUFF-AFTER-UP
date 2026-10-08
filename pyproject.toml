@@ -1,0 +1,40 @@
+# Cau hinh cong cu phat trien. Phan mem KHONG duoc dong goi tu tep nay —
+# dong goi van di qua kiosk.spec (PyInstaller).
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# -p no:cacheprovider: khong de .pytest_cache rai vao thu muc du an.
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = [".venv", ".venv_build", "build", "dist"]
+
+[tool.ruff.lint]
+# Chi cac luat bat LOI THAT, khong bat van phong:
+#   E9, F   — cu phap hong, ten chua dinh nghia, import/bien thua (pyflakes)
+#   PLE     — loi logic pylint phat hien duoc tinh
+#   B006/8  — gia tri mac dinh co the thay doi (list/dict) dung chung giua cac lan goi
+#   SIM115  — mo tep ma khong dong trong `with` (trong ma san pham)
+#   B023    — ham long bat bien vong lap (dung sai gia tri khi goi sau)
+select = ["E9", "F", "PLE", "B006", "B008", "SIM115", "B023"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test va kich ban do dac mo tep ngan, doc mot lan; khong dang gia viet lai.
+"tests/**" = ["SIM115", "B023"]
+"du_lieu_test/**" = ["SIM115", "B023"]
+
+[tool.coverage.run]
+# Chi do MA SAN PHAM. Test va kich ban nghien cuu khong tinh vao.
+source = ["."]
+omit = [
+    "tests/*", "du_lieu_test/*", "mau_csv/*", ".claude/*",
+    "tao_logo.py",   # cong cu ve bieu tuong, chay tay mot lan
+    "tao_bao_cao_docx.py",   # dung bao cao .docx tu trang HTML bang Chromium, chay tay
+]
+
+[tool.coverage.report]
+# San duoi: do duoc 88% ngay 27/09 (ma san pham). Bo test tut xuong duoi muc nay la
+# CI do — ma moi them khong kem test se bi bat ngay, khong doi ai de y.
+fail_under = 85
+show_missing = false

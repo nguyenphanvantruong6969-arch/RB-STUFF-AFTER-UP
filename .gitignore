@@ -1,0 +1,102 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+app.db
+# Ban sao luu tu dong truoc MOI lan chay pipeline (api._backup_db) va tep
+# hong bi doi ten khi phuc hoi (recovery.py) — deu la BAN SAO DAY DU cua
+# du lieu hoc sinh, nam ngay canh app.db, tuc thu muc goc khi chay tu ma
+# nguon. Luat `app.db` o tren KHONG bat duoc chung vi khac ten tep.
+*.db.bak-*
+*.db.corrupt-*
+app.db-journal
+# Log loi (chan_doan.py): co duong dan may va doan du lieu gay loi.
+loi_khoi_dong.txt
+loi_ung_dung.txt
+# File ket qua xuat ra — la DU LIEU HOC SINH, khong bao gio duoc vao git.
+# Ten mac dinh cua export_csv la ket_qua_phan_bo.csv, kem thu muc
+# ket_qua_phan_bo_theo_club/. Chan rong de bat ca cac ten khac.
+match_results.csv
+ket_qua*.csv
+ket_qua*_theo_club/
+# Ban nhieu buoi xuat them HAI thu muc nua. Luat `ket_qua*.csv` o tren
+# KHONG chan duoc chung: gitignore khop theo TEN TEP, ma ten tep ben trong
+# la `thu_2.csv` / `clb_bongda.csv` — khong bat dau bang "ket_qua". Da thu
+# bang git check-ignore. Thieu hai dong nay la ho ten hoc sinh that di
+# thang vao git.
+ket_qua*_theo_buoi/
+ket_qua*_danh_sach_cho/
+
+# NGOAI LE: ket_qua_thu_tai.csv la SO DO THU TAI, khong phai du lieu hoc
+# sinh. Ca 18 cot deu la so dem va thoi gian (so hoc sinh, so CLB, giay,
+# MB); cot chu duy nhat chi nhan hai gia tri "chia_deu"/"theo_nhu_cau".
+# Day la du lieu THO dung sau bao cao thu tai — thieu no thi
+# bao_cao_thu_tai.html khong ai dung lai duoc, ma README lai dang tro
+# toi. Luat ket_qua*.csv o tren chan nham no chi vi trung tien to ten.
+!du_lieu_test/thu_tai/ket_qua_thu_tai.csv
+# PHAN HOI KHAO SAT — DU LIEU HOC SINH CO THAT, khac han moi bo du lieu
+# trong du_lieu_test/ (deu la may sinh). Day la cau tra loi cua hoc sinh
+# that, phan lon la tre vi thanh nien. Khong bao gio duoc vao git.
+#
+# Chan theo DUOI BANG TINH chu khong theo ten, vi Google Forms dat ten
+# mac dinh khac nhau tuy ngon ngu: "... (Responses)" hoac "... (Phan hoi)".
+# Chi bang tinh moi bi chan, nen ban thân BO CAU HOI (docs/KHAO_SAT_CAU_HOI.md)
+# van vao git binh thuong — do la cong cu do, khong phai du lieu.
+*(Responses)*.csv
+*(Responses)*.xlsx
+*Responses*.csv
+*Responses*.xlsx
+*hản hồi*.csv
+*hản hồi*.xlsx
+phan_hoi*.csv
+phan_hoi*.xlsx
+khao_sat*.csv
+khao_sat*.xlsx
+KHAO_SAT*.csv
+KHAO_SAT*.xlsx
+#
+# 02/09: du an chuyen sang MICROSOFT FORMS. Cac luat tren viet cho Google
+# Forms va KHONG chan duoc ten Microsoft Forms dat. Da thu bang
+# git check-ignore, ca bon deu LOT:
+#     KHAO SAT Quy trinh & Muc do hai long...(1-53).xlsx   (co dau)
+#     KHAO SAT(1-12).xlsx
+#     Form1(1-53).xlsx
+#     Khao sat CLB.xlsx
+# Luat KHAO_SAT* KHONG khop "KHAO SAT" co dau va co khoang trang.
+#
+# Microsoft Forms dat ten "<ten form>(1-53).xlsx" — chan theo hinh dang do:
+*(1-*).xlsx
+*(1-*).csv
+# Ten form tieng Viet CO DAU:
+*KHẢO SÁT*.xlsx
+*KHẢO SÁT*.csv
+*Khảo sát*.xlsx
+*Khảo sát*.csv
+*khảo sát*.xlsx
+*khảo sát*.csv
+#
+# LUOI CHAN CUOI: chan MOI bang tinh o THU MUC GOC du an. Ten tep Forms
+# xuat ra khong doan truoc duoc, ma thu muc goc la cho de roi tep vao
+# nhat. Bo mau va bo du lieu test deu nam trong thu muc con nen khong bi
+# anh huong. Neu that su can mot bang tinh o goc thi mo khoa rieng bang
+# dong "!ten_tep.xlsx".
+/*.xlsx
+/*.csv
+
+build/
+dist/
+
+# build_windows.bat dung mot moi truong ao RIENG (.venv_build) de khong
+# dung toi .venv dang lam viec. Khong chan thi mot lan build tay lam ca
+# nghin tep thu vien hien ra trong "git status".
+.venv_build/
+
+# pip freeze cua may da build — workflow tu sinh roi kem vao ban giao di,
+# no noi ve MOT lan build cu the chu khong phai ve ma nguon.
+phien_ban_goi.txt
+
+# Bao cao do phu cua pytest-cov
+.coverage
+
+# Anh chup so do/mo phong cua tao_bao_cao_docx.py (san pham dung, khong luu)
+bao_cao_hinh/

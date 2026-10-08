@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="recovery_title">Phục hồi dữ liệu</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="shortcut icon" type="image/x-icon" href="logo.ico">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="recovery-shell">
+  <div class="panel recovery-card">
+    <div class="panel-head">
+      <button type="button" class="lang-toggle-light" id="btnLangToggle" data-i18n="lang_toggle_label">EN</button>
+    </div>
+
+    <h1 class="recovery-heading" id="recoveryHeading" data-i18n="recovery_heading">Không mở được dữ liệu</h1>
+    <p class="recovery-intro" id="recoveryIntro" data-i18n="recovery_intro">Chương trình không khởi động được vì tệp dữ liệu bị lỗi. Dữ liệu có thể vẫn còn. Hãy thử các bước bên dưới trước khi nhờ hỗ trợ.</p>
+
+    <!-- Chỉ hiện khi chương trình KHÔNG TẠO ĐƯỢC TỆP trong thư mục của nó.
+         Khi đó CSDL không hỏng gì cả, và phần sao lưu/khôi phục bên dưới
+         bị ẩn đi vì không nút nào trong đó giúp được. -->
+    <div id="khongGhiDuoc" class="recovery-khong-ghi" hidden>
+      <p><span data-i18n="recovery_kg_thu_muc">Thư mục của chương trình:</span>
+        <code id="khongGhiDuocThuMuc"></code></p>
+      <p data-i18n="recovery_kg_vi_sao">Windows đang chặn chương trình tạo tệp trong thư mục này, nên nó không lưu được dữ liệu.</p>
+      <p class="recovery-kg-cach" data-i18n="recovery_kg_cach_tieu_de">Cách sửa — làm MỘT trong hai cách:</p>
+      <ol>
+        <li data-i18n="recovery_kg_cach_1">Đóng chương trình. Chuyển NGUYÊN thư mục chương trình sang một chỗ đơn giản, ví dụ C:\RBDA (tạo thư mục này ngay trong ổ C:, không đặt trong Documents, Desktop hay OneDrive). Rồi mở lại PhanBoCauLacBo.exe.</li>
+        <li data-i18n="recovery_kg_cach_2">Hoặc giữ nguyên chỗ cũ và cho phép chương trình: Bảo mật Windows → Bảo vệ khỏi vi-rút và mối đe doạ → Bảo vệ khỏi mã độc tống tiền → Quyền truy cập thư mục được kiểm soát → Cho phép ứng dụng → thêm PhanBoCauLacBo.exe. Rồi mở lại chương trình.</li>
+      </ol>
+      <p data-i18n="recovery_kg_khong_mat">Dữ liệu cũ (nếu có) KHÔNG bị mất — không cần bấm khôi phục hay bắt đầu lại.</p>
+      <button type="button" class="btn btn-primary" id="btnKiemLaiThuMuc" data-i18n="btn_kiem_lai_thu_muc">Kiểm tra lại</button>
+    </div>
+
+    <div id="phanKhoiPhuc">
+    <details class="recovery-error-detail">
+      <summary data-i18n="recovery_error_detail_label">Chi tiết kỹ thuật (gửi cho người hỗ trợ nếu cần)</summary>
+      <pre id="initErrorDetail"></pre>
+    </details>
+
+    <p class="recovery-backups-label" data-i18n="recovery_backups_label">Các bản sao lưu tìm thấy trên máy này:</p>
+    <table class="data-table" id="backupsTable">
+      <thead>
+        <tr>
+          <th data-i18n="th_backup_name">Tên tệp</th>
+          <th data-i18n="th_backup_time">Thời điểm sao lưu</th>
+          <th data-i18n="th_backup_size">Dung lượng</th>
+        </tr>
+      </thead>
+      <tbody id="backupsTableBody"></tbody>
+    </table>
+    <p id="noBackupsMsg" hidden></p>
+
+    <div class="recovery-actions">
+      <button type="button" class="btn btn-primary" id="btnRestoreBackup" data-i18n="btn_restore_backup">Khôi phục từ bản sao lưu gần nhất</button>
+      <button type="button" class="btn btn-danger" id="btnStartFresh" data-i18n="btn_start_fresh">Bắt đầu với dữ liệu trống</button>
+    </div>
+    </div>
+
+    <div id="recoveryStatus" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<script src="i18n_loi.js"></script>
+<script src="i18n.js"></script>
+<script src="chung.js"></script>
+<script src="recovery.js"></script>
+</body>
+</html>

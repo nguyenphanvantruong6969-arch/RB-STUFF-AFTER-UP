@@ -1,0 +1,25 @@
+﻿student_id,name,reserve_group,thu_2_pref_1,thu_2_pref_2,thu_4_pref_1,thu_4_pref_2,thu_6_pref_1,thu_6_pref_2
+HS001,Nguyễn Văn An,,clb_tinhoc,clb_bongro,clb_robotics,clb_nauan,clb_tienganh,clb_covua
+HS002,Trần Thị Bình,chinh_sach,clb_vanhoc,clb_tinhoc,clb_mythuat,,clb_tienganh,
+HS003,Lê Minh Cường,,clb_bongro,,clb_nauan,clb_mythuat,clb_lamvuon,
+HS004,Phạm Thu Dung,khoi_10,clb_vanhoc,clb_bongro,clb_mythuat,clb_robotics,clb_covua,
+HS005,Hoàng Gia Em,,clb_tinhoc,,,,clb_lamvuon,clb_covua
+HS006,Vũ Ngọc Giang,,clb_bongro,clb_vanhoc,clb_robotics,,clb_tienganh,clb_lamvuon
+HS007,Đỗ Khánh Hà,chinh_sach,clb_vanhoc,,clb_nauan,,clb_tienganh,clb_covua
+HS008,Bùi Quang Huy,,clb_tinhoc,clb_bongro,clb_robotics,clb_mythuat,clb_covua,
+HS009,Ngô Bảo Khanh,,clb_bongro,,clb_nauan,clb_robotics,clb_lamvuon,
+HS010,Dương Thị Lan,khoi_10,clb_vanhoc,clb_tinhoc,clb_mythuat,,clb_tienganh,
+HS011,Lý Hoàng Minh,,clb_tinhoc,clb_vanhoc,clb_robotics,,clb_covua,clb_lamvuon
+HS012,Hồ Thanh Nga,,clb_bongro,clb_tinhoc,clb_nauan,,clb_lamvuon,
+HS013,Đặng Gia Phúc,chinh_sach,clb_vanhoc,clb_bongro,clb_mythuat,clb_nauan,clb_tienganh,
+HS014,Phan Minh Quân,,clb_bongro,,clb_robotics,clb_nauan,clb_covua,
+HS015,Trịnh Thu Sương,,clb_tinhoc,,clb_mythuat,clb_nauan,clb_lamvuon,clb_tienganh
+HS016,Mai Anh Tuấn,,clb_bongro,clb_vanhoc,clb_nauan,,clb_covua,clb_lamvuon
+HS017,Chu Diệu Uyên,khoi_10,clb_vanhoc,,clb_mythuat,clb_robotics,clb_tienganh,clb_lamvuon
+HS018,Tạ Quốc Việt,,clb_tinhoc,clb_bongro,clb_robotics,,clb_covua,
+HS019,Cao Thị Xuân,,clb_vanhoc,clb_tinhoc,clb_nauan,clb_mythuat,clb_lamvuon,
+HS020,Lâm Hoài Yến,chinh_sach,clb_vanhoc,,clb_mythuat,,clb_tienganh,clb_covua
+HS021,Đinh Bá Long,,,,clb_robotics,clb_nauan,clb_lamvuon,clb_covua
+HS022,Võ Kim Ngân,,clb_bongro,clb_tinhoc,clb_nauan,,clb_covua,
+HS023,Hà Đức Thắng,khoi_10,clb_tinhoc,clb_vanhoc,clb_mythuat,clb_robotics,clb_lamvuon,
+HS024,Nguyễn Thảo Vy,,clb_bongro,clb_vanhoc,clb_nauan,clb_mythuat,clb_tienganh,clb_covua

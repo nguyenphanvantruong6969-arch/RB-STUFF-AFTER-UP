@@ -1,0 +1,103 @@
+{
+  "_ghi_chu": "NGUON DUY NHAT cua bieu mau. Sua o day roi chay tao_mau_forms.py - khong sua tay tep .docx / CAI_DAT_FORMS.md sinh ra. dap_an la SO THU TU lua chon dung, dem tu 0.",
+  "tieu_de": "Đăng ký câu lạc bộ và thi tuyển — mẫu",
+  "diem_moi_cau": 2,
+  "buoi": [
+    {"ma": "thu_2", "ten": "Thứ Hai"},
+    {"ma": "thu_3", "ten": "Thứ Ba"},
+    {"ma": "thu_4", "ten": "Thứ Tư"},
+    {"ma": "thu_5", "ten": "Thứ Năm"},
+    {"ma": "thu_6", "ten": "Thứ Sáu"}
+  ],
+  "cau_lac_bo": [
+    {"club_id": "clb_covua", "name": "CLB Cờ vua", "buoi": "thu_2", "capacity": 14, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Quân nào đi theo hình chữ L?", "lua_chon": ["Xe", "Tượng", "Mã", "Hậu"], "dap_an": 2},
+       {"cau": "Muốn nhập thành thì cần điều kiện nào?", "lua_chon": ["Vua chưa từng di chuyển", "Vua đang bị chiếu", "Có quân đứng giữa Vua và Xe", "Xe đã di chuyển trước đó"], "dap_an": 0},
+       {"cau": "Tốt đi tới hàng cuối cùng của bàn cờ thì sao?", "lua_chon": ["Bị loại khỏi bàn cờ", "Được phong thành quân khác (trừ Vua)", "Phải đứng yên tới hết ván", "Quay về ô xuất phát"], "dap_an": 1},
+       {"cau": "Trường hợp nào ván cờ là HOÀ?", "lua_chon": ["Một bên mất Hậu", "Bên tới lượt không còn nước đi hợp lệ và không bị chiếu", "Vua bị chiếu", "Một bên mất cả hai Xe"], "dap_an": 1},
+       {"cau": "Ký hiệu O-O nghĩa là gì?", "lua_chon": ["Nhập thành cánh Vua", "Nhập thành cánh Hậu", "Chiếu hết", "Cầu hoà"], "dap_an": 0}
+     ]},
+    {"club_id": "clb_vanhoc", "name": "CLB Văn học", "buoi": "thu_2", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Truyện Kiều là tác phẩm của ai?", "lua_chon": ["Nguyễn Du", "Nguyễn Trãi", "Hồ Xuân Hương", "Nguyễn Đình Chiểu"], "dap_an": 0},
+       {"cau": "Câu “Mặt trời xuống biển như hòn lửa” dùng biện pháp tu từ nào?", "lua_chon": ["So sánh", "Ẩn dụ", "Hoán dụ", "Nói quá"], "dap_an": 0},
+       {"cau": "Mỗi cặp câu thơ lục bát gồm những câu nào?", "lua_chon": ["Một câu 6 chữ và một câu 8 chữ", "Hai câu 7 chữ", "Một câu 5 chữ và một câu 7 chữ", "Bốn câu 7 chữ"], "dap_an": 0},
+       {"cau": "Tiểu thuyết Tắt đèn là của ai?", "lua_chon": ["Nam Cao", "Ngô Tất Tố", "Vũ Trọng Phụng", "Nguyễn Công Hoan"], "dap_an": 1},
+       {"cau": "Kể theo ngôi thứ nhất thì người kể xưng là gì?", "lua_chon": ["Tôi", "Anh ấy", "Họ", "Gọi thẳng tên nhân vật"], "dap_an": 0}
+     ]},
+    {"club_id": "clb_nhiepanh", "name": "CLB Nhiếp ảnh", "buoi": "thu_2", "capacity": 14, "reserve_capacity": 0, "reserve_group": "", "de_thi": []},
+
+    {"club_id": "clb_tienganh", "name": "CLB Tiếng Anh", "buoi": "thu_3", "capacity": 14, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "She ___ to school every day.", "lua_chon": ["go", "goes", "going", "gone"], "dap_an": 1},
+       {"cau": "Từ trái nghĩa với “ancient” là gì?", "lua_chon": ["modern", "old", "huge", "quiet"], "dap_an": 0},
+       {"cau": "I have lived here ___ 2020.", "lua_chon": ["since", "for", "from", "at"], "dap_an": 0},
+       {"cau": "If it rains tomorrow, we ___ at home.", "lua_chon": ["will stay", "stayed", "would stay", "staying"], "dap_an": 0},
+       {"cau": "Câu nào đúng ngữ pháp?", "lua_chon": ["He don't like tea.", "He doesn't like tea.", "He not like tea.", "He doesn't likes tea."], "dap_an": 1}
+     ]},
+    {"club_id": "clb_mythuat", "name": "CLB Mỹ thuật", "buoi": "thu_3", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Ba màu cơ bản trong hội hoạ truyền thống là gì?", "lua_chon": ["Đỏ, vàng, lam", "Đỏ, lục, lam", "Cam, tím, lục", "Đen, trắng, xám"], "dap_an": 0},
+       {"cau": "Màu bổ túc của màu đỏ là màu nào?", "lua_chon": ["Vàng", "Lục", "Cam", "Tím"], "dap_an": 1},
+       {"cau": "Luật xa gần giúp bức tranh có điều gì?", "lua_chon": ["Tươi màu hơn", "Nhiều nét hơn", "Cảm giác chiều sâu", "Kích thước nhỏ hơn"], "dap_an": 2},
+       {"cau": "Tranh dân gian Đông Hồ thường in trên loại giấy nào?", "lua_chon": ["Giấy điệp", "Giấy báo", "Giấy bóng kính", "Giấy than"], "dap_an": 0},
+       {"cau": "Pha màu lam với màu vàng thì được màu gì?", "lua_chon": ["Tím", "Cam", "Nâu", "Lục"], "dap_an": 3}
+     ]},
+    {"club_id": "clb_bongda", "name": "CLB Bóng đá", "buoi": "thu_3", "capacity": 18, "reserve_capacity": 0, "reserve_group": "", "de_thi": []},
+
+    {"club_id": "clb_robotics", "name": "CLB Robotics", "buoi": "thu_4", "capacity": 10, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Cảm biến siêu âm trên robot dùng để làm gì?", "lua_chon": ["Đo nhiệt độ", "Đo khoảng cách", "Nhận biết màu", "Đo độ ẩm"], "dap_an": 1},
+       {"cau": "Vòng lặp trong lập trình dùng để làm gì?", "lua_chon": ["Lặp lại một nhóm lệnh", "Dừng chương trình", "Xoá biến", "Nối dây điện"], "dap_an": 0},
+       {"cau": "Động cơ servo khác động cơ DC thường ở điểm nào?", "lua_chon": ["Không cần điện", "Chỉ quay một chiều", "Điều khiển được góc quay chính xác", "Luôn quay nhanh hơn"], "dap_an": 2},
+       {"cau": "Robot tránh vật cản đo được khoảng cách dưới 10 cm thì nên làm gì?", "lua_chon": ["Tăng tốc đi thẳng", "Tắt cảm biến", "Dừng lại hoặc rẽ hướng khác", "Đứng chờ mãi"], "dap_an": 2},
+       {"cau": "Arduino là gì?", "lua_chon": ["Bo mạch vi điều khiển", "Một loại pin", "Phần mềm vẽ", "Một loại cảm biến"], "dap_an": 0}
+     ]},
+    {"club_id": "clb_khoahoc", "name": "CLB Khoa học", "buoi": "thu_4", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Ở áp suất tiêu chuẩn, nước sôi ở bao nhiêu độ C?", "lua_chon": ["90", "100", "50", "0"], "dap_an": 1},
+       {"cau": "Cây xanh tạo chất hữu cơ nhờ ánh sáng qua quá trình nào?", "lua_chon": ["Hô hấp", "Thoát hơi nước", "Quang hợp", "Lên men"], "dap_an": 2},
+       {"cau": "Đơn vị đo lực là gì?", "lua_chon": ["Niutơn (N)", "Jun (J)", "Oát (W)", "Kilôgam (kg)"], "dap_an": 0},
+       {"cau": "Khí nào chiếm tỉ lệ lớn nhất trong không khí?", "lua_chon": ["Oxy", "Cacbonic", "Hiđro", "Nitơ"], "dap_an": 3},
+       {"cau": "Trong thí nghiệm, “biến kiểm soát” là gì?", "lua_chon": ["Yếu tố giữ nguyên để so sánh công bằng", "Yếu tố cố tình thay đổi", "Kết quả đo được", "Giả thuyết ban đầu"], "dap_an": 0}
+     ]},
+    {"club_id": "clb_kynang", "name": "CLB Kỹ năng sống", "buoi": "thu_4", "capacity": 18, "reserve_capacity": 0, "reserve_group": "", "de_thi": []},
+
+    {"club_id": "clb_tinhoc", "name": "CLB Tin học", "buoi": "thu_5", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "1 byte bằng bao nhiêu bit?", "lua_chon": ["2", "8", "10", "16"], "dap_an": 1},
+       {"cau": "Hệ nhị phân dùng những chữ số nào?", "lua_chon": ["0 và 1", "0 đến 9", "1 và 2", "A đến F"], "dap_an": 0},
+       {"cau": "Số nhị phân 101 bằng bao nhiêu trong hệ thập phân?", "lua_chon": ["3", "5", "6", "101"], "dap_an": 1},
+       {"cau": "Thuật toán là gì?", "lua_chon": ["Một loại phần cứng", "Một trang web", "Dãy hữu hạn các bước để giải một bài toán", "Một loại virus"], "dap_an": 2},
+       {"cau": "Mật khẩu nào mạnh nhất?", "lua_chon": ["123456", "password", "ngaysinh", "T0i#Hoc!2026"], "dap_an": 3}
+     ]},
+    {"club_id": "clb_amnhac", "name": "CLB Âm nhạc", "buoi": "thu_5", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Có bao nhiêu tên nốt nhạc cơ bản?", "lua_chon": ["5", "7", "8", "12"], "dap_an": 1},
+       {"cau": "Một nốt tròn dài bằng mấy nốt đen?", "lua_chon": ["1", "2", "4", "8"], "dap_an": 2},
+       {"cau": "Ký hiệu # trong bản nhạc gọi là gì?", "lua_chon": ["Dấu thăng", "Dấu giáng", "Dấu lặng", "Dấu nối"], "dap_an": 0},
+       {"cau": "Nhịp 3/4 có ý nghĩa gì?", "lua_chon": ["Mỗi ô nhịp 3 phách, mỗi phách là một nốt đen", "Mỗi ô nhịp 4 phách", "Mỗi ô nhịp 3 phách, mỗi phách là một nốt trắng", "Mỗi ô nhịp 2 phách"], "dap_an": 0},
+       {"cau": "Bài Tiến quân ca do ai sáng tác?", "lua_chon": ["Trịnh Công Sơn", "Văn Cao", "Phạm Tuyên", "Hoàng Việt"], "dap_an": 1}
+     ]},
+    {"club_id": "clb_tinhnguyen", "name": "CLB Tình nguyện", "buoi": "thu_5", "capacity": 20, "reserve_capacity": 0, "reserve_group": "", "de_thi": []},
+
+    {"club_id": "clb_toan", "name": "CLB Toán tư duy", "buoi": "thu_6", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Số tiếp theo của dãy 2, 4, 8, 16 là gì?", "lua_chon": ["18", "20", "24", "32"], "dap_an": 3},
+       {"cau": "Lớp có 30 học sinh, 40% là nữ. Lớp có bao nhiêu bạn nữ?", "lua_chon": ["10", "12", "14", "18"], "dap_an": 1},
+       {"cau": "Tổng ba góc trong một tam giác bằng bao nhiêu?", "lua_chon": ["90°", "180°", "270°", "360°"], "dap_an": 1},
+       {"cau": "Ba bạn bắt tay nhau, mỗi cặp bắt đúng một lần. Có bao nhiêu cái bắt tay?", "lua_chon": ["2", "3", "6", "9"], "dap_an": 1},
+       {"cau": "Số nguyên tố nhỏ nhất là số nào?", "lua_chon": ["0", "1", "2", "3"], "dap_an": 2}
+     ]},
+    {"club_id": "clb_lichsu", "name": "CLB Lịch sử", "buoi": "thu_6", "capacity": 12, "reserve_capacity": 0, "reserve_group": "",
+     "de_thi": [
+       {"cau": "Chiến thắng Điện Biên Phủ diễn ra năm nào?", "lua_chon": ["1945", "1954", "1968", "1975"], "dap_an": 1},
+       {"cau": "Ngô Quyền đánh thắng quân Nam Hán trên sông nào?", "lua_chon": ["Sông Như Nguyệt", "Sông Hồng", "Sông Bạch Đằng", "Sông Hương"], "dap_an": 2},
+       {"cau": "Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập vào ngày nào?", "lua_chon": ["19/8/1945", "2/9/1945", "7/5/1954", "30/4/1975"], "dap_an": 1},
+       {"cau": "Vua Quang Trung đại phá quân Thanh vào năm nào?", "lua_chon": ["1771", "1789", "1802", "1858"], "dap_an": 1},
+       {"cau": "Bình Ngô đại cáo do ai viết?", "lua_chon": ["Lý Thường Kiệt", "Trần Hưng Đạo", "Nguyễn Trãi", "Lê Lợi"], "dap_an": 2}
+     ]},
+    {"club_id": "clb_bongro", "name": "CLB Bóng rổ", "buoi": "thu_6", "capacity": 18, "reserve_capacity": 0, "reserve_group": "", "de_thi": []}
+  ]
+}

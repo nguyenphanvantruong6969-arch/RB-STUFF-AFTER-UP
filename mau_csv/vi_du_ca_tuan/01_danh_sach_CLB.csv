@@ -1,0 +1,19 @@
+﻿club_id,name,capacity,reserve_capacity,reserve_group,buoi
+clb_robotics,CLB Robotics,15,3,chinh_sach,thu_2
+clb_covua,CLB Cờ vua,18,0,,thu_2
+clb_bongro,CLB Bóng rổ,15,0,,thu_2
+clb_bongda,CLB Bóng đá,15,0,,thu_3
+clb_khieuvu,CLB Khiêu vũ,18,0,,thu_3
+clb_tinhoc,CLB Tin học,15,3,khoi_10,thu_3
+clb_khoahoc,CLB Khoa học,15,3,khoi_10,thu_4
+clb_amnhac,CLB Âm nhạc,15,0,,thu_4
+clb_bcs,CLB Báo chí,18,0,,thu_4
+clb_mythuat,CLB Mỹ thuật,15,0,,thu_5
+clb_nauan,CLB Nấu ăn,18,3,khoi_10,thu_5
+clb_nhiepanh,CLB Nhiếp ảnh,15,3,khoi_10,thu_5
+clb_lamvuon,CLB Làm vườn,15,3,chinh_sach,thu_6
+clb_tinhnguyen,CLB Tình nguyện,18,0,,thu_6
+clb_tranhbien,CLB Tranh biện,15,0,,thu_6
+clb_coking,CLB Cờ tướng,15,0,,thu_7
+clb_thuvien,CLB Thư viện,15,3,khoi_10,thu_7
+clb_dangian,CLB Trò chơi dân gian,18,0,,thu_7

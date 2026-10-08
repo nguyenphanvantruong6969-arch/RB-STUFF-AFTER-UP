@@ -1,0 +1,11 @@
+student_id,name,club_id,rank
+HS001,Nguyễn Văn An,clb_bongro,1
+HS001,Nguyễn Văn An,clb_amnhac,2
+HS001,Nguyễn Văn An,clb_tienganh,3
+HS002,Trần Thị Bình,clb_tienganh,1
+HS003,Lê Minh Cường,clb_robotics,1
+HS003,Lê Minh Cường,clb_mythuat,2
+HS004,Phạm Thu Dung,clb_mythuat,1
+HS004,Phạm Thu Dung,clb_amnhac,2
+HS004,Phạm Thu Dung,clb_bongro,3
+HS005,Hoàng Văn Em,clb_mythuat,1

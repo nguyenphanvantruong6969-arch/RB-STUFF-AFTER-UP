@@ -1,0 +1,232 @@
+name: Build Windows executable (rbda-kiosk)
+
+# CHI CHAY KHI BAM TAY, co chu dinh. Buoc cuoi ghi de ban phat hanh cong
+# khai "ban-moi-nhat" — cai ma nguoi ngoai tai ve. Chay tu dong theo moi
+# lan day nhanh thi mot commit dang lam do lai thanh ban chinh thuc.
+on:
+  workflow_dispatch:
+    inputs:
+      bo_qua_test:
+        description: "Bo qua bo test (chi dung khi can ban build gap)"
+        type: boolean
+        default: false
+
+# Mac dinh CHI DOC. Chi job build — job duy nhat dang ban phat hanh — duoc
+# cap quyen ghi, ngay tai job do ben duoi. Truoc day ca job test cung nhan
+# quyen ghi du no khong dang gi.
+permissions:
+  contents: read
+
+jobs:
+  # -------------------------------------------------------------------
+  # Bo test — chay tren WINDOWS, khong phai Linux.
+  #
+  # Bo test van xanh tren Linux o may phat trien. Chay lai o day de bat
+  # dung loai loi ma Linux khong thay: duong dan dau gach nguoc, tep mo
+  # chua dong nen khong xoa duoc, bang ma mac dinh cua console. Do la
+  # nhung loi chi hien ra o dung noi nha truong chay phan mem.
+  #
+  # Chan build khi do — nhung co duong thoat `bo_qua_test`, de mot test
+  # hoa ra chi chay duoc tren Linux khong lam ca truong khong co ban cai.
+  # -------------------------------------------------------------------
+  test:
+    name: Bo test tren Windows
+    runs-on: windows-latest
+    if: ${{ !inputs.bo_qua_test }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # CO Y khong cai playwright. Nhom test giao dien goi
+      # `pytest.importorskip("playwright")`: thieu goi thi chung TU BO
+      # QUA, con cai goi ma khong tai trinh duyet kem theo thi chung CHET
+      # khi mo trinh duyet — te hon han viec bo qua.
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install "pytest>=8.0,<10" "pillow>=10.0,<13"
+
+      - name: Run test suite
+        run: python -m pytest tests/ -q
+
+  build:
+    runs-on: windows-latest
+    needs: test
+    # `always()` de job nay van duoc xet khi job test bi BO QUA. Dieu kien
+    # that nam o ve sau: test xanh, hoac nguoi chay chu dong bo qua.
+    if: ${{ always() && (needs.test.result == 'success' || inputs.bo_qua_test) }}
+    # Can quyen ghi de dua ban build len muc Releases.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements-build.txt
+
+      # Ban build hong vi mot goi phu thuoc len phien ban moi la chuyen DA
+      # xay ra voi pythonnet. Co danh sach nay thi lan sau dung lai duoc
+      # dung moi truong da cho ra ban chay duoc.
+      - name: Ghi lai phien ban cac goi da dung
+        run: pip freeze > phien_ban_goi.txt
+
+      - name: Build with PyInstaller
+        run: pyinstaller kiosk.spec --noconfirm
+
+      # -----------------------------------------------------------------
+      # SOAT BAN DONG GOI TRUOC KHI PHAT HANH.
+      #
+      # Loi dang so nhat khong phai build that bai — build that bai thi
+      # biet ngay. Loi dang so la build THANH CONG ma ben trong la giao
+      # dien cua ban CU: phan mem chay duoc, trong binh thuong, chi thieu
+      # dung tinh nang vua lam. Buoc nay so tung tep bang ma bam SHA256
+      # voi chinh tep nguon no di ra, nen chuyen do khong lot qua.
+      #
+      # Kem theo: .config PHAI nam canh .exe moi duoc .NET doc, va thu
+      # muc _internal PHAI co that. Ca hai deu tung hong that.
+      # -----------------------------------------------------------------
+      - name: Soat ban dong goi khop ma nguon
+        shell: pwsh
+        run: |
+          $goc = "dist\PhanBoCauLacBo"
+          $noi_bo = "$goc\_internal"
+          $loi = 0
+
+          if (-not (Test-Path "$goc\PhanBoCauLacBo.exe")) {
+            Write-Output "::error::Khong thay PhanBoCauLacBo.exe"
+            exit 1
+          }
+          if (-not (Test-Path $noi_bo)) {
+            Write-Output "::error::Khong thay thu muc _internal"
+            exit 1
+          }
+
+          foreach ($f in @("index.html", "style.css", "i18n_loi.js", "i18n.js", "chung.js",
+                           "recovery.html", "recovery.js", "logo.png", "logo.ico")) {
+            $goi = Join-Path $noi_bo $f
+            if (-not (Test-Path $goi)) {
+              Write-Output "::error::Thieu trong ban dong goi: $f"
+              $loi++
+              continue
+            }
+            $a = (Get-FileHash $f   -Algorithm SHA256).Hash
+            $b = (Get-FileHash $goi -Algorithm SHA256).Hash
+            if ($a -ne $b) {
+              Write-Output "::error::Ban dong goi lech khoi ma nguon: $f"
+              $loi++
+            } else {
+              Write-Output "khop: $f"
+            }
+          }
+
+          # Giao dien chinh nam trong js/ (nhieu tep) — so tung tep nhu tren.
+          foreach ($tep in Get-ChildItem "js" -Filter *.js) {
+            $goi = Join-Path $noi_bo "js\$($tep.Name)"
+            if (-not (Test-Path $goi)) {
+              Write-Output "::error::Thieu trong ban dong goi: js/$($tep.Name)"
+              $loi++
+            } elseif ((Get-FileHash $tep.FullName -Algorithm SHA256).Hash -ne (Get-FileHash $goi -Algorithm SHA256).Hash) {
+              Write-Output "::error::Ban dong goi lech khoi ma nguon: js/$($tep.Name)"
+              $loi++
+            } else {
+              Write-Output "khop: js/$($tep.Name)"
+            }
+          }
+
+          $fonts = Get-ChildItem "$noi_bo\assets\fonts" -Filter *.woff2 -ErrorAction SilentlyContinue
+          if ($fonts.Count -lt 1) {
+            Write-Output "::error::Thieu bo chu trong assets/fonts"
+            $loi++
+          } else {
+            Write-Output "bo chu: $($fonts.Count) tep"
+          }
+
+          if ($loi -gt 0) { exit 1 }
+          Write-Output "Ban dong goi khop ma nguon."
+
+      # Windows canh bao "nha phat hanh khong xac dinh" voi moi ung dung
+      # khong mua chu ky so thuong mai. Nguoi tai ve can huong dan xu ly
+      # NGAY TRONG thu muc vua giai nen — de o cho khac thi khong ai thay.
+      - name: Kem tai lieu, mau CSV va du lieu chay thu vao goi
+        run: |
+          # .config PHAI nam canh .exe (khong phai trong _internal/)
+          # thi .NET Framework moi doc — xem chu thich trong chinh tep do.
+          Copy-Item PhanBoCauLacBo.exe.config dist/PhanBoCauLacBo/
+          Copy-Item HUONG_DAN_CAI_DAT.md dist/PhanBoCauLacBo/
+          # Huong dan dung phan mem — tep NGUOI DUNG can nhat, va la tep duy
+          # nhat viet cho nguoi chua tung mo chuong trinh bao gio.
+          Copy-Item HUONG_DAN_SU_DUNG.md dist/PhanBoCauLacBo/
+          Copy-Item ky_va_tin_cay.ps1    dist/PhanBoCauLacBo/
+          Copy-Item mau_csv              dist/PhanBoCauLacBo/mau_csv -Recurse
+          Copy-Item du_lieu_test         dist/PhanBoCauLacBo/du_lieu_test -Recurse
+          # Truy duoc ban cai tren may nha truong ra tu commit nao. Khong
+          # co dong nay thi cau "may o phong 2 dang chay ban nao" khong
+          # ai tra loi duoc.
+          Copy-Item phien_ban_goi.txt    dist/PhanBoCauLacBo/
+          Set-Content -Encoding utf8 dist/PhanBoCauLacBo/PHIEN_BAN.txt @(
+            "Ban dong goi tu kho ma nguon",
+            "----------------------------",
+            "Nhanh  : ${{ github.ref_name }}",
+            "Commit : ${{ github.sha }}",
+            "Build  : $(Get-Date -Format 'yyyy-MM-dd HH:mm') UTC",
+            "Python : 3.11",
+            "",
+            "Chay PhanBoCauLacBo.exe. Phai giu NGUYEN ca thu muc nay —",
+            "thu muc _internal di kem la bat buoc."
+          )
+        shell: pwsh
+
+      # Tep trong muc Actions chi tai duoc khi DA DANG NHAP GitHub. Tren
+      # may nguoi khac (may giam khao) thi do la mot rao can that. Ban tren
+      # muc Releases thi tai bang mot duong dan thuong, khong can dang nhap.
+      - name: Nen thanh mot tep .zip
+        run: Compress-Archive -Path dist/PhanBoCauLacBo/* -DestinationPath PhanBoCauLacBo-windows.zip -Force
+        shell: pwsh
+
+      - name: Phat hanh len muc Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Mo ta de o tep rieng: here-string cua PowerShell doi dau dong ket
+        # thuc nam o cot 0, ma cot 0 lai ket thuc luon khoi YAML nay.
+        run: |
+          $tag = "ban-moi-nhat"
+          gh release view $tag 2>$null | Out-Null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "RB-DA Kiosk - ban moi nhat" --notes-file .github/mo_ta_ban_phat_hanh.md
+          } else {
+            # BAT BUOC phai co nhanh nay. `gh release create` chi chay khi ban
+            # phat hanh CHUA ton tai, nen sau lan dau tien, sua
+            # mo_ta_ban_phat_hanh.md la sua vao khoang khong: trang tai ve van
+            # hien nguyen mo ta cu. Da dinh that — mo ta con ghi bo du lieu
+            # "120 hoc sinh / 10 CLB" rat lau sau khi goi da doi.
+            gh release edit $tag --notes-file .github/mo_ta_ban_phat_hanh.md
+          }
+          gh release upload $tag PhanBoCauLacBo-windows.zip --clobber
+        shell: pwsh
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PhanBoCauLacBo-windows
+          path: dist/PhanBoCauLacBo/
+
+      # Build hong thi nhat ky cua PyInstaller la thu duy nhat truy duoc
+      # nguyen nhan, ma no nam trong thu muc build/ da bi .gitignore chan
+      # nen khong co cach nao xem lai sau khi may ao bi xoa.
+      - name: Giu lai nhat ky khi build hong
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nhat-ky-build-hong-${{ github.run_number }}
+          path: |
+            build/
+            phien_ban_goi.txt
+          if-no-files-found: ignore
+          retention-days: 14

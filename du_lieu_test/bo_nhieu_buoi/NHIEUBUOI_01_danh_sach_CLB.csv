@@ -1,0 +1,14 @@
+﻿club_id,name,capacity,reserve_capacity,reserve_group,buoi
+clb_covua,CLB Cờ vua,18,0,,thu_2
+clb_vanhoc,CLB Văn học,16,3,khoi_10,thu_2
+clb_nhiepanh,CLB Nhiếp ảnh,14,0,,thu_2
+clb_bongda,CLB Bóng đá,20,5,chinh_sach,thu_3
+clb_mythuat,CLB Mỹ thuật,14,3,khoi_10,thu_3
+clb_tienganh,CLB Tiếng Anh,16,2,chinh_sach,thu_3
+clb_robotics,CLB Robotics,12,0,,thu_4
+clb_khoahoc,CLB Khoa học,14,2,khoi_10,thu_4
+clb_tinhoc,CLB Tin học,16,4,chinh_sach,thu_5
+clb_amnhac,CLB Âm nhạc,15,0,,thu_5
+clb_tinhnguyen,CLB Tình nguyện,22,0,,thu_6
+clb_bongro,CLB Bóng rổ,20,0,,thu_6
+clb_lamvuon,CLB Làm vườn,18,0,,thu_6

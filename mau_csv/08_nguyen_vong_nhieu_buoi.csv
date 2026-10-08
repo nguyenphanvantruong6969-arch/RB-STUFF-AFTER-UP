@@ -1,0 +1,7 @@
+student_id,name,reserve_group,thu_2_pref_1,thu_2_pref_2,thu_4_pref_1,thu_4_pref_2,thu_6_pref_1,thu_6_pref_2
+HS001,Nguyễn Văn An,,clb_nhiepanh,clb_covua,clb_robotics,clb_khoahoc,clb_bongro,
+HS002,Trần Thị Bình,khoi_10,clb_nhiepanh,,,,clb_lamvuon,clb_bongro
+HS003,Lê Minh Cường,,clb_covua,,clb_robotics,clb_khoahoc,,
+HS004,Phạm Thu Dung,chinh_sach,,,clb_khoahoc,clb_robotics,clb_bongro,clb_lamvuon
+HS005,Hoàng Gia Em,,clb_covua,clb_nhiepanh,,,clb_lamvuon,
+HS006,Vũ Ngọc Giang,,,,clb_robotics,,clb_bongro,clb_lamvuon

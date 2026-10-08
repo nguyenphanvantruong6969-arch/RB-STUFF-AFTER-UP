@@ -1,0 +1,18 @@
+-r requirements.txt
+pytest>=8.0,<10
+# Do do phu (CI chay `--cov`, san duoi dat trong pyproject.toml).
+pytest-cov>=5.0,<8
+# Lint: chi bat loi that (xem [tool.ruff.lint] trong pyproject.toml).
+ruff>=0.6,<1
+# Tuỳ chọn: chỉ dùng cho các test giao diện tests/test_giao_dien_*.py (chạy
+# giao diện thật bằng Chromium). Thiếu gói này thì các test đó TỰ BỎ QUA,
+# phần còn lại của bộ test vẫn chạy đủ. Cài xong nhớ `playwright install
+# chromium` để có trình duyệt.
+playwright>=1.40,<2
+# Chi dung cho tests/test_bieu_tuong.py: doc logo.ico de kiem no co du cac
+# co Windows can. Thieu goi nay thi test do TU BO QUA, phan mem chay khong
+# can toi no.
+pillow>=10.0,<13
+# Chi dung cho mau_forms_thi_clb/tao_mau_forms.py de ghi tep Quick Import
+# .docx. Thieu goi nay thi bo qua rieng tep .docx, cac tep khac van sinh.
+python-docx>=1.1,<2

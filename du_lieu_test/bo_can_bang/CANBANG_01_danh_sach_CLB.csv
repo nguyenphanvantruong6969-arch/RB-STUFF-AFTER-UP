@@ -1,0 +1,25 @@
+﻿club_id,name,capacity,reserve_capacity,reserve_group,buoi
+clb_covua,CLB Cờ vua,24,0,,thu_2
+clb_vanhoc,CLB Văn học,22,4,khoi_10,thu_2
+clb_nhiepanh,CLB Nhiếp ảnh,20,0,,thu_2
+clb_bongban,CLB Bóng bàn,26,0,,thu_2
+clb_bongda,CLB Bóng đá,28,6,chinh_sach,thu_3
+clb_mythuat,CLB Mỹ thuật,22,4,khoi_10,thu_3
+clb_tienganh,CLB Tiếng Anh,26,4,chinh_sach,thu_3
+clb_thuvien,CLB Thư viện,24,0,,thu_3
+clb_robotics,CLB Robotics,20,0,,thu_4
+clb_khoahoc,CLB Khoa học,24,4,khoi_10,thu_4
+clb_tranhbien,CLB Tranh biện,22,3,chinh_sach,thu_4
+clb_coVay,CLB Cờ vây,20,0,,thu_4
+clb_tinhoc,CLB Tin học,26,5,chinh_sach,thu_5
+clb_amnhac,CLB Âm nhạc,22,0,,thu_5
+clb_khieuvu,CLB Khiêu vũ,22,0,,thu_5
+clb_thucong,CLB Thủ công,24,0,,thu_5
+clb_tinhnguyen,CLB Tình nguyện,30,0,,thu_6
+clb_bongro,CLB Bóng rổ,26,0,,thu_6
+clb_lamvuon,CLB Làm vườn,24,0,,thu_6
+clb_dienanh,CLB Điện ảnh,26,0,,thu_6
+clb_nauan,CLB Nấu ăn,24,0,,thu_7
+clb_dangian,CLB Trò chơi dân gian,28,0,,thu_7
+clb_caulong,CLB Cầu lông,24,0,,thu_7
+clb_dando,CLB Đan đồ,20,0,,thu_7

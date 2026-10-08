@@ -1,0 +1,6 @@
+club_id,name,capacity,reserve_capacity,reserve_group
+clb_bongro,CLB Bóng rổ,20,0,
+clb_tienganh,CLB Tiếng Anh,25,5,chinh_sach
+clb_robotics,CLB Robotics,15,0,
+clb_amnhac,CLB Âm nhạc,20,0,
+clb_mythuat,CLB Mỹ thuật,18,3,chinh_sach

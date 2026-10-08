@@ -1,0 +1,348 @@
+{
+  "_ghi_chu": "Sinh bởi du_lieu_test/do_toi_uu_on_dinh.py — KHÔNG sửa tay. Mọi bảng trong docs/NGHIEN_CUU_TOI_UU.md/.html đọc từ tệp này.",
+  "giay_chay": 113.11,
+  "seed_moc": 42,
+  "so_seed_quet": 20,
+  "so_the_hien_tn1": 300,
+  "tn1_toi_uu_hoc_sinh": {
+    "co_du_tru": {
+      "nhieu_nhat": 4,
+      "nhom_kho_rural_hospital": 120,
+      "nhom_kho_toi_uu": 120,
+      "nhom_kho_trong_tap": 120,
+      "phan_vi_du": [],
+      "rbda_nam_trong_tap_on_dinh": 1073,
+      "rbda_toi_uu_cho_hoc_sinh": 1073,
+      "rural_hospital_giu_nguyen": 1073,
+      "so_the_hien": 1073,
+      "so_the_hien_nhieu_hon_1_on_dinh": 120,
+      "ti_le_nhieu_hon_1_phan_tram": 11.2,
+      "tong_ma_tran_on_dinh": 1202
+    },
+    "khong_du_tru": {
+      "nhieu_nhat": 4,
+      "nhom_kho_rural_hospital": 120,
+      "nhom_kho_toi_uu": 120,
+      "nhom_kho_trong_tap": 120,
+      "phan_vi_du": [],
+      "rbda_nam_trong_tap_on_dinh": 1015,
+      "rbda_toi_uu_cho_hoc_sinh": 1015,
+      "rural_hospital_giu_nguyen": 1015,
+      "so_the_hien": 1015,
+      "so_the_hien_nhieu_hon_1_on_dinh": 120,
+      "ti_le_nhieu_hon_1_phan_tram": 11.8,
+      "tong_ma_tran_on_dinh": 1144
+    },
+    "vi_du_huong_dan": {
+      "rbda_toi_uu": true,
+      "rbda_trong_tap": true,
+      "so_ma_tran_on_dinh": 1
+    }
+  },
+  "tn24_so_co_che": {
+    "TEST_0*          (120 em / 10 CLB)": {
+      "Boston / nhận ngay": {
+        "cap_pha_vo": 25,
+        "chu_trinh_pareto": 0,
+        "co_suat": 106,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0004,
+        "khong_suat": 14,
+        "nv1": 81,
+        "nv2": 10,
+        "nv3_tro_len": 15,
+        "so_em_khac_rbda": 29,
+        "thu_hang_tb": 1.462,
+        "tong_hoc_sinh": 120
+      },
+      "DA do CLB đề xuất": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 5,
+        "co_suat": 108,
+        "em_trong_chu_trinh": 10,
+        "giay": 0.0016,
+        "khong_suat": 12,
+        "nv1": 64,
+        "nv2": 28,
+        "nv3_tro_len": 16,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 1.611,
+        "tong_hoc_sinh": 120
+      },
+      "RB-DA (phần mềm)": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 5,
+        "co_suat": 108,
+        "em_trong_chu_trinh": 10,
+        "giay": 0.0,
+        "khong_suat": 12,
+        "nv1": 64,
+        "nv2": 28,
+        "nv3_tro_len": 16,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 1.611,
+        "tong_hoc_sinh": 120
+      },
+      "TTC": {
+        "cap_pha_vo": 68,
+        "chu_trinh_pareto": 0,
+        "co_suat": 105,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.007,
+        "khong_suat": 15,
+        "nv1": 77,
+        "nv2": 16,
+        "nv3_tro_len": 12,
+        "so_em_khac_rbda": 28,
+        "thu_hang_tb": 1.419,
+        "tong_hoc_sinh": 120
+      },
+      "Xét theo bốc thăm": {
+        "cap_pha_vo": 84,
+        "chu_trinh_pareto": 0,
+        "co_suat": 107,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0,
+        "khong_suat": 13,
+        "nv1": 72,
+        "nv2": 19,
+        "nv3_tro_len": 16,
+        "so_em_khac_rbda": 49,
+        "thu_hang_tb": 1.57,
+        "tong_hoc_sinh": 120
+      }
+    },
+    "bo_sach          (140 em / 12 CLB)": {
+      "Boston / nhận ngay": {
+        "cap_pha_vo": 50,
+        "chu_trinh_pareto": 0,
+        "co_suat": 138,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0007,
+        "khong_suat": 2,
+        "nv1": 92,
+        "nv2": 14,
+        "nv3_tro_len": 32,
+        "so_em_khac_rbda": 62,
+        "thu_hang_tb": 1.826,
+        "tong_hoc_sinh": 140
+      },
+      "DA do CLB đề xuất": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 16,
+        "co_suat": 140,
+        "em_trong_chu_trinh": 40,
+        "giay": 0.0065,
+        "khong_suat": 0,
+        "nv1": 54,
+        "nv2": 46,
+        "nv3_tro_len": 40,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 2.1,
+        "tong_hoc_sinh": 140
+      },
+      "RB-DA (phần mềm)": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 16,
+        "co_suat": 140,
+        "em_trong_chu_trinh": 40,
+        "giay": 0.0,
+        "khong_suat": 0,
+        "nv1": 54,
+        "nv2": 46,
+        "nv3_tro_len": 40,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 2.1,
+        "tong_hoc_sinh": 140
+      },
+      "TTC": {
+        "cap_pha_vo": 118,
+        "chu_trinh_pareto": 0,
+        "co_suat": 140,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0137,
+        "khong_suat": 0,
+        "nv1": 80,
+        "nv2": 29,
+        "nv3_tro_len": 31,
+        "so_em_khac_rbda": 62,
+        "thu_hang_tb": 1.879,
+        "tong_hoc_sinh": 140
+      },
+      "Xét theo bốc thăm": {
+        "cap_pha_vo": 121,
+        "chu_trinh_pareto": 0,
+        "co_suat": 138,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0001,
+        "khong_suat": 2,
+        "nv1": 81,
+        "nv2": 24,
+        "nv3_tro_len": 33,
+        "so_em_khac_rbda": 75,
+        "thu_hang_tb": 1.928,
+        "tong_hoc_sinh": 140
+      }
+    },
+    "vi_du_huong_dan  (10 em / 4 CLB)": {
+      "Boston / nhận ngay": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 0,
+        "co_suat": 9,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0001,
+        "khong_suat": 1,
+        "nv1": 7,
+        "nv2": 2,
+        "nv3_tro_len": 0,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 1.222,
+        "tong_hoc_sinh": 10
+      },
+      "DA do CLB đề xuất": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 0,
+        "co_suat": 9,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0001,
+        "khong_suat": 1,
+        "nv1": 7,
+        "nv2": 2,
+        "nv3_tro_len": 0,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 1.222,
+        "tong_hoc_sinh": 10
+      },
+      "RB-DA (phần mềm)": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 0,
+        "co_suat": 9,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0,
+        "khong_suat": 1,
+        "nv1": 7,
+        "nv2": 2,
+        "nv3_tro_len": 0,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 1.222,
+        "tong_hoc_sinh": 10
+      },
+      "TTC": {
+        "cap_pha_vo": 0,
+        "chu_trinh_pareto": 0,
+        "co_suat": 9,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0002,
+        "khong_suat": 1,
+        "nv1": 7,
+        "nv2": 2,
+        "nv3_tro_len": 0,
+        "so_em_khac_rbda": 0,
+        "thu_hang_tb": 1.222,
+        "tong_hoc_sinh": 10
+      },
+      "Xét theo bốc thăm": {
+        "cap_pha_vo": 4,
+        "chu_trinh_pareto": 0,
+        "co_suat": 8,
+        "em_trong_chu_trinh": 0,
+        "giay": 0.0,
+        "khong_suat": 2,
+        "nv1": 7,
+        "nv2": 1,
+        "nv3_tro_len": 0,
+        "so_em_khac_rbda": 4,
+        "thu_hang_tb": 1.125,
+        "tong_hoc_sinh": 10
+      }
+    }
+  },
+  "tn2b_dan_on_dinh": {
+    "TEST_0*          (120 em / 10 CLB)": {
+      "em_khac_nhieu_nhat": 0,
+      "so_seed": 20,
+      "so_seed_hai_dau_khac_nhau": 0
+    },
+    "bo_sach          (140 em / 12 CLB)": {
+      "em_khac_nhieu_nhat": 0,
+      "so_seed": 20,
+      "so_seed_hai_dau_khac_nhau": 0
+    },
+    "vi_du_huong_dan  (10 em / 4 CLB)": {
+      "em_khac_nhieu_nhat": 0,
+      "so_seed": 20,
+      "so_seed_hai_dau_khac_nhau": 0
+    }
+  },
+  "tn5_chu_trinh_pareto": {
+    "TEST_0*          (120 em / 10 CLB)": {
+      "moc_seed_42": {
+        "chu_trinh_dai_hon_2": 0,
+        "do_dai": [
+          2
+        ],
+        "em_len_hang": 10,
+        "hang_tb_sau": 1.509,
+        "hang_tb_truoc": 1.611,
+        "pha_vo_sau": 49,
+        "pha_vo_truoc": 0,
+        "so_chu_trinh": 5
+      },
+      "quet_seed": {
+        "chu_trinh_it_nhat": 5,
+        "chu_trinh_nhieu_nhat": 6,
+        "chu_trinh_tb": 5.4,
+        "co_chu_trinh_dai_hon_2": 0,
+        "pha_vo_sau_khi_doi_tb": 48.5,
+        "seed_cho_0_chu_trinh": 0,
+        "so_seed": 20
+      }
+    },
+    "bo_sach          (140 em / 12 CLB)": {
+      "moc_seed_42": {
+        "chu_trinh_dai_hon_2": 7,
+        "do_dai": [
+          2,
+          3,
+          4
+        ],
+        "em_len_hang": 32,
+        "hang_tb_sau": 1.771,
+        "hang_tb_truoc": 2.1,
+        "pha_vo_sau": 92,
+        "pha_vo_truoc": 0,
+        "so_chu_trinh": 16
+      },
+      "quet_seed": {
+        "chu_trinh_it_nhat": 14,
+        "chu_trinh_nhieu_nhat": 16,
+        "chu_trinh_tb": 14.95,
+        "co_chu_trinh_dai_hon_2": 20,
+        "pha_vo_sau_khi_doi_tb": 86.7,
+        "seed_cho_0_chu_trinh": 0,
+        "so_seed": 20
+      }
+    },
+    "vi_du_huong_dan  (10 em / 4 CLB)": {
+      "moc_seed_42": {
+        "chu_trinh_dai_hon_2": 0,
+        "do_dai": [],
+        "em_len_hang": 0,
+        "hang_tb_sau": 1.222,
+        "hang_tb_truoc": 1.222,
+        "pha_vo_sau": 0,
+        "pha_vo_truoc": 0,
+        "so_chu_trinh": 0
+      },
+      "quet_seed": {
+        "chu_trinh_it_nhat": 0,
+        "chu_trinh_nhieu_nhat": 0,
+        "chu_trinh_tb": 0,
+        "co_chu_trinh_dai_hon_2": 0,
+        "pha_vo_sau_khi_doi_tb": 0,
+        "seed_cho_0_chu_trinh": 20,
+        "so_seed": 20
+      }
+    }
+  }
+}

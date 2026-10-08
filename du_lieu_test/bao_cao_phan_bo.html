@@ -1,0 +1,177 @@
+<title>Báo cáo mẫu — Kết quả phân bổ RB-DA</title>
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+
+  :root {
+    --muc: #1C2321; --muc-nhat: #4A5350; --xam: #5B6570;
+    --giay: #F3F4F1; --the: #FFFFFF; --ke: #DBDCD5; --ke-mo: #E9EAE4;
+    --cam: #CC785C; --reu: #3F6B52; --vang: #C98A1F; --gach: #B84A3E;
+    --reu-nhat: #DCE9E0; --gach-nhat: #F3DCD9; --vang-nhat: #F1DFB8;
+    --f-hien: "Be Vietnam Pro", "Segoe UI", sans-serif;
+    --f-than: "IBM Plex Sans", "Segoe UI", sans-serif;
+    --f-so: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --muc: #E8EAE6; --muc-nhat: #B4BAB6; --xam: #929A9E;
+      --giay: #161A19; --the: #1F2422; --ke: #333A37; --ke-mo: #262C2A;
+      --cam: #E39A80; --reu: #7FB393; --vang: #E0AF52; --gach: #E08074;
+      --reu-nhat: #23342A; --gach-nhat: #382422; --vang-nhat: #33291A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --muc: #E8EAE6; --muc-nhat: #B4BAB6; --xam: #929A9E;
+    --giay: #161A19; --the: #1F2422; --ke: #333A37; --ke-mo: #262C2A;
+    --cam: #E39A80; --reu: #7FB393; --vang: #E0AF52; --gach: #E08074;
+    --reu-nhat: #23342A; --gach-nhat: #382422; --vang-nhat: #33291A;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--giay); color: var(--muc);
+    font-family: var(--f-than); font-size: 16px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .khung { max-width: 1000px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  h1 { font-family: var(--f-hien); font-weight: 700; font-size: clamp(30px, 5vw, 44px);
+       line-height: 1.12; letter-spacing: -0.02em; margin: 0 0 14px; text-wrap: balance; }
+  h2 { font-family: var(--f-hien); font-weight: 600; font-size: 24px; letter-spacing: -0.01em;
+       margin: 64px 0 6px; display: flex; align-items: baseline; gap: 14px; text-wrap: balance; }
+  h2 .stt { font-family: var(--f-so); font-size: 13px; color: var(--cam);
+            border: 1px solid var(--cam); border-radius: 4px; padding: 1px 7px; flex: none; }
+  h3 { font-family: var(--f-hien); font-weight: 600; font-size: 17px; margin: 34px 0 8px; }
+  p { margin: 0 0 14px; max-width: 68ch; }
+  .dan { color: var(--xam); font-size: 15px; margin-bottom: 30px; max-width: 68ch; }
+  code { font-family: var(--f-so); font-size: 0.9em; background: var(--ke-mo);
+         padding: 1px 5px; border-radius: 3px; }
+  strong { font-weight: 600; }
+
+  .canh-bao { border: 1px solid var(--gach); background: var(--gach-nhat);
+    border-radius: 8px; padding: 16px 20px; margin: 0 0 34px; }
+  .canh-bao p { margin: 0; font-size: 14.5px; color: var(--muc); }
+  .canh-bao .tieu { font-family: var(--f-so); font-size: 11px; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--gach); display: block; margin-bottom: 6px; }
+
+  .doc-so { display: grid; gap: 14px; margin: 26px 0 8px;
+    grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); }
+  .o-so { background: var(--the); border: 1px solid var(--ke); border-radius: 10px; padding: 16px 18px; }
+  .o-so .con-so { font-family: var(--f-so); font-weight: 500; font-size: 30px;
+    line-height: 1.1; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .o-so .nhan { font-family: var(--f-so); font-size: 10.5px; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--xam); margin-top: 7px; display: block; }
+  .o-so.tot .con-so { color: var(--reu); }
+  .o-so.canh .con-so { color: var(--gach); }
+
+  .bang-cuon { overflow-x: auto; margin: 22px 0; border: 1px solid var(--ke); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--the); }
+  th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--ke-mo); }
+  th { font-family: var(--f-so); font-size: 10.5px; letter-spacing: .08em;
+       text-transform: uppercase; color: var(--xam); font-weight: 500;
+       background: var(--ke-mo); white-space: nowrap; }
+  td.so { font-family: var(--f-so); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  .dam { font-weight: 600; }
+
+  .the-do-thi { background: var(--the); border: 1px solid var(--ke); border-radius: 10px;
+    padding: 22px 20px 14px; margin: 22px 0; overflow-x: auto; }
+  .do-thi { width: 100%; height: auto; min-width: 480px; display: block; }
+  .luoi { stroke: var(--ke); stroke-width: 1; }
+  .nhan-truc { font-family: var(--f-so); font-size: 11px; fill: var(--xam); }
+  .nhan-y { text-anchor: end; }
+  .nhan-x { text-anchor: middle; }
+  .nhan-cot { font-family: var(--f-so); font-size: 12px; font-weight: 500;
+    fill: var(--muc); text-anchor: middle; }
+  .chu-thich { list-style: none; padding: 0; margin: 6px 0 0; display: flex;
+    flex-wrap: wrap; gap: 8px 20px; font-family: var(--f-so); font-size: 12px; color: var(--muc-nhat); }
+  .chu-thich li { display: flex; align-items: center; gap: 7px; }
+  .cham { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+
+  .ket { border-left: 3px solid var(--cam); padding: 2px 0 2px 18px; margin: 20px 0; }
+  .ket p:last-child { margin-bottom: 0; }
+  .doan-cuoi { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--ke);
+    color: var(--xam); font-size: 14px; }
+  .doan-cuoi p { max-width: none; }
+</style>
+
+<div class="khung">
+<h1>Báo cáo mẫu: Kết quả phân bổ câu lạc bộ</h1>
+<p class="dan">Chạy thật thuật toán RB-DA (Reserve-Based Deferred Acceptance) trên bộ dữ liệu mẫu <code>du_lieu_test/bo_sach/</code> — 140 học sinh, 12 câu lạc bộ, seed cố định = 42. Đi đúng đường người dùng thật đi: nạp CSV qua <code>import_csv_auto</code>, chạy qua <code>run_pipeline</code>, đọc kết quả từ bảng <code>match_results</code>.</p>
+<div class="canh-bao"><span class="tieu">Dữ liệu mô phỏng</span><p><code>bo_sach/</code> là bộ dữ liệu do máy sinh (không phải học sinh có thật), thiết kế để nạp vào <strong>không phát sinh cảnh báo nào</strong> — đo được <strong>0 cảnh báo lúc nạp</strong> và <strong>0 cảnh báo sức khoẻ dữ liệu</strong> ở lần chạy này. Đây là báo cáo <strong>mẫu</strong> minh hoạ định dạng đầu ra, không phải kết quả tuyển sinh thật.</p></div>
+<h2><span class="stt">TL</span>Tóm tắt</h2>
+<div class="doc-so">
+<div class="o-so tot"><div class="con-so">140 / 140</div><span class="nhan">học sinh được xếp</span></div>
+<div class="o-so "><div class="con-so">100,0%</div><span class="nhan">tỉ lệ xếp được</span></div>
+<div class="o-so "><div class="con-so">11</div><span class="nhan">số vòng lặp thuật toán</span></div>
+<div class="o-so "><div class="con-so">16</div><span class="nhan">vào bằng suất dự trữ</span></div>
+<div class="o-so "><div class="con-so">54</div><span class="nhan">được đúng nguyện vọng 1</span></div>
+<div class="o-so tot"><div class="con-so">0</div><span class="nhan">chưa được xếp</span></div>
+</div>
+<div class="ket"><p>140 trong tổng số 140 học sinh (100,0%) được xếp vào một câu lạc bộ. 16 trong số đó vào bằng <strong>suất dự trữ</strong> (ưu tiên theo nhóm khai báo, không theo điểm/bốc thăm) — cơ chế dự trữ thật sự có tác dụng trên bộ dữ liệu này, không chỉ tồn tại trên lý thuyết.</p></div>
+<h2><span class="stt">1</span>Được xếp vào nguyện vọng thứ mấy</h2>
+<p>Không phải ai cũng vào nguyện vọng 1 — đây chính là bằng chứng thuật toán <strong>thực sự phải cạnh tranh</strong>, không phải ai muốn gì được nấy.</p>
+<div class="the-do-thi">
+<svg viewBox="0 0 760 260" class="do-thi" role="img">
+<line x1="46" y1="216.0" x2="736" y2="216.0" class="luoi"/>
+<text x="36" y="220.0" class="nhan-truc nhan-y">0</text>
+<line x1="46" y1="167.0" x2="736" y2="167.0" class="luoi"/>
+<text x="36" y="171.0" class="nhan-truc nhan-y">16</text>
+<line x1="46" y1="118.0" x2="736" y2="118.0" class="luoi"/>
+<text x="36" y="122.0" class="nhan-truc nhan-y">31</text>
+<line x1="46" y1="69.0" x2="736" y2="69.0" class="luoi"/>
+<text x="36" y="73.0" class="nhan-truc nhan-y">47</text>
+<line x1="46" y1="20.0" x2="736" y2="20.0" class="luoi"/>
+<text x="36" y="24.0" class="nhan-truc nhan-y">62</text>
+<rect x="71.9" y="45.6" width="63.3" height="170.4" fill="var(--cam)" rx="3"/>
+<text x="103.5" y="37.6" class="nhan-cot">54</text>
+<text x="103.5" y="238" class="nhan-truc nhan-x">1</text>
+<rect x="186.9" y="70.8" width="63.3" height="145.2" fill="var(--reu)" rx="3"/>
+<text x="218.5" y="62.8" class="nhan-cot">46</text>
+<text x="218.5" y="238" class="nhan-truc nhan-x">2</text>
+<rect x="301.9" y="149.7" width="63.3" height="66.3" fill="var(--vang)" rx="3"/>
+<text x="333.5" y="141.7" class="nhan-cot">21</text>
+<text x="333.5" y="238" class="nhan-truc nhan-x">3</text>
+<rect x="416.9" y="181.3" width="63.3" height="34.7" fill="var(--gach)" rx="3"/>
+<text x="448.5" y="173.3" class="nhan-cot">11</text>
+<text x="448.5" y="238" class="nhan-truc nhan-x">4</text>
+<rect x="531.9" y="193.9" width="63.3" height="22.1" fill="var(--cam)" rx="3"/>
+<text x="563.5" y="185.9" class="nhan-cot">7</text>
+<text x="563.5" y="238" class="nhan-truc nhan-x">5</text>
+<rect x="646.9" y="212.8" width="63.3" height="3.2" fill="var(--reu)" rx="3"/>
+<text x="678.5" y="204.8" class="nhan-cot">1</text>
+<text x="678.5" y="238" class="nhan-truc nhan-x">6</text>
+</svg>
+</div>
+<div class="bang-cuon"><table><thead><tr><th>Nguyện vọng</th><th>Số học sinh</th><th>Tỉ lệ trong nhóm được xếp</th></tr></thead><tbody>
+<tr><td>Nguyện vọng 1</td><td class="so dam">54</td><td class="so">38,6%</td></tr>
+<tr><td>Nguyện vọng 2</td><td class="so dam">46</td><td class="so">32,9%</td></tr>
+<tr><td>Nguyện vọng 3</td><td class="so dam">21</td><td class="so">15,0%</td></tr>
+<tr><td>Nguyện vọng 4</td><td class="so dam">11</td><td class="so">7,9%</td></tr>
+<tr><td>Nguyện vọng 5</td><td class="so dam">7</td><td class="so">5,0%</td></tr>
+<tr><td>Nguyện vọng 6</td><td class="so dam">1</td><td class="so">0,7%</td></tr>
+</tbody></table></div>
+<h2><span class="stt">2</span>Diện thường và diện dự trữ</h2>
+<div class="bang-cuon"><table><thead><tr><th>Diện trúng tuyển</th><th>Số học sinh</th><th>Tỉ lệ</th></tr></thead><tbody><tr><td>Thường</td><td class="so dam">124</td><td class="so">88,6%</td></tr><tr><td>Dự trữ</td><td class="so dam">16</td><td class="so">11,4%</td></tr></tbody></table></div>
+<h2><span class="stt">3</span>Tình hình từng câu lạc bộ</h2>
+<p>Chỗ đã lấp so với chỉ tiêu, tách riêng phần lấp bằng suất dự trữ.</p>
+<div class="bang-cuon"><table><thead><tr><th>Câu lạc bộ</th><th>Chỉ tiêu</th><th>Đã lấp</th><th>Trong đó dự trữ</th><th>Lấp đầy</th></tr></thead><tbody>
+<tr><td>CLB Âm nhạc</td><td class="so">14</td><td class="so dam">14</td><td class="so">—</td><td class="so">100%</td></tr>
+<tr><td>CLB Bóng đá</td><td class="so">22</td><td class="so dam">22</td><td class="so">5</td><td class="so">100%</td></tr>
+<tr><td>CLB Bóng rổ</td><td class="so">16</td><td class="so dam">16</td><td class="so">—</td><td class="so">100%</td></tr>
+<tr><td>CLB Cờ vua</td><td class="so">4</td><td class="so dam">4</td><td class="so">—</td><td class="so">100%</td></tr>
+<tr><td>CLB Khoa học</td><td class="so">10</td><td class="so dam">5</td><td class="so">—</td><td class="so">50%</td></tr>
+<tr><td>CLB Mỹ thuật</td><td class="so">14</td><td class="so dam">14</td><td class="so">4</td><td class="so">100%</td></tr>
+<tr><td>CLB Nhiếp ảnh</td><td class="so">10</td><td class="so dam">10</td><td class="so">—</td><td class="so">100%</td></tr>
+<tr><td>CLB Robotics</td><td class="so">10</td><td class="so dam">8</td><td class="so">—</td><td class="so">80%</td></tr>
+<tr><td>CLB Tiếng Anh</td><td class="so">18</td><td class="so dam">18</td><td class="so">3</td><td class="so">100%</td></tr>
+<tr><td>CLB Tình nguyện</td><td class="so">10</td><td class="so dam">7</td><td class="so">—</td><td class="so">70%</td></tr>
+<tr><td>CLB Tin học</td><td class="so">14</td><td class="so dam">14</td><td class="so">4</td><td class="so">100%</td></tr>
+<tr><td>CLB Văn học</td><td class="so">8</td><td class="so dam">8</td><td class="so">—</td><td class="so">100%</td></tr>
+</tbody></table></div>
+<h2><span class="stt">PP</span>Cách tạo báo cáo này</h2>
+<p>Sinh bằng <code>du_lieu_test/bao_cao_phan_bo.py</code>: dựng một CSDL tạm, nạp ba tệp CSV trong <code>bo_sach/</code> qua đúng API nạp liệu của ứng dụng (<code>PipelineAPI.import_csv_auto</code>), chạy <code>PipelineAPI.run_pipeline(seed=42)</code>, rồi đọc thẳng bảng <code>match_results</code>/<code>clubs</code> để tính mọi con số ở trên — không có con số nào gõ tay. CSDL tạm bị xoá ngay sau khi chạy xong, không đụng tới <code>app.db</code> thật.</p>
+<p>Tái tạo: <code>./.venv/bin/python du_lieu_test/bao_cao_phan_bo.py</code>. Cùng seed và cùng bộ dữ liệu luôn cho ra đúng các con số này — xem <code>tests/test_bo_sach.py</code> để biết những gì được canh cố định.</p>
+<div class="doan-cuoi"><p>Đây là báo cáo <strong>mẫu</strong> để minh hoạ định dạng đầu ra của hệ thống. Dữ liệu là mô phỏng do máy sinh (seed cố định), không phải học sinh có thật; báo cáo cho một đợt tuyển sinh thật sẽ dùng đúng script này trên <code>app.db</code> thật thay vì bộ mẫu.</p></div>
+</div>

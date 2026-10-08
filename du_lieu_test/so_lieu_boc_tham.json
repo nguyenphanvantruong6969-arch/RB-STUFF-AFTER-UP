@@ -1,0 +1,724 @@
+{
+  "_ban_rut_gon": false,
+  "_ghi_chu": "Sinh bởi du_lieu_test/do_boc_tham.py — KHÔNG sửa tay.",
+  "giay_chay": 22.4,
+  "hat_sinh": 20250911,
+  "so_seed_moi_o": 30,
+  "so_seed_tn7a": 200,
+  "tn7a_bo_mau": {
+    "hieu": {
+      "A1_vs_A2": {
+        "ci95_cao": 0.465,
+        "ci95_thap": 0.02,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 200,
+        "so_seed_a_thang": 63,
+        "so_seed_b_thang": 90,
+        "so_seed_hoa": 47,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 0.245
+      },
+      "A1_vs_A3": {
+        "ci95_cao": 0.9,
+        "ci95_thap": 0.73,
+        "ket_luan": "A3 có bù tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A3 có bù); âm = A1 một lần cả tuần tốt hơn, dương = A3 có bù tốt hơn",
+        "so_seed": 200,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 141,
+        "so_seed_hoa": 59,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A3 có bù",
+        "trung_binh_hieu": 0.815
+      }
+    },
+    "so_em_co_khai": 160,
+    "so_seed": 200,
+    "so_seed_kiem_on_dinh": 20,
+    "theo_che_do": {
+      "A1 một lần cả tuần": {
+        "clb_tb": 1.3196,
+        "do_lech_tb": 0.9425,
+        "hang_tb": 1.3371,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_max": 39,
+        "trang_tay_min": 33,
+        "trang_tay_tb": 36.5
+      },
+      "A2 bốc lại mỗi buổi": {
+        "clb_tb": 1.319,
+        "do_lech_tb": 0.9394,
+        "hang_tb": 1.337,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_max": 39,
+        "trang_tay_min": 34,
+        "trang_tay_tb": 36.255
+      },
+      "A3 có bù": {
+        "clb_tb": 1.3156,
+        "do_lech_tb": 0.9278,
+        "hang_tb": 1.3393,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_max": 38,
+        "trang_tay_min": 33,
+        "trang_tay_tb": 35.685
+      }
+    },
+    "tong_suat_tb": {
+      "A1 một lần cả tuần": 211.13,
+      "A2 bốc lại mỗi buổi": 211.03,
+      "A3 có bù": 210.495
+    }
+  },
+  "tn7b_thuan_boc_tham": {
+    "choi_0.5_khai_3": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 2.9997,
+        "A2 bốc lại mỗi buổi": 2.9993,
+        "A3 có bù": 2.9997
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 0.0,
+        "ci95_thap": 0.0,
+        "ket_luan": "không phân biệt được",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 0,
+        "so_seed_hoa": 30,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 0
+      },
+      "so_buoi_khai": 3,
+      "ti_le_choi": 0.5,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 0,
+        "A2 bốc lại mỗi buổi": 0,
+        "A3 có bù": 0
+      }
+    },
+    "choi_0.5_khai_5": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 5,
+        "A2 bốc lại mỗi buổi": 5,
+        "A3 có bù": 5
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 0.0,
+        "ci95_thap": 0.0,
+        "ket_luan": "không phân biệt được",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 0,
+        "so_seed_hoa": 30,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 0
+      },
+      "so_buoi_khai": 5,
+      "ti_le_choi": 0.5,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 0,
+        "A2 bốc lại mỗi buổi": 0,
+        "A3 có bù": 0
+      }
+    },
+    "choi_1.0_khai_3": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 2.5072,
+        "A2 bốc lại mỗi buổi": 2.5118,
+        "A3 có bù": 2.5043
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 5.5333,
+        "ci95_thap": 3.8333,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 29,
+        "so_seed_hoa": 1,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 4.6667
+      },
+      "so_buoi_khai": 3,
+      "ti_le_choi": 1.0,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 5.3667,
+        "A2 bốc lại mỗi buổi": 0.7,
+        "A3 có bù": 0
+      }
+    },
+    "choi_1.0_khai_5": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 4.1915,
+        "A2 bốc lại mỗi buổi": 4.187,
+        "A3 có bù": 4.1895
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 1.6333,
+        "ci95_thap": 0.8,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 22,
+        "so_seed_hoa": 8,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 1.2
+      },
+      "so_buoi_khai": 5,
+      "ti_le_choi": 1.0,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 1.2,
+        "A2 bốc lại mỗi buổi": 0,
+        "A3 có bù": 0
+      }
+    },
+    "choi_1.5_khai_3": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 1.9797,
+        "A2 bốc lại mỗi buổi": 1.9822,
+        "A3 có bù": 1.9798
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 22.2333,
+        "ci95_thap": 19.5,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 30,
+        "so_seed_hoa": 0,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 20.8333
+      },
+      "so_buoi_khai": 3,
+      "ti_le_choi": 1.5,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 27.7667,
+        "A2 bốc lại mỗi buổi": 6.9333,
+        "A3 có bù": 0
+      }
+    },
+    "choi_1.5_khai_5": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 3.2943,
+        "A2 bốc lại mỗi buổi": 3.2973,
+        "A3 có bù": 3.2957
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 14.2667,
+        "ci95_thap": 12.4,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 30,
+        "so_seed_hoa": 0,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 13.3667
+      },
+      "so_buoi_khai": 5,
+      "ti_le_choi": 1.5,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 14.1667,
+        "A2 bốc lại mỗi buổi": 0.8,
+        "A3 có bù": 0
+      }
+    },
+    "choi_2.0_khai_3": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 1.5003,
+        "A2 bốc lại mỗi buổi": 1.5003,
+        "A3 có bù": 1.5003
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 44.2333,
+        "ci95_thap": 40.5,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 30,
+        "so_seed_hoa": 0,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 42.3667
+      },
+      "so_buoi_khai": 3,
+      "ti_le_choi": 2.0,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 66.9333,
+        "A2 bốc lại mỗi buổi": 24.5667,
+        "A3 có bù": 1.1667
+      }
+    },
+    "choi_2.0_khai_5": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 2.5,
+        "A2 bốc lại mỗi buổi": 2.5,
+        "A3 có bù": 2.5
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 51.4,
+        "ci95_thap": 46.5667,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 30,
+        "so_seed_hoa": 0,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 49
+      },
+      "so_buoi_khai": 5,
+      "ti_le_choi": 2.0,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 54.7333,
+        "A2 bốc lại mỗi buổi": 5.7333,
+        "A3 có bù": 0
+      }
+    },
+    "choi_4.0_khai_3": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 0.75,
+        "A2 bốc lại mỗi buổi": 0.75,
+        "A3 có bù": 0.75
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 48.7333,
+        "ci95_thap": 44.6667,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 30,
+        "so_seed_hoa": 0,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 46.7
+      },
+      "so_buoi_khai": 3,
+      "ti_le_choi": 4.0,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 132.2,
+        "A2 bốc lại mỗi buổi": 85.5,
+        "A3 có bù": 50.0333
+      }
+    },
+    "choi_4.0_khai_5": {
+      "clb_tb": {
+        "A1 một lần cả tuần": 1.25,
+        "A2 bốc lại mỗi buổi": 1.25,
+        "A3 có bù": 1.25
+      },
+      "hieu_A1_vs_A2": {
+        "ci95_cao": 81.2,
+        "ci95_thap": 77.0333,
+        "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+        "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+        "so_seed": 30,
+        "so_seed_a_thang": 0,
+        "so_seed_b_thang": 30,
+        "so_seed_hoa": 0,
+        "ten_a": "A1 một lần cả tuần",
+        "ten_b": "A2 bốc lại mỗi buổi",
+        "trung_binh_hieu": 79.0333
+      },
+      "so_buoi_khai": 5,
+      "ti_le_choi": 4.0,
+      "tong_cap_pha_vo": 0,
+      "trang_tay_tb": {
+        "A1 một lần cả tuần": 126.7,
+        "A2 bốc lại mỗi buổi": 47.6667,
+        "A3 có bù": 0
+      }
+    }
+  },
+  "tn7c_co_che": {
+    "theo_do_min_cua_diem": {
+      "1 mức": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 13.2667,
+          "ci95_thap": 10.6,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 0,
+          "so_seed_b_thang": 30,
+          "so_seed_hoa": 0,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 11.9333
+        },
+        "loi_the_A2": 11.9333,
+        "loi_the_A2_ti_le": 91.09,
+        "so_muc_diem": 1,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 13.1,
+          "A2 bốc lại mỗi buổi": 1.1667,
+          "A3 có bù": 0
+        }
+      },
+      "11 mức": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 0.4,
+          "ci95_thap": -0.0333,
+          "ket_luan": "không phân biệt được",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 2,
+          "so_seed_b_thang": 6,
+          "so_seed_hoa": 22,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 0.1667
+        },
+        "loi_the_A2": 0.1667,
+        "loi_the_A2_ti_le": 23.81,
+        "so_muc_diem": 11,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 0.7,
+          "A2 bốc lại mỗi buổi": 0.5333,
+          "A3 có bù": 0.4
+        }
+      },
+      "2 mức": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 1.6333,
+          "ci95_thap": 0.6333,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 2,
+          "so_seed_b_thang": 20,
+          "so_seed_hoa": 8,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 1.1
+        },
+        "loi_the_A2": 1.1,
+        "loi_the_A2_ti_le": 55.93,
+        "so_muc_diem": 2,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 1.9667,
+          "A2 bốc lại mỗi buổi": 0.8667,
+          "A3 có bù": 0.2
+        }
+      },
+      "4 mức": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 0.6333,
+          "ci95_thap": 0.1,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 3,
+          "so_seed_b_thang": 12,
+          "so_seed_hoa": 15,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 0.3667
+        },
+        "loi_the_A2": 0.3667,
+        "loi_the_A2_ti_le": 29.73,
+        "so_muc_diem": 4,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 1.2333,
+          "A2 bốc lại mỗi buổi": 0.8667,
+          "A3 có bù": 0.3333
+        }
+      },
+      "61 mức": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 0.1333,
+          "ci95_thap": -0.1333,
+          "ket_luan": "không phân biệt được",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 2,
+          "so_seed_b_thang": 2,
+          "so_seed_hoa": 26,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 0
+        },
+        "loi_the_A2": 0.0,
+        "loi_the_A2_ti_le": 0.0,
+        "so_muc_diem": 61,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 1.0333,
+          "A2 bốc lại mỗi buổi": 1.0333,
+          "A3 có bù": 1
+        }
+      }
+    },
+    "theo_ti_le_tier1": {
+      "tier1_0.00": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 13.9333,
+          "ci95_thap": 11.5,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 0,
+          "so_seed_b_thang": 30,
+          "so_seed_hoa": 0,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 12.7333
+        },
+        "loi_the_A2": 12.7333,
+        "loi_the_A2_ti_le": 92.49,
+        "ti_le_tier1": 0.0,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 13.7667,
+          "A2 bốc lại mỗi buổi": 1.0333,
+          "A3 có bù": 0
+        }
+      },
+      "tier1_0.10": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 12.9667,
+          "ci95_thap": 10.5,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 0,
+          "so_seed_b_thang": 30,
+          "so_seed_hoa": 0,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 11.7333
+        },
+        "loi_the_A2": 11.7333,
+        "loi_the_A2_ti_le": 90.96,
+        "ti_le_tier1": 0.1,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 12.9,
+          "A2 bốc lại mỗi buổi": 1.1667,
+          "A3 có bù": 0
+        }
+      },
+      "tier1_0.25": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 11.0333,
+          "ci95_thap": 8.3667,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 0,
+          "so_seed_b_thang": 30,
+          "so_seed_hoa": 0,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 9.7333
+        },
+        "loi_the_A2": 9.7333,
+        "loi_the_A2_ti_le": 75.06,
+        "ti_le_tier1": 0.25,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 12.9667,
+          "A2 bốc lại mỗi buổi": 3.2333,
+          "A3 có bù": 0
+        }
+      },
+      "tier1_0.50": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 6.7,
+          "ci95_thap": 4.2333,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 1,
+          "so_seed_b_thang": 28,
+          "so_seed_hoa": 1,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 5.4667
+        },
+        "loi_the_A2": 5.4667,
+        "loi_the_A2_ti_le": 40.2,
+        "ti_le_tier1": 0.5,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 13.6,
+          "A2 bốc lại mỗi buổi": 8.1333,
+          "A3 có bù": 1.3667
+        }
+      },
+      "tier1_0.75": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 3.1,
+          "ci95_thap": 0.9667,
+          "ket_luan": "A2 bốc lại mỗi buổi tốt hơn",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 3,
+          "so_seed_b_thang": 20,
+          "so_seed_hoa": 7,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 1.9667
+        },
+        "loi_the_A2": 1.9667,
+        "loi_the_A2_ti_le": 19.03,
+        "ti_le_tier1": 0.75,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 10.3333,
+          "A2 bốc lại mỗi buổi": 8.3667,
+          "A3 có bù": 6.1333
+        }
+      },
+      "tier1_0.90": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 0.7333,
+          "ci95_thap": -0.3333,
+          "ket_luan": "không phân biệt được",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 12,
+          "so_seed_b_thang": 13,
+          "so_seed_hoa": 5,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 0.2
+        },
+        "loi_the_A2": 0.2,
+        "loi_the_A2_ti_le": 3.59,
+        "ti_le_tier1": 0.9,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 5.5667,
+          "A2 bốc lại mỗi buổi": 5.3667,
+          "A3 có bù": 3.9667
+        }
+      },
+      "tier1_1.00": {
+        "hieu_A1_vs_A2": {
+          "ci95_cao": 0.4333,
+          "ci95_thap": -0.1,
+          "ket_luan": "không phân biệt được",
+          "nhan_chieu": "hiệu = (A1 một lần cả tuần) − (A2 bốc lại mỗi buổi); âm = A1 một lần cả tuần tốt hơn, dương = A2 bốc lại mỗi buổi tốt hơn",
+          "so_seed": 30,
+          "so_seed_a_thang": 6,
+          "so_seed_b_thang": 11,
+          "so_seed_hoa": 13,
+          "ten_a": "A1 một lần cả tuần",
+          "ten_b": "A2 bốc lại mỗi buổi",
+          "trung_binh_hieu": 0.1667
+        },
+        "loi_the_A2": 0.1667,
+        "loi_the_A2_ti_le": 19.23,
+        "ti_le_tier1": 1.0,
+        "tong_cap_pha_vo": 0,
+        "trang_tay_tb": {
+          "A1 một lần cả tuần": 0.8667,
+          "A2 bốc lại mỗi buổi": 0.7,
+          "A3 có bù": 0.0333
+        }
+      }
+    }
+  },
+  "tn7d_khai_gian": {
+    "A1 một lần cả tuần": {
+      "so_em_loi_tong_diem": 0,
+      "so_em_troi_hoan_toan": 0,
+      "so_the_hien": 12,
+      "ti_le_troi_phan_tram": 0.0,
+      "tong_em_thu": 300,
+      "vi_du": null
+    },
+    "A2 bốc lại mỗi buổi": {
+      "so_em_loi_tong_diem": 0,
+      "so_em_troi_hoan_toan": 0,
+      "so_the_hien": 12,
+      "ti_le_troi_phan_tram": 0.0,
+      "tong_em_thu": 300,
+      "vi_du": null
+    },
+    "A3 có bù": {
+      "so_em_loi_tong_diem": 113,
+      "so_em_troi_hoan_toan": 0,
+      "so_the_hien": 12,
+      "ti_le_troi_phan_tram": 0.0,
+      "tong_em_thu": 300,
+      "vi_du": {
+        "diem_khi_khai_gian": {
+          "buoi_1": 0,
+          "buoi_2": 0,
+          "buoi_3": 3,
+          "buoi_4": 1
+        },
+        "diem_khi_khai_that": {
+          "buoi_1": 0,
+          "buoi_2": 1,
+          "buoi_3": 2,
+          "buoi_4": 0
+        },
+        "khai_gian": {
+          "buoi_1": [
+            "buoi_1_clb2",
+            "buoi_1_clb1"
+          ],
+          "buoi_3": [
+            "buoi_3_clb1",
+            "buoi_3_clb2",
+            "buoi_3_clb3"
+          ],
+          "buoi_4": [
+            "buoi_4_clb2"
+          ]
+        },
+        "nguyen_vong_that": {
+          "buoi_1": [
+            "buoi_1_clb2",
+            "buoi_1_clb1"
+          ],
+          "buoi_2": [
+            "buoi_2_clb3"
+          ],
+          "buoi_3": [
+            "buoi_3_clb1",
+            "buoi_3_clb2",
+            "buoi_3_clb3"
+          ],
+          "buoi_4": [
+            "buoi_4_clb2"
+          ]
+        },
+        "student_id": "E0001",
+        "tong_khi_khai_gian": 4,
+        "tong_khi_khai_that": 3
+      }
+    }
+  }
+}

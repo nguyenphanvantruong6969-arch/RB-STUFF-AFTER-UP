@@ -1,0 +1,937 @@
+<title>Mở rộng RB-DA sang nhiều buổi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Bảng màu và bộ chữ lấy nguyên từ style.css của phần mềm và từ ba trang tài
+   liệu chị em (CO_CHE_THUAT_TOAN, GIAI_DAP_BOC_THAM, NGHIEN_CUU_TOI_UU), để
+   trang này là một thể với ứng dụng chứ không phải màu tự nghĩ ra.
+   Hai màu dữ liệu --c-ok / --c-no đã qua bộ kiểm tách mù màu ở cả hai chế độ. */
+:root {
+  --ink:#1C2321; --ink-soft:#3A423F; --slate:#5B6570;
+  --paper:#F3F4F1; --raised:#FFFFFF; --hairline:#DBDCD5;
+  --gold:#C98A1F; --gold-soft:#F1DFB8;
+  --moss:#3F6B52; --moss-soft:#DCE9E0;
+  --rust:#B84A3E; --rust-soft:#F3DCD9;
+  --band:#E7E8E2;
+  --c-ok:#2A78D6; --c-ok-soft:#DCE9F8;
+  --c-no:#EB6834; --c-no-soft:#FBE2D6;
+  --shadow:0 1px 2px rgba(28,35,33,.06), 0 8px 24px -16px rgba(28,35,33,.28);
+  --f-display:"Be Vietnam Pro","Inter",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink:#E9EAE4; --ink-soft:#C3C7C0; --slate:#949C96;
+    --paper:#141816; --raised:#1D2320; --hairline:#333B37;
+    --gold:#E0A93F; --gold-soft:#3A2F16;
+    --moss:#6FB58F; --moss-soft:#1B2B22;
+    --rust:#E08076; --rust-soft:#3A211E;
+    --band:#252C28;
+    --c-ok:#3987E5; --c-ok-soft:#16243A;
+    --c-no:#D95926; --c-no-soft:#3A2115;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"] {
+  --ink:#E9EAE4; --ink-soft:#C3C7C0; --slate:#949C96;
+  --paper:#141816; --raised:#1D2320; --hairline:#333B37;
+  --gold:#E0A93F; --gold-soft:#3A2F16;
+  --moss:#6FB58F; --moss-soft:#1B2B22;
+  --rust:#E08076; --rust-soft:#3A211E;
+  --band:#252C28;
+  --c-ok:#3987E5; --c-ok-soft:#16243A;
+  --c-no:#D95926; --c-no-soft:#3A2115;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:16.5px; line-height:1.68;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:1140px; margin:0 auto; padding:0 24px 96px; }
+
+header { padding:64px 0 40px; border-bottom:1px solid var(--hairline); }
+.eyebrow {
+  font-family:var(--f-mono); font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--slate); margin:0 0 18px;
+}
+h1 {
+  font-family:var(--f-display); font-weight:700; font-size:clamp(30px,4.6vw,50px);
+  line-height:1.1; letter-spacing:-.022em; margin:0 0 20px; text-wrap:balance;
+  max-width:20ch;
+}
+.lede { font-size:19px; line-height:1.6; color:var(--ink-soft); max-width:64ch; margin:0; }
+.meta {
+  display:flex; flex-wrap:wrap; gap:8px 28px; margin-top:28px;
+  font-family:var(--f-mono); font-size:12.5px; color:var(--slate);
+}
+.meta b { color:var(--ink-soft); font-weight:500; }
+
+.cols { display:grid; grid-template-columns:1fr; gap:0; }
+@media (min-width:960px) { .cols { grid-template-columns:214px 1fr; gap:56px; } }
+nav.toc { display:none; }
+@media (min-width:960px) {
+  nav.toc { display:block; position:sticky; top:32px; align-self:start; padding-top:56px; }
+}
+.toc h2 {
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--slate); margin:0 0 14px; font-weight:500;
+}
+.toc ol { list-style:none; margin:0; padding:0; }
+.toc li { margin-bottom:2px; }
+.toc a {
+  display:flex; gap:10px; padding:7px 10px; border-radius:6px;
+  color:var(--ink-soft); text-decoration:none; font-size:14px; line-height:1.35;
+  border-left:2px solid transparent;
+}
+.toc a .tn { font-family:var(--f-mono); font-size:11.5px; color:var(--slate); padding-top:2px; }
+.toc a:hover, .toc a:focus-visible {
+  color:var(--ink); background:var(--raised); border-left-color:var(--gold); outline:none;
+}
+
+main { padding-top:56px; min-width:0; }
+section { margin-bottom:76px; scroll-margin-top:24px; }
+h2.q {
+  font-family:var(--f-display); font-weight:600; font-size:clamp(23px,2.9vw,31px);
+  line-height:1.24; letter-spacing:-.015em; margin:0 0 22px; text-wrap:balance;
+}
+h2.q .num {
+  display:block; font-family:var(--f-mono); font-size:12px; font-weight:400;
+  letter-spacing:.14em; color:var(--gold); margin-bottom:9px;
+}
+h3 {
+  font-family:var(--f-display); font-weight:600; font-size:18px;
+  margin:40px 0 14px; letter-spacing:-.008em;
+}
+p { margin:0 0 16px; max-width:66ch; }
+strong { font-weight:600; }
+ol.steps, ul.steps { max-width:66ch; padding-left:22px; margin:0 0 20px; }
+ol.steps li, ul.steps li { margin-bottom:9px; }
+
+.claim {
+  background:var(--raised); border:1px solid var(--hairline);
+  border-left:3px solid var(--c-ok); border-radius:0 10px 10px 0;
+  padding:22px 26px; margin:26px 0; box-shadow:var(--shadow); max-width:70ch;
+}
+.claim .big {
+  font-family:var(--f-display); font-weight:700; font-size:clamp(19px,2.3vw,24px);
+  line-height:1.3; letter-spacing:-.015em; margin:0 0 10px; text-wrap:balance;
+}
+.claim p:last-child { margin-bottom:0; }
+
+.scroll { overflow-x:auto; margin:0 0 24px; -webkit-overflow-scrolling:touch; }
+table { border-collapse:collapse; width:100%; min-width:460px; font-size:15px; }
+caption {
+  caption-side:top; text-align:left; font-family:var(--f-mono); font-size:11.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--slate); padding:0 0 10px;
+}
+th, td { text-align:left; padding:11px 16px 11px 0; border-bottom:1px solid var(--hairline); vertical-align:top; }
+thead th {
+  font-family:var(--f-mono); font-size:11.5px; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--slate); font-weight:500;
+  border-bottom-width:1.5px; padding-bottom:8px;
+}
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; padding-right:0; }
+tbody tr:last-child td { border-bottom:none; }
+td b { font-weight:600; }
+.ok { color:var(--moss); font-weight:600; }
+.bad { color:var(--rust); font-weight:600; }
+tr.hl td { background:var(--moss-soft); }
+
+figure { margin:30px 0 32px; }
+figcaption { font-size:14px; color:var(--slate); margin-top:14px; max-width:68ch; }
+.fig-shell {
+  background:var(--raised); border:1px solid var(--hairline); border-radius:10px;
+  padding:22px 20px 18px; overflow-x:auto;
+}
+.fig-shell svg { display:block; width:100%; min-width:620px; height:auto; color:var(--ink-soft); }
+
+pre {
+  font-family:var(--f-mono); font-size:13px; line-height:1.7;
+  background:var(--raised); border:1px solid var(--hairline);
+  border-radius:8px; padding:14px 16px; overflow-x:auto; margin:0 0 22px;
+}
+code { font-family:var(--f-mono); font-size:.88em; background:var(--raised);
+  border:1px solid var(--hairline); border-radius:4px; padding:1px 5px; }
+pre code { background:none; border:none; padding:0; font-size:1em; }
+
+.note {
+  background:var(--moss-soft); border-left:3px solid var(--moss);
+  border-radius:0 8px 8px 0; padding:18px 22px; margin:26px 0; font-size:15.5px;
+  max-width:70ch;
+}
+.note.warn { background:var(--gold-soft); border-left-color:var(--gold); }
+.note.alert { background:var(--rust-soft); border-left-color:var(--rust); }
+.note p:last-child { margin-bottom:0; }
+.note h4 { font-family:var(--f-display); font-size:15.5px; margin:0 0 8px; }
+
+.phases { display:grid; gap:10px; margin:24px 0 28px; }
+.phase {
+  display:grid; grid-template-columns:46px 1fr; gap:18px; align-items:start;
+  background:var(--raised); border:1px solid var(--hairline); border-radius:10px;
+  padding:16px 20px;
+}
+.phase .n2 {
+  font-family:var(--f-mono); font-size:12px; color:var(--slate);
+  border:1px solid var(--hairline); border-radius:6px; padding:5px 0;
+  text-align:center; letter-spacing:.06em;
+}
+.phase h4 { font-family:var(--f-display); font-size:16px; margin:0 0 5px; }
+.phase p { font-size:14.5px; line-height:1.55; color:var(--ink-soft); margin:0; max-width:none; }
+.phase .out {
+  display:block; margin-top:7px; font-family:var(--f-mono); font-size:12.5px;
+  color:var(--moss);
+}
+
+footer {
+  border-top:1px solid var(--hairline); margin-top:20px; padding-top:32px;
+  font-size:14px; color:var(--slate); max-width:70ch;
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Phần mềm phân bổ câu lạc bộ · RB-DA · Tài liệu thiết kế</p>
+  <h1>Mở rộng sang nhiều buổi trong tuần</h1>
+  <p class="lede">Một tuần có nhiều CLB sinh hoạt vào nhiều ngày. Học sinh nên
+  được xếp một <strong>thời khoá biểu tuần</strong>, không phải một CLB duy nhất.
+  Tài liệu này hình dung cho hết việc đó <em>trước khi</em> viết dòng mã đầu tiên
+  — và chỉ ra vì sao, với bốn điều kiện đã chốt, <strong>thuật toán không phải
+  sửa một dòng nào</strong>.</p>
+  <div class="meta">
+    <span>Trạng thái: <b>thiết kế, chưa lập trình</b></span>
+    <span>Lõi thuật toán: <b>giữ nguyên</b></span>
+    <span><b>5</b> giai đoạn</span>
+    <span>Bản đầy đủ: <b>KE_HOACH_NHIEU_BUOI.md</b></span>
+  </div>
+</header>
+
+<div class="cols">
+<nav class="toc" aria-label="Mục lục">
+  <h2>Nội dung</h2>
+  <ol>
+    <li><a href="#phanra"><span class="tn">01</span><span>Ý tưởng trung tâm</span></a></li>
+    <li><a href="#dieukien"><span class="tn">02</span><span>Bốn điều kiện</span></a></li>
+    <li><a href="#boctham"><span class="tn">03</span><span>Ba thiết kế bốc thăm</span></a></li>
+    <li><a href="#dulieu"><span class="tn">04</span><span>Dữ liệu vào</span></a></li>
+    <li><a href="#ketqua"><span class="tn">05</span><span>Dữ liệu ra</span></a></li>
+    <li><a href="#giaodien"><span class="tn">06</span><span>Giao diện</span></a></li>
+    <li><a href="#lotrinh"><span class="tn">07</span><span>Lộ trình &amp; bẫy</span></a></li>
+    <li><a href="#datoi"><span class="tn">08</span><span>Đã làm tới đâu</span></a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="phanra">
+  <h2 class="q"><span class="num">Ý TƯỞNG TRUNG TÂM</span>Tuần không phải một bài toán lớn — nó là nhiều bài toán nhỏ giống hệt nhau</h2>
+
+  <p>Mỗi CLB sinh hoạt <strong>đúng một buổi</strong>. Học sinh lấy tối đa một
+  CLB mỗi buổi. <strong>Không có trần</strong> số CLB mỗi tuần. Ba điều đó cộng
+  lại nghĩa là: việc xếp Thứ 3 <em>không ảnh hưởng gì</em> tới việc xếp Thứ 5.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 760 372" role="img"
+           aria-label="Sơ đồ phân rã: dữ liệu tuần chia xuống ba nhánh Thứ 3, Thứ 5, Thứ 6; mỗi nhánh chạy đúng hàm run_rbda nguyên bản rồi ghép lại thành thời khoá biểu. Không có mũi tên nào nối giữa các nhánh.">
+        <defs>
+          <marker id="mui" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"></path>
+          </marker>
+        </defs>
+
+        <rect x="110" y="18" width="540" height="46" rx="8"
+              fill="var(--band)" stroke="currentColor" stroke-width="1"></rect>
+        <text x="380" y="40" text-anchor="middle" font-size="13.5"
+              font-family="var(--f-body)" fill="var(--ink)" font-weight="600">Dữ liệu một tuần</text>
+        <text x="380" y="56" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--slate)">CLB · điểm · nguyện vọng theo từng buổi</text>
+
+        <line x1="190" y1="64" x2="190" y2="104" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui)"></line>
+        <line x1="380" y1="64" x2="380" y2="104" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui)"></line>
+        <line x1="570" y1="64" x2="570" y2="104" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui)"></line>
+        <text x="398" y="90" font-size="11.5" font-family="var(--f-mono)"
+              fill="var(--slate)">cắt theo buổi</text>
+
+        <rect x="110" y="108" width="160" height="112" rx="8"
+              fill="var(--c-ok-soft)" stroke="var(--c-ok)" stroke-width="1.5"></rect>
+        <text x="190" y="130" text-anchor="middle" font-size="13"
+              font-family="var(--f-body)" fill="var(--ink)" font-weight="600">Thứ 3</text>
+        <text x="190" y="154" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink-soft)">run_rbda()</text>
+        <text x="190" y="172" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink-soft)">verify_stability()</text>
+        <text x="190" y="200" text-anchor="middle" font-size="11"
+              font-family="var(--f-mono)" fill="var(--c-ok)">nguyên bản, không sửa</text>
+
+        <rect x="300" y="108" width="160" height="112" rx="8"
+              fill="var(--c-ok-soft)" stroke="var(--c-ok)" stroke-width="1.5"></rect>
+        <text x="380" y="130" text-anchor="middle" font-size="13"
+              font-family="var(--f-body)" fill="var(--ink)" font-weight="600">Thứ 5</text>
+        <text x="380" y="154" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink-soft)">run_rbda()</text>
+        <text x="380" y="172" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink-soft)">verify_stability()</text>
+        <text x="380" y="200" text-anchor="middle" font-size="11"
+              font-family="var(--f-mono)" fill="var(--c-ok)">nguyên bản, không sửa</text>
+
+        <rect x="490" y="108" width="160" height="112" rx="8"
+              fill="var(--c-ok-soft)" stroke="var(--c-ok)" stroke-width="1.5"></rect>
+        <text x="570" y="130" text-anchor="middle" font-size="13"
+              font-family="var(--f-body)" fill="var(--ink)" font-weight="600">Thứ 6</text>
+        <text x="570" y="154" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink-soft)">run_rbda()</text>
+        <text x="570" y="172" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink-soft)">verify_stability()</text>
+        <text x="570" y="200" text-anchor="middle" font-size="11"
+              font-family="var(--f-mono)" fill="var(--c-ok)">nguyên bản, không sửa</text>
+
+        <circle cx="285" cy="164" r="11" fill="var(--raised)"
+                stroke="var(--slate)" stroke-width="1.25"></circle>
+        <path d="M280 159 L290 169 M290 159 L280 169" stroke="var(--slate)"
+              stroke-width="1.5" fill="none"></path>
+        <circle cx="475" cy="164" r="11" fill="var(--raised)"
+                stroke="var(--slate)" stroke-width="1.25"></circle>
+        <path d="M470 159 L480 169 M480 159 L470 169" stroke="var(--slate)"
+              stroke-width="1.5" fill="none"></path>
+
+        <line x1="190" y1="220" x2="190" y2="262" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui)"></line>
+        <line x1="380" y1="220" x2="380" y2="262" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui)"></line>
+        <line x1="570" y1="220" x2="570" y2="262" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui)"></line>
+        <text x="398" y="248" font-size="11.5" font-family="var(--f-mono)"
+              fill="var(--slate)">ghép</text>
+
+        <rect x="110" y="266" width="540" height="46" rx="8"
+              fill="var(--moss-soft)" stroke="var(--moss)" stroke-width="1.5"></rect>
+        <text x="380" y="288" text-anchor="middle" font-size="13.5"
+              font-family="var(--f-body)" fill="var(--ink)" font-weight="600">Thời khoá biểu tuần của mỗi em</text>
+        <text x="380" y="304" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--slate)">ket_qua_thoi_khoa_bieu.csv</text>
+
+        <text x="110" y="344" font-size="12.5" font-family="var(--f-body)"
+              fill="var(--ink-soft)">✕ = không có ràng buộc nào nối hai buổi — đó là toàn bộ lý do mọi bảo đảm còn nguyên.</text>
+      </svg>
+    </div>
+    <figcaption><strong>Không có mũi tên ngang giữa ba khối.</strong> Đó không
+    phải chi tiết trang trí mà là mệnh đề chính: vì ba thị trường độc lập,
+    <code>run_rbda</code> chạy y nguyên trên từng buổi, và mọi tính chất đã
+    chứng minh cho một buổi tự động đúng cho cả tuần.</figcaption>
+  </figure>
+
+  <div class="claim">
+    <p class="big">Bài toán tuần = số buổi × bài toán ngày, hoàn toàn độc lập.</p>
+    <p>Chạy đúng <code>run_rbda</code> hiện tại, mỗi buổi một lần. Phần viết
+    thêm chỉ là <strong>60–80 dòng cắt–gọi–ghép</strong>, không có logic ưu tiên
+    mới nào.</p>
+  </div>
+
+  <div class="scroll">
+  <table>
+    <caption>Bốn tính chất đã đo — và vì sao chúng sống sót</caption>
+    <thead><tr><th>Tính chất</th><th class="n">Một buổi</th><th class="n">Cả tuần</th><th>Vì sao</th></tr></thead>
+    <tbody>
+      <tr><td>Ổn định (0 cặp phá vỡ)</td><td class="n ok">✓</td><td class="n ok">✓</td>
+        <td>không cặp nào bắc cầu được giữa hai buổi</td></tr>
+      <tr><td>Tối ưu cho học sinh</td><td class="n ok">✓</td><td class="n ok">✓</td>
+        <td>tối ưu trong từng thị trường độc lập</td></tr>
+      <tr class="hl"><td><b>Khai thật có lợi nhất</b></td><td class="n ok">✓</td><td class="n ok">✓</td>
+        <td><b>khai ở buổi <em>d</em> chỉ ảnh hưởng buổi <em>d</em></b> — không có kênh nào để hi sinh ngày này lấy ngày kia</td></tr>
+      <tr><td>Bền trước nhiễu</td><td class="n ok">✓</td><td class="n ok">✓</td>
+        <td>nhiễu buổi <em>d</em> không lan sang buổi khác</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="dieukien">
+  <h2 class="q"><span class="num">BỐN ĐIỀU KIỆN</span>Bảng trên đúng vì ba điều kiện — bỏ điều nào là mất điều gì</h2>
+
+  <div class="scroll">
+  <table>
+    <caption>Điều kiện đã chốt cho bản v1</caption>
+    <thead><tr><th>Câu hỏi</th><th>Chốt</th></tr></thead>
+    <tbody>
+      <tr><td>Một CLB sinh hoạt mấy buổi/tuần?</td><td><b>Đúng một buổi</b></td></tr>
+      <tr><td>Trần số CLB mỗi tuần?</td><td><b>Không có trần</b> — chỉ ràng buộc ≤ 1 CLB mỗi ngày</td></tr>
+      <tr><td>Trùng giờ trong ngày?</td><td><b>Không</b> — trường chỉ tổ chức vào tiết 9</td></tr>
+      <tr><td>Học sinh khai nguyện vọng?</td><td><b>Mỗi ngày một danh sách xếp hạng riêng</b></td></tr>
+      <tr><td>Bốc thăm qua các ngày?</td><td><b>Làm cả ba thiết kế, đo rồi quyết</b></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="scroll">
+  <table>
+    <caption>Nếu vi phạm — hỏng chính xác cái gì</caption>
+    <thead><tr><th>Vi phạm</th><th>Hậu quả lý thuyết</th></tr></thead>
+    <tbody>
+      <tr><td>CLB sinh hoạt 2 buổi, vào là phải đi cả hai</td>
+        <td>Sinh <b>tính bổ trợ</b> giữa các ngày → ma trận ổn định <span class="bad">có thể không tồn tại</span></td></tr>
+      <tr><td>Có trần K CLB/tuần</td>
+        <td>Vẫn tồn tại và vẫn tối ưu cho học sinh (ràng buộc là một <b>matroid cắt ngọn</b>), nhưng <span class="bad">khai thật có lợi nhất không còn được bảo đảm</span></td></tr>
+      <tr><td>CLB có nhiều lớp khác ngày, em chỉ vào một lớp</td>
+        <td>“≤1 mỗi buổi” giao “≤1 mỗi CLB” là <b>giao hai matroid — không còn là matroid</b> → <span class="bad">mất bảo đảm</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note warn">
+    <p>Ba dòng trên là lý do phải <strong>viết rõ điều kiện trong báo cáo</strong>.
+    Nói “thuật toán chạy được cho nhiều ngày” mà không nói điều kiện là nói thiếu
+    cái quan trọng nhất — người đọc không biết nó còn đúng khi nào.</p>
+  </div>
+</section>
+
+<section id="boctham">
+  <h2 class="q"><span class="num">BA THIẾT KẾ BỐC THĂM</span>Em không may số bốc thăm có thua ở mọi ngày không?</h2>
+
+  <p>Với một số bốc thăm dùng chung cả tuần, em đứng cuối Tầng 2 sẽ đứng cuối ở
+  <strong>mọi</strong> buổi. May rủi <strong>cộng dồn</strong>. Có ba cách xử lý,
+  và chúng khác nhau đúng ở <em>một mũi tên</em>.</p>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 760 238" role="img"
+           aria-label="So ba thiết kế bốc thăm. A1 STB tuần: một hộp bốc thăm nối tới cả Thứ 3 và Thứ 5. A2 STB ngày: hai hộp bốc thăm riêng, mỗi hộp nối một buổi. A3 STB có bù: thêm một mũi tên màu cam đi từ kết cục Thứ 3 sang ưu tiên Thứ 5, phá tính độc lập.">
+        <defs>
+          <marker id="mui2" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"></path>
+          </marker>
+          <marker id="muiCam" viewBox="0 0 10 10" refX="9" refY="5"
+                  markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--c-no)"></path>
+          </marker>
+        </defs>
+
+        <!-- A1 -->
+        <text x="14" y="20" font-size="13" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">A1 — STB tuần</text>
+        <rect x="69" y="34" width="120" height="30" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="129" y="53" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink)">1 bộ số</text>
+        <line x1="122" y1="64" x2="74" y2="100" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui2)"></line>
+        <line x1="136" y1="64" x2="184" y2="100" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui2)"></line>
+        <rect x="29" y="104" width="90" height="30" rx="6" fill="var(--c-ok-soft)"
+              stroke="var(--c-ok)" stroke-width="1.25"></rect>
+        <text x="74" y="123" text-anchor="middle" font-size="12"
+              font-family="var(--f-body)" fill="var(--ink)">Thứ 3</text>
+        <rect x="139" y="104" width="90" height="30" rx="6" fill="var(--c-ok-soft)"
+              stroke="var(--c-ok)" stroke-width="1.25"></rect>
+        <text x="184" y="123" text-anchor="middle" font-size="12"
+              font-family="var(--f-body)" fill="var(--ink)">Thứ 5</text>
+        <rect x="29" y="150" width="200" height="24" rx="12" fill="var(--c-ok-soft)"></rect>
+        <text x="129" y="166" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--c-ok)">độc lập — giữ mọi bảo đảm</text>
+        <text x="29" y="196" font-size="11.5" font-family="var(--f-body)"
+              fill="var(--slate)">May rủi cộng dồn:</text>
+        <text x="29" y="212" font-size="11.5" font-family="var(--f-body)"
+              fill="var(--slate)">có em trắng tay cả tuần.</text>
+
+        <!-- A2 -->
+        <text x="269" y="20" font-size="13" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">A2 — STB ngày</text>
+        <rect x="284" y="34" width="90" height="30" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="329" y="53" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink)">số T3</text>
+        <rect x="394" y="34" width="90" height="30" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="439" y="53" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink)">số T5</text>
+        <line x1="329" y1="64" x2="329" y2="100" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui2)"></line>
+        <line x1="439" y1="64" x2="439" y2="100" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui2)"></line>
+        <rect x="284" y="104" width="90" height="30" rx="6" fill="var(--c-ok-soft)"
+              stroke="var(--c-ok)" stroke-width="1.25"></rect>
+        <text x="329" y="123" text-anchor="middle" font-size="12"
+              font-family="var(--f-body)" fill="var(--ink)">Thứ 3</text>
+        <rect x="394" y="104" width="90" height="30" rx="6" fill="var(--c-ok-soft)"
+              stroke="var(--c-ok)" stroke-width="1.25"></rect>
+        <text x="439" y="123" text-anchor="middle" font-size="12"
+              font-family="var(--f-body)" fill="var(--ink)">Thứ 5</text>
+        <rect x="284" y="150" width="200" height="24" rx="12" fill="var(--c-ok-soft)"></rect>
+        <text x="384" y="166" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--c-ok)">độc lập — giữ mọi bảo đảm</text>
+        <text x="284" y="196" font-size="11.5" font-family="var(--f-body)"
+              fill="var(--slate)">May rủi san đều:</text>
+        <text x="284" y="212" font-size="11.5" font-family="var(--f-body)"
+              fill="var(--slate)">rất ít em trắng tay.</text>
+
+        <!-- A3 -->
+        <text x="524" y="20" font-size="13" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">A3 — STB có bù</text>
+        <rect x="579" y="34" width="120" height="30" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="639" y="53" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--ink)">1 bộ số</text>
+        <line x1="632" y1="64" x2="584" y2="100" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui2)"></line>
+        <line x1="646" y1="64" x2="694" y2="100" stroke="currentColor"
+              stroke-width="1.5" marker-end="url(#mui2)"></line>
+        <rect x="539" y="104" width="90" height="30" rx="6" fill="var(--c-ok-soft)"
+              stroke="var(--c-ok)" stroke-width="1.25"></rect>
+        <text x="584" y="123" text-anchor="middle" font-size="12"
+              font-family="var(--f-body)" fill="var(--ink)">Thứ 3</text>
+        <rect x="649" y="104" width="90" height="30" rx="6" fill="var(--c-no-soft)"
+              stroke="var(--c-no)" stroke-width="1.5"></rect>
+        <text x="694" y="123" text-anchor="middle" font-size="12"
+              font-family="var(--f-body)" fill="var(--ink)">Thứ 5</text>
+        <line x1="629" y1="119" x2="647" y2="119" stroke="var(--c-no)"
+              stroke-width="2" marker-end="url(#muiCam)"></line>
+        <text x="639" y="147" text-anchor="middle" font-size="11"
+              font-family="var(--f-mono)" fill="var(--c-no)">kết cục T3 đổi ưu tiên T5</text>
+        <rect x="539" y="150" width="200" height="24" rx="12" fill="var(--c-no-soft)"></rect>
+        <text x="639" y="166" text-anchor="middle" font-size="11.5"
+              font-family="var(--f-mono)" fill="var(--c-no)">PHÁ độc lập</text>
+        <text x="539" y="196" font-size="11.5" font-family="var(--f-body)"
+              fill="var(--slate)">Em có thể bỏ trống T3</text>
+        <text x="539" y="212" font-size="11.5" font-family="var(--f-body)"
+              fill="var(--slate)">để giành ưu tiên T5.</text>
+      </svg>
+    </div>
+    <figcaption><strong>Ba thiết kế khác nhau đúng ở một mũi tên.</strong> A1 và
+    A2 giữ ba khối rời nhau. A3 thêm mũi tên cam — ưu tiên buổi sau phụ thuộc
+    <em>kết cục</em> buổi trước, mà kết cục lại phụ thuộc nguyện vọng đã khai.
+    Đó chính là kênh khai gian mà cả dự án được dựng lên để bịt.</figcaption>
+  </figure>
+
+  <div class="note alert">
+    <h4>A3 là cái bẫy, và phải ghi rõ là bẫy</h4>
+    <p>Nó nghe rất công bằng: <em>“em chưa có CLB nào thì được ưu tiên buổi
+    sau”</em>. Nhưng nó vi phạm đúng ràng buộc ghi ở dòng 63–72 của
+    <code>compute_club_priority</code>. A3 có mặt trong kế hoạch này để
+    <strong>bị đo</strong>, không phải để được khuyến nghị trước khi đo.</p>
+    <p><strong>Ràng buộc cài đặt:</strong> nếu làm A3 thì phải cài bằng cách
+    đánh lại bộ số STB <em>trước khi</em> chạy buổi đó — tuyệt đối không thêm
+    tham số nào vào <code>compute_club_priority</code>.</p>
+  </div>
+
+  <h3>Dự đoán — nêu trước để phép đo có thể bác bỏ</h3>
+  <div class="claim">
+    <p class="big">Số CLB trung bình mỗi em ở A1 và A2 bằng nhau. Chỉ phương sai và số em trắng tay là khác.</p>
+    <p>Vì các buổi độc lập, A1 và A2 cho cùng phân phối kết quả ở <em>mỗi</em>
+    buổi — chúng chỉ khác nhau ở chỗ may rủi có tương quan giữa các ngày hay
+    không. Nếu đo ra A2 làm giảm cả số trung bình thì hoặc mô hình sai, hoặc bộ
+    đo sai; cả hai đều phải truy ra chứ không được bỏ qua.</p>
+  </div>
+
+  <p>Thí nghiệm <strong>TN7</strong> đo mỗi thiết kế: phân bố số CLB/em ·
+  <strong>số em trắng tay cả tuần</strong> · Gini · thứ hạng nguyện vọng trung
+  bình · cặp phá vỡ từng buổi · <strong>số em khai gian được</strong>. Dự đoán:
+  A1 và A2 cho <span class="ok">0 em khai gian</span>, A3 <span class="bad">khác
+  0</span>. Bộ đo đã có sẵn — <code>do_khai_that.py</code> dùng lại nguyên vẹn.</p>
+
+  <div class="note">
+    <h4>TN7 đã chạy — hai dự đoán trên đều đứng vững</h4>
+    <p><strong>Số CLB trung bình mỗi em bằng nhau, chỉ số em trắng tay khác.</strong>
+    Trên bộ mẫu 5 buổi, 200 seed: 1,320 · 1,319 · 1,316 câu lạc bộ mỗi em ở ba
+    thiết kế, trong khi số em trắng tay là 36,50 · 36,26 · 35,69. Ở lưới thuần
+    bốc thăm, số câu lạc bộ trung bình trùng nhau tới <em>chữ số thứ ba</em>
+    trong khi số em trắng tay chênh nhau tới 79 em. Không thiết kế nào tạo thêm
+    chỗ — chúng chỉ đổi <em>ai</em> được chỗ.</p>
+    <p><strong>A1 và A2 cho 0 em khai gian, A3 khác 0.</strong> Dò kênh
+    <em>giấu bớt buổi</em> trên 300 lượt: A1 <span class="ok">0</span> ·
+    A2 <span class="ok">0</span> · A3 <span class="bad">113</span> (37,7%).</p>
+    <p><strong>Và đã chốt:</strong> phần mềm chạy duy nhất <b>A2</b>. Bộ chọn
+    ba thiết kế đã bỏ, <code>api.run_pipeline</code> không còn nhận tham số chế
+    độ. A1 và A3 ở lại trong thuật toán như <em>dụng cụ đo</em> cho TN7, không
+    còn là lựa chọn. Thứ tự bốc thăm từng buổi giờ hiện ở thẻ Kết quả và xuất
+    ra tệp riêng — thứ mà bản kế hoạch này bỏ sót, và là thứ trả lời câu phụ
+    huynh sẽ hỏi.</p>
+    <p><strong>Điều đo được mà dự đoán chưa nói tới:</strong> lợi thế của A2
+    <em>lớn hay nhỏ</em> phụ thuộc gần như hoàn toàn vào việc còn bao nhiêu chỗ
+    cho bốc thăm quyết định. Trên dữ liệu có điểm của trường, A2 chỉ hơn A1
+    <strong>0,245 em trên 160</strong> (0,15%); trên dữ liệu thuần bốc thăm, A2
+    cứu <strong>1,2 → 79,0</strong> em trên 200. Số liệu và ba biểu đồ ở mục
+    <strong>TN7</strong> của <code>NGHIEN_CUU_TOI_UU.md</code>; bộ đo ở
+    <code>du_lieu_test/do_boc_tham.py</code>, 23 test canh ở
+    <code>tests/test_boc_tham.py</code>.</p>
+  </div>
+</section>
+
+<section id="dulieu">
+  <h2 class="q"><span class="num">DỮ LIỆU VÀO</span>Thêm một cột, và không phá bộ dữ liệu cũ</h2>
+
+  <p><code>buoi</code> là <strong>cột tuỳ chọn</strong>. Không có cột đó ⇒ mọi
+  CLB thuộc một buổi ngầm định ⇒ <strong>chạy y hệt phần mềm hiện tại</strong>.
+  Đây là ràng buộc cứng, có test canh.</p>
+
+  <h3>Tệp 01 — danh sách CLB</h3>
+  <pre><code>club_id,name,capacity,reserve_capacity,reserve_group,buoi
+clb_bongda,CLB Bóng đá,22,5,chinh_sach,thu_3
+clb_tinhoc,CLB Tin học,14,4,chinh_sach,thu_5</code></pre>
+
+  <p><code>buoi</code> là <strong>nhãn tự do</strong>, không phải danh sách cố
+  định. Quy tắc duy nhất: <strong>hai CLB cùng giá trị <code>buoi</code> là
+  trùng giờ.</strong> Trường hiện chỉ dùng tiết 9 nên nhãn bằng ngày là đủ; nếu
+  sau này có thêm tiết thì <code>thu_3_tiet_9</code> và
+  <code>thu_3_tiet_10</code> chạy được ngay, <strong>không đổi một dòng thuật
+  toán nào</strong>.</p>
+
+  <h3>Tệp 03 — nguyện vọng: mỗi buổi một danh sách</h3>
+  <p>Microsoft Forms: một câu Ranking cho mỗi buổi — <em>“Thứ 3 (tiết 9) em muốn
+  CLB nào?”</em></p>
+  <p>Trần của phần mềm nay khớp đúng công cụ thu phiếu: <strong>10 nguyện vọng mỗi
+  buổi</strong>, bằng số mục tối đa của một câu Ranking. Trước đây trần đếm cho cả tuần,
+  tức một con số của Forms bị đem áp cho sáu câu hỏi Forms gộp lại.</p>
+  <pre><code>student_id,name,reserve_group,thu_3_pref_1,thu_3_pref_2,thu_5_pref_1,thu_5_pref_2
+HS001,Nguyễn Văn A,,clb_bongda,clb_covua,clb_tinhoc,</code></pre>
+
+  <div class="note">
+    <p>Em không muốn sinh hoạt buổi nào thì <strong>để trống</strong> cột buổi
+    đó. Đó cũng là cách khai <em>“thứ 5 em bận”</em> — <strong>không cần thêm
+    cột <code>ngay_ban</code></strong>. Nguyên tắc: không thêm trường nào mà
+    nguyện vọng đã diễn đạt được.</p>
+  </div>
+
+  <p><strong>Tệp 02 (chọn CLB muốn thi) không đổi.</strong> Điểm là của cặp
+  (học sinh, CLB), không phụ thuộc buổi; quy trình chấm mù giữ nguyên.</p>
+
+  <div class="note warn">
+    <h4>Hai phép soát bắt buộc, không được im lặng</h4>
+    <ol class="steps">
+      <li>Một số CLB có <code>buoi</code> còn số khác trống → gom vào
+      <code>__chua_xep_buoi__</code> và kêu <strong>cảnh báo nghiêm trọng</strong>.</li>
+      <li>CLB ghi ở cột <code>thu_3_pref_*</code> mà lại có <code>buoi = thu_5</code>
+      → cảnh báo, <strong>nêu đích danh dòng</strong>. Đây là lỗi gõ tay dễ xảy
+      ra nhất, và im lặng thì hỏng kết quả.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="ketqua">
+  <h2 class="q"><span class="num">DỮ LIỆU RA</span>Sản phẩm chính là một thời khoá biểu</h2>
+
+  <div class="scroll">
+  <table>
+    <caption>Tệp xuất ra</caption>
+    <thead><tr><th>Tệp</th><th>Nội dung</th></tr></thead>
+    <tbody>
+      <tr class="hl"><td><code>ket_qua_thoi_khoa_bieu.csv</code></td>
+        <td><b>Sản phẩm chính</b> — mỗi em một dòng: <code>student_id, name, thu_2, …, thu_7, so_clb, so_nv1</code></td></tr>
+      <tr><td><code>ket_qua_phan_bo_theo_club/</code></td><td>giữ nguyên, thêm cột <code>buoi</code></td></tr>
+      <tr><td><code>ket_qua_theo_buoi/</code></td><td>danh sách theo từng buổi, cho giáo viên trực ngày đó</td></tr>
+      <tr><td><code>ket_qua_do_phu.csv</code></td><td>em trắng tay cả tuần · em trống buổi nào · số CLB mỗi em</td></tr>
+      <tr><td><code>ket_qua_danh_sach_cho/</code></td><td>hàng chờ theo thứ tự ưu tiên, lấy từ <code>rejection_log</code> — dùng khi có em rút</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note alert">
+    <h4>Lỗ rò dữ liệu phải bịt TRƯỚC khi có tệp đầu tiên</h4>
+    <p><code>.gitignore</code> hiện chặn <code>ket_qua*.csv</code> và
+    <code>ket_qua*_theo_club/</code>. Nhưng tệp
+    <code>ket_qua_theo_buoi/thu_2.csv</code> có <strong>basename là
+    <code>thu_2.csv</code></strong> nên <strong>không khớp luật nào</strong> —
+    nó sẽ lọt vào git cùng tên học sinh thật. Phải thêm
+    <code>ket_qua_theo_buoi/</code> và <code>ket_qua_danh_sach_cho/</code> vào
+    <code>.gitignore</code> ngay ở <strong>giai đoạn 1</strong>.</p>
+  </div>
+
+  <p><code>run_history</code> ghi thêm <code>che_do_boc_tham</code> và
+  <code>so_buoi</code> — không có hai cột này thì sau không truy được kết quả cũ
+  đã chạy bằng thiết kế nào.</p>
+</section>
+
+<section id="giaodien">
+  <h2 class="q"><span class="num">GIAO DIỆN</span>Một thành phần mới, dùng lại ở ba chỗ</h2>
+
+  <figure>
+    <div class="fig-shell">
+      <svg viewBox="0 0 760 244" role="img"
+           aria-label="Phác giao diện lưới tuần: năm cột theo ngày, mỗi cột hiện số chỗ và tỉ lệ chọi, bên dưới là các CLB kèm thanh lấp đầy. Thứ 3 quá tải với tỉ lệ chọi 3,1 lần, Thứ 6 còn trống nhiều.">
+        <rect x="16" y="14" width="136" height="36" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="26" y="30" font-size="12" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">Thứ 2</text>
+        <text x="26" y="44" font-size="10.5" font-family="var(--f-mono)"
+              fill="var(--slate)">36 chỗ · chọi 1,2×</text>
+        <rect x="164" y="14" width="136" height="36" rx="6" fill="var(--c-no-soft)"
+              stroke="var(--c-no)" stroke-width="1.5"></rect>
+        <text x="174" y="30" font-size="12" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">Thứ 3</text>
+        <text x="174" y="44" font-size="10.5" font-family="var(--f-mono)"
+              fill="var(--c-no)">40 chỗ · chọi 3,1×</text>
+        <rect x="312" y="14" width="136" height="36" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="322" y="30" font-size="12" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">Thứ 4</text>
+        <text x="322" y="44" font-size="10.5" font-family="var(--f-mono)"
+              fill="var(--slate)">28 chỗ · chọi 1,4×</text>
+        <rect x="460" y="14" width="136" height="36" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="470" y="30" font-size="12" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">Thứ 5</text>
+        <text x="470" y="44" font-size="10.5" font-family="var(--f-mono)"
+              fill="var(--slate)">32 chỗ · chọi 1,1×</text>
+        <rect x="608" y="14" width="136" height="36" rx="6" fill="var(--band)"
+              stroke="currentColor" stroke-width="1"></rect>
+        <text x="618" y="30" font-size="12" font-family="var(--f-body)"
+              fill="var(--ink)" font-weight="600">Thứ 6</text>
+        <text x="618" y="44" font-size="10.5" font-family="var(--f-mono)"
+              fill="var(--slate)">30 chỗ · chọi 0,4×</text>
+
+        <rect x="16" y="60" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="26" y="76" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Cờ vua</text>
+        <rect x="26" y="82" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="26" y="82" width="104" height="6" rx="3" fill="var(--c-ok)"></rect>
+        <rect x="16" y="104" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="26" y="120" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Văn học</text>
+        <rect x="26" y="126" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="26" y="126" width="70" height="6" rx="3" fill="var(--c-ok)"></rect>
+
+        <rect x="164" y="60" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="174" y="76" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Bóng đá</text>
+        <rect x="174" y="82" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="174" y="82" width="116" height="6" rx="3" fill="var(--c-ok)"></rect>
+        <rect x="164" y="104" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="174" y="120" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Mỹ thuật</text>
+        <rect x="174" y="126" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="174" y="126" width="116" height="6" rx="3" fill="var(--c-ok)"></rect>
+        <rect x="164" y="148" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="174" y="164" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Tiếng Anh</text>
+        <rect x="174" y="170" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="174" y="170" width="116" height="6" rx="3" fill="var(--c-ok)"></rect>
+
+        <rect x="312" y="60" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="322" y="76" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Robotics</text>
+        <rect x="322" y="82" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="322" y="82" width="99" height="6" rx="3" fill="var(--c-ok)"></rect>
+        <rect x="312" y="104" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="322" y="120" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Khoa học</text>
+        <rect x="322" y="126" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="322" y="126" width="58" height="6" rx="3" fill="var(--c-ok)"></rect>
+
+        <rect x="460" y="60" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="470" y="76" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Tin học</text>
+        <rect x="470" y="82" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="470" y="82" width="112" height="6" rx="3" fill="var(--c-ok)"></rect>
+        <rect x="460" y="104" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="470" y="120" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Âm nhạc</text>
+        <rect x="470" y="126" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="470" y="126" width="82" height="6" rx="3" fill="var(--c-ok)"></rect>
+
+        <rect x="608" y="60" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="618" y="76" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Tình nguyện</text>
+        <rect x="618" y="82" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="618" y="82" width="34" height="6" rx="3" fill="var(--c-ok)"></rect>
+        <rect x="608" y="104" width="136" height="38" rx="6" fill="var(--raised)"
+              stroke="var(--hairline)" stroke-width="1"></rect>
+        <text x="618" y="120" font-size="11" font-family="var(--f-body)" fill="var(--ink)">CLB Bóng rổ</text>
+        <rect x="618" y="126" width="116" height="6" rx="3" fill="var(--band)"></rect>
+        <rect x="618" y="126" width="46" height="6" rx="3" fill="var(--c-ok)"></rect>
+
+        <text x="16" y="216" font-size="12.5" font-family="var(--f-body)"
+              fill="var(--ink-soft)">Thứ 3 chọi 3,1× trong khi Thứ 6 mới 0,4× — dời một CLB đông sang Thứ 6 là sửa được vấn đề</text>
+        <text x="16" y="234" font-size="12.5" font-family="var(--f-body)"
+              fill="var(--ink-soft)">TRƯỚC khi chạy, thay vì phải giải thích SAU khi chạy.</text>
+      </svg>
+    </div>
+    <figcaption><strong>Lưới tuần</strong> — dùng lại ở ba chỗ: tổng quan cho
+    người quản trị, xem kết quả theo buổi, và thời khoá biểu của một em. Phần
+    đáng giá nhất là <strong>tỉ lệ chọi theo buổi</strong>: nó biến một vấn đề
+    phải giải thích thành một vấn đề sửa được.</figcaption>
+  </figure>
+
+  <div class="scroll">
+  <table>
+    <caption>Năm tab hiện có — thêm gì vào đâu</caption>
+    <thead><tr><th>Tab</th><th>Thêm gì</th></tr></thead>
+    <tbody>
+      <tr><td><b>04</b> Quản lý CLB</td><td>Trường <code>Buổi</code> trong form · lưới tuần toàn trường · <b>Bảng tải theo buổi</b></td></tr>
+      <tr><td><b>01</b> Vận hành</td><td>Chọn thiết kế bốc thăm (A3 kèm cảnh báo đỏ) · kết quả tách theo từng buổi: số vòng, số em xếp được, cặp phá vỡ</td></tr>
+      <tr><td><b>02</b> Kết quả</td><td><b>Thời khoá biểu</b> (tra một em → cả tuần) · <b>Theo buổi</b> · <b>Độ phủ</b>: số em có 0/1/2/…/5 CLB, nêu đích danh em trắng tay</td></tr>
+      <tr><td><b>03</b> Nhập tại chỗ</td><td>Nhập theo từng buổi, kèm chỉ báo sống <em>“em mới khai 2 buổi → tối đa 2 CLB”</em></td></tr>
+      <tr><td><b>05</b> Nhập điểm</td><td>Nhóm CLB theo buổi cho dễ tìm. Việc chấm <b>không đổi</b> — điểm vẫn mù và không phụ thuộc buổi</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="lotrinh">
+  <h2 class="q"><span class="num">LỘ TRÌNH</span>Năm giai đoạn, mỗi giai đoạn dùng được ngay</h2>
+
+  <div class="phases">
+    <div class="phase">
+      <span class="n2">GĐ 1</span>
+      <div>
+        <h4>Buổi sinh hoạt vào dữ liệu</h4>
+        <p><code>clubs.buoi</code> + migration · nhập CSV có <code>buoi</code> ·
+        Admin UI + lưới tuần + bảng tải · <strong>vá <code>.gitignore</code></strong></p>
+        <span class="out">→ Khai báo được buổi; chạy vẫn y hệt cũ</span>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="n2">GĐ 2</span>
+      <div>
+        <h4>Chạy theo buổi</h4>
+        <p><code>run_rbda_nhieu_buoi</code> · <code>match_results</code> khoá
+        chính <code>(student_id, buoi)</code> · ba thiết kế bốc thăm · xuất thời
+        khoá biểu</p>
+        <span class="out">→ Xếp được cả tuần</span>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="n2">GĐ 3</span>
+      <div>
+        <h4>Giao diện kết quả</h4>
+        <p>Thời khoá biểu · theo buổi · độ phủ · nhập tại chỗ theo buổi</p>
+        <span class="out">→ Dùng được thật ở trường</span>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="n2">GĐ 4</span>
+      <div>
+        <h4>Đo lường &amp; nghiên cứu</h4>
+        <p>TN7–TN9 · mở rộng trang nghiên cứu · <strong>chốt thiết kế bốc thăm
+        bằng số đo</strong></p>
+        <span class="out">→ Trả lời được “dùng cách bốc thăm nào”</span>
+      </div>
+    </div>
+    <div class="phase">
+      <span class="n2">GĐ 5</span>
+      <div>
+        <h4>Forms &amp; tài liệu</h4>
+        <p>Bộ câu hỏi Forms mới · mẫu CSV · <code>HUONG_DAN_SU_DUNG</code></p>
+        <span class="out">→ Bàn giao được</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Chỗ rủi ro nhất: migration <code>match_results</code></h3>
+  <p>Khoá chính đổi từ <code>student_id</code> sang
+  <code>(student_id, buoi)</code>. Khoá này <strong>tự nó canh ràng buộc “≤1 CLB
+  mỗi buổi” ở tầng cơ sở dữ liệu</strong>, không chỉ ở tầng mã — một em không
+  thể có hai CLB cùng buổi kể cả khi mã có lỗi.</p>
+  <p>Quy trình: sao lưu bằng <code>_backup_db()</code> có sẵn → tạo bảng mới →
+  chép dòng cũ với <code>buoi = '__mac_dinh__'</code> → đổi tên.
+  <strong><code>run_history</code> không được đụng tới</strong> — đó là dấu vết
+  kiểm toán, <code>reset_data</code> cũng không xoá nó.</p>
+
+  <h3>Bẫy đã biết — ghi ra để không vấp</h3>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Bẫy</th><th>Xử lý ở v1</th></tr></thead>
+    <tbody>
+      <tr><td>CLB có hai lớp khác ngày, em chỉ vào một</td>
+        <td>v1 <b>cấm</b>. Nếu cần thì tách thành hai CLB riêng và chấp nhận em có thể trúng cả hai</td></tr>
+      <tr><td>Sàn sĩ số (CLB dưới N em thì không mở)</td>
+        <td>Ràng buộc sàn <b>phá tính ổn định</b>. v1 <b>chỉ báo cáo</b>; huỷ rồi chạy lại thì phải ghi rõ kết quả mới <b>không</b> còn là kết quả ổn định của bài toán gốc</td></tr>
+      <tr><td>Số phòng mỗi buổi có hạn</td>
+        <td>v1 chỉ hiện trong Bảng tải theo buổi, không đưa vào ràng buộc</td></tr>
+      <tr><td>Em khai lệch buổi</td><td>Soát khi nhập, nêu đích danh dòng</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Định nghĩa “xong” của giai đoạn 2</h3>
+  <div class="claim">
+    <p class="big">Test trùng khít xanh: một buổi ⇒ kết quả y hệt phần mềm cũ, ba bộ dữ liệu × 20 seed.</p>
+    <p>Chừng nào nó chưa xanh thì mọi con số trong
+    <code>NGHIEN_CUU_TOI_UU.md</code> chưa chắc còn nói về đoạn mã đang chạy.</p>
+  </div>
+</section>
+
+<section id="datoi">
+  <h2 class="q"><span class="num">ĐÃ LÀM TỚI ĐÂU</span>Cả năm giai đoạn xong</h2>
+  <p>Phần mềm khai báo được buổi, xếp được cả tuần, có đủ ba màn hình mới, ba thiết kế
+  bốc thăm đã được đo chính thức (TN7, <code>NGHIEN_CUU_TOI_UU.md</code>), và bộ câu hỏi
+  Forms kèm mẫu CSV nhiều buổi đã có (<code>BO_CAU_HOI_FORMS.md</code>,
+  <code>mau_csv/</code> tệp <code>06_</code>–<code>08_</code>). Ba bộ đo cũ ra đúng số cũ,
+  và năm hàm lõi không sửa một dòng.</p>
+  <p>Hai việc làm THÊM sau khi lộ trình đã chốt, vì dùng thật mới lộ ra:
+  <strong>chọn buổi để xếp</strong> (xếp lại một ngày mà không đụng ngày đã công bố) và
+  <strong>trần nguyện vọng tính theo từng buổi</strong> (trần cũ đếm cả tuần, âm thầm gạt
+  31/180 em của một bộ dữ liệu thử ra khỏi đợt xếp).</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Giai đoạn</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td>1 — Buổi vào dữ liệu, di trú, <code>.gitignore</code></td><td>✅ xong</td></tr>
+      <tr><td>2 — <code>run_rbda_nhieu_buoi</code>, ba cách bốc thăm, xuất thời khoá biểu</td><td>✅ xong</td></tr>
+      <tr><td>3 — Lịch tuần, bảng tải, thời khoá biểu, độ phủ, song ngữ</td><td>✅ xong</td></tr>
+      <tr><td>4 — Đo lường TN7 và mở rộng trang nghiên cứu</td><td>✅ xong</td></tr>
+      <tr><td>5 — Bộ câu hỏi Microsoft Forms mới</td><td>✅ xong</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Bốn chỗ thiết kế phải sửa khi chạm vào mã thật</h3>
+  <ol>
+    <li><strong>Một buổi thì ba cách bốc thăm phải cho CÙNG kết quả.</strong> Bản đầu để
+    <code>stb_ngay</code> xáo lại cả khi chỉ có một buổi. Đã chặn ở
+    <code>sinh_stb_theo_buoi</code>, có test canh.</li>
+    <li><strong>Ba cách bốc thăm đều phải dẫn xuất từ bộ số ĐÃ KHOÁ.</strong> Bản cài đặt
+    hoán vị VỊ TRÍ trong dàn số đã khoá, nên tính "không phụ thuộc thứ tự nhập liệu" được
+    thừa kế nguyên vẹn.</li>
+    <li><strong>Tỉ lệ chọi phải đếm theo SỐ HỌC SINH, không phải số lượt nguyện vọng.</strong>
+    Đếm theo lượt làm mọi buổi trông như nhau (4,1× tới 6,5×) đúng lúc cần phân biệt buổi
+    chật với buổi rộng (đếm đúng: 0,88× tới 4,92×).</li>
+    <li><strong>Bảng kết quả và huy hiệu "chưa được xếp" phải đổi nghĩa.</strong> 160 em ×
+    5 buổi = 800 dòng, và huy hiệu đếm số Ô TRỐNG (593) chứ không phải số EM trắng tay (38).
+    Ở chế độ nhiều buổi, con số "em trắng tay" lấy từ bảng Độ phủ.</li>
+  </ol>
+
+  <h3>Vì sao A2 cứu ít em trên dữ liệu của trường</h3>
+  <p>Trên bộ mẫu 5 buổi, 200 seed ghép cặp: A1 để lại <strong>36,50</strong> em trắng tay,
+  A2 <strong>36,26</strong> — hiệu +0,245 em, khoảng tin cậy 95% [+0,020 ; +0,465]. Giả
+  thuyết <em>"em trắng tay trượt vì thiếu chỗ"</em> đã bị bác bỏ hai lần: 33/38 em trắng tay
+  có khai từ hai buổi trở lên, và ở chọi <strong>4,0×</strong> A2 vẫn cứu <strong>79</strong>
+  em. Nguyên nhân thật (TN7c) là <strong>ĐIỂM</strong>: em không có điểm là Tầng 2 ở
+  <em>mọi</em> buổi, nên rủi ro đã tương quan sẵn qua điểm chứ không qua bộ số thăm.</p>
+
+  <h3>Hai lỗi của chính bộ đo</h3>
+  <ol>
+    <li><strong>Kết luận trên một seed.</strong> Bảng cũ (38 / 38 / 37) là một lần chạy ở
+    seed 42, trong khi dao động theo seed là 6 em — gấp tám lần khoảng cách giữa ba thiết
+    kế. Mọi số của TN7 giờ là trung bình nhiều seed, ghép cặp, kèm khoảng tin cậy.</li>
+    <li><strong>In sai chiều hiệu số.</strong> Nhãn gõ tay <em>"(âm = A2 tốt hơn)"</em> nói
+    ngược với công thức. Nay nhãn do <code>mo_ta_chieu()</code> sinh ra, và bốn test canh
+    chiều dấu trong <code>tests/test_boc_tham.py</code>.</li>
+  </ol>
+
+  <div class="note">
+    <h4>Việc phải làm khi nâng cấp một trường đang chạy</h4>
+    <p>Trường đã chạy nhiều buổi bằng bản cũ thì lần chạy tới ra kết quả khác (bộ số đã
+    khoá không đổi, thứ tự trong từng buổi thì đổi). Trường một buổi không đổi gì. Dòng
+    nhật ký cũ ghi <code>stb_tuan</code> không bị sửa lại, và bảng Số bốc thăm theo buổi đọc
+    chính cột đó để dựng lại đúng thứ tự lần chạy ấy đã dùng.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Tài liệu này mô tả <strong>thiết kế và hệ quả kỹ thuật</strong>. Phần nhận
+  định về việc trường nên chọn thiết kế bốc thăm nào, cái giá nào chấp nhận
+  được, và ý nghĩa khoa học của kết quả — người thực hiện đề tài tự viết.</p>
+  <p>Các con số trong phác giao diện (tỉ lệ chọi, mức lấp đầy) là <strong>số
+  minh hoạ</strong> cho bản thiết kế, không phải kết quả đo.</p>
+</footer>
+
+</main>
+</div>
+</div>

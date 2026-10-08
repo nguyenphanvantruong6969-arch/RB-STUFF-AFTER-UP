@@ -1,0 +1,11 @@
+﻿student_id,name,reserve_group,pref_1,pref_2
+HS01,Nguyễn Văn An,,clb_bongro,clb_tinhoc
+HS02,Trần Thị Bình,,clb_bongro,clb_mythuat
+HS03,Lê Minh Cường,,clb_bongro,clb_nauan
+HS04,Phạm Thu Dung,chinh_sach,clb_bongro,clb_mythuat
+HS05,Hoàng Văn Đức,,clb_bongro,clb_tinhoc
+HS06,Vũ Ngọc Giang,,clb_tinhoc,clb_nauan
+HS07,Đỗ Thị Hạnh,,clb_mythuat,clb_nauan
+HS08,Bùi Quang Khánh,,clb_mythuat,clb_nauan
+HS09,Ngô Phương Linh,,clb_nauan,clb_tinhoc
+HS10,Dương Bá Minh,,clb_bongro,

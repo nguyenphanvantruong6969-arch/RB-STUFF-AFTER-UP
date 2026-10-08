@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" font-family="'IBM Plex Sans',Arial,sans-serif">
+<rect width="1600" height="1000" fill="#FFFFFF"/>
+<text x="60" y="80" font-size="44" fill="#1C2321" font-weight="700" text-anchor="start" font-family="'Be Vietnam Pro','IBM Plex Sans',Arial,sans-serif">Được xếp vào nguyện vọng thứ mấy</text>
+<text x="60" y="128" font-size="28" fill="#5B6570" font-weight="400" text-anchor="start" font-family="'IBM Plex Sans',Arial,sans-serif">108 em được xếp · bộ 120 học sinh, 10 CLB · hạt giống bốc thăm 42</text>
+<line x1="140" x2="1540" y1="820.0" y2="820.0" stroke="#DBDCD5" stroke-width="2"/>
+<text x="120" y="830.0" font-size="26" fill="#8A929A" font-weight="400" text-anchor="end" font-family="'IBM Plex Sans',Arial,sans-serif">0</text>
+<line x1="140" x2="1540" y1="634.2857142857142" y2="634.2857142857142" stroke="#DBDCD5" stroke-width="2"/>
+<text x="120" y="644.2857142857142" font-size="26" fill="#8A929A" font-weight="400" text-anchor="end" font-family="'IBM Plex Sans',Arial,sans-serif">20</text>
+<line x1="140" x2="1540" y1="448.57142857142856" y2="448.57142857142856" stroke="#DBDCD5" stroke-width="2"/>
+<text x="120" y="458.57142857142856" font-size="26" fill="#8A929A" font-weight="400" text-anchor="end" font-family="'IBM Plex Sans',Arial,sans-serif">40</text>
+<line x1="140" x2="1540" y1="262.8571428571429" y2="262.8571428571429" stroke="#DBDCD5" stroke-width="2"/>
+<text x="120" y="272.8571428571429" font-size="26" fill="#8A929A" font-weight="400" text-anchor="end" font-family="'IBM Plex Sans',Arial,sans-serif">60</text>
+<path d="M200.0,820 V231.71428571428567 Q200.0,225.71428571428567 206.0,225.71428571428567 H424.0 Q430.0,225.71428571428567 430.0,231.71428571428567 V820 Z" fill="#27805A"/>
+<text x="315.0" y="203.71428571428567" font-size="34" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">64 em · 59%</text>
+<text x="315.0" y="870" font-size="32" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">NV 1</text>
+<path d="M550.0,820 V566.0 Q550.0,560.0 556.0,560.0 H774.0 Q780.0,560.0 780.0,566.0 V820 Z" fill="#7FAE95"/>
+<text x="665.0" y="538.0" font-size="34" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">28 em · 26%</text>
+<text x="665.0" y="870" font-size="32" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">NV 2</text>
+<path d="M900.0,820 V733.1428571428571 Q900.0,727.1428571428571 906.0,727.1428571428571 H1124.0 Q1130.0,727.1428571428571 1130.0,733.1428571428571 V820 Z" fill="#7FAE95"/>
+<text x="1015.0" y="705.1428571428571" font-size="34" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">10 em · 9%</text>
+<text x="1015.0" y="870" font-size="32" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">NV 3</text>
+<path d="M1250.0,820 V770.2857142857143 Q1250.0,764.2857142857143 1256.0,764.2857142857143 H1474.0 Q1480.0,764.2857142857143 1480.0,770.2857142857143 V820 Z" fill="#7FAE95"/>
+<text x="1365.0" y="742.2857142857143" font-size="34" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">6 em · 6%</text>
+<text x="1365.0" y="870" font-size="32" fill="#1C2321" font-weight="600" text-anchor="middle" font-family="'IBM Plex Sans',Arial,sans-serif">NV 4</text>
+<line x1="140" x2="1540" y1="820" y2="820" stroke="#5B6570" stroke-width="2"/>
+<text x="60" y="960" font-size="24" fill="#8A929A" font-weight="400" text-anchor="start" font-family="'IBM Plex Sans',Arial,sans-serif">Dữ liệu mô phỏng — nguồn: du_lieu_test/SO_LIEU_DA_KIEM_CHUNG.md, mục 2</text>
+</svg>

@@ -1,0 +1,7 @@
+student_id,name,reserve_group,test_club_1,score_1,test_club_2,score_2
+HS001,Nguyễn Văn An,,clb_nhiepanh,8.5,clb_robotics,9
+HS002,Trần Thị Bình,khoi_10,clb_nhiepanh,7,,
+HS003,Lê Minh Cường,,clb_robotics,6.5,clb_khoahoc,8
+HS004,Phạm Thu Dung,chinh_sach,clb_khoahoc,9.5,,
+HS005,Hoàng Gia Em,,,,,
+HS006,Vũ Ngọc Giang,,clb_robotics,7.5,,

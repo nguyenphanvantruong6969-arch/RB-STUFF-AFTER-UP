@@ -1,0 +1,539 @@
+<title>Đăng ký CLB và thi tuyển</title>
+<meta name="description" content="Bản mô phỏng biểu mẫu đăng ký câu lạc bộ theo buổi, có rẽ nhánh sang đề thi và chấm điểm tự động.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#e9efee; --card:#ffffff; --ink:#1b2523; --muted:#5a6966; --line:#d3dddb;
+  --accent:#0d6964; --accent-ink:#ffffff; --accent-soft:#dbecea; --band:#0d6964;
+  --ok:#1d7439; --ok-soft:#e0f1e5; --bad:#b0271d; --bad-soft:#fbe6e3; --warn:#8a5a00; --warn-soft:#fff2d6;
+  --field:#f6f9f8; --shadow:0 1px 2px rgba(18,40,38,.08),0 2px 8px rgba(18,40,38,.05);
+  --sans:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#101816; --card:#18221f; --ink:#e3ecea; --muted:#9aaba7; --line:#2c3a37;
+    --accent:#4fb8ae; --accent-ink:#06201d; --accent-soft:#1c3633; --band:#0f4f4b;
+    --ok:#6fcf8c; --ok-soft:#173424; --bad:#f08a80; --bad-soft:#3a1c19; --warn:#f0c060; --warn-soft:#3a2f14;
+    --field:#121b19; --shadow:0 1px 2px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#101816; --card:#18221f; --ink:#e3ecea; --muted:#9aaba7; --line:#2c3a37;
+  --accent:#4fb8ae; --accent-ink:#06201d; --accent-soft:#1c3633; --band:#0f4f4b;
+  --ok:#6fcf8c; --ok-soft:#173424; --bad:#f08a80; --bad-soft:#3a1c19; --warn:#f0c060; --warn-soft:#3a2f14;
+  --field:#121b19; --shadow:0 1px 2px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto;display:grid;gap:14px}
+.topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding-block:14px 4px}
+.sim{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px}
+.tabs button{border:0;background:none;color:var(--muted);font:600 13px var(--sans);padding:6px 14px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink)}
+.card{background:var(--card);border-radius:10px;box-shadow:var(--shadow);padding:20px 22px}
+.band{background:var(--band);border-radius:10px;padding:26px 22px 20px;color:#fff}
+.band h1{margin:0 0 6px;font-size:26px;line-height:1.25;font-weight:700;text-wrap:balance}
+.band p{margin:0;opacity:.88;max-width:62ch}
+.progress{height:4px;background:rgba(255,255,255,.25);border-radius:4px;margin-top:18px;overflow:hidden}
+.progress i{display:block;height:100%;background:#fff;border-radius:4px;transition:width .25s}
+.prog-txt{font-size:12px;margin-top:6px;opacity:.85;font-variant-numeric:tabular-nums}
+.sec-title{display:flex;flex-direction:column;gap:2px}
+.sec-kicker{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.sec-title h2{margin:0;font-size:20px;text-wrap:balance}
+.sec-title p{margin:4px 0 0;color:var(--muted)}
+.q{display:grid;gap:12px}
+.q.err{box-shadow:inset 3px 0 0 var(--bad),var(--shadow)}
+.q-head{display:flex;gap:10px;align-items:flex-start}
+.q-num{font-weight:600;color:var(--muted);min-width:1.8em;font-variant-numeric:tabular-nums}
+.q-title{font-weight:600;flex:1}
+.req{color:var(--bad);margin-left:3px}
+.code{font:500 11.5px var(--mono);color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:4px;padding:1px 6px;white-space:nowrap}
+.q-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-left:calc(1.8em + 10px)}
+.pts{font-size:12px;color:var(--muted)}
+.body{padding-left:calc(1.8em + 10px);display:grid;gap:8px}
+input[type=text]{width:100%;font:15px var(--sans);color:var(--ink);background:var(--field);border:0;border-bottom:2px solid var(--line);padding:10px 12px;border-radius:4px 4px 0 0}
+input[type=text]:focus{outline:none;border-bottom-color:var(--accent)}
+.opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;border:1px solid transparent;cursor:pointer;background:var(--field)}
+.opt:hover{border-color:var(--line)}
+.opt input{accent-color:var(--accent);width:18px;height:18px;margin:0;flex:none}
+.opt.sel{background:var(--accent-soft);border-color:var(--accent)}
+.errmsg{color:var(--bad);font-size:13px;font-weight:500}
+.hint{font-size:13px;color:var(--muted)}
+.note{font-size:13px;border-radius:6px;padding:8px 12px;background:var(--warn-soft);color:var(--warn)}
+.rank{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.rank li{display:flex;align-items:center;gap:10px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:8px 8px 8px 10px;cursor:grab;user-select:none}
+.rank li.drag{opacity:.45}
+.rank li.over{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.rank.untouched li{color:var(--muted)}
+.rank .pos{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--accent);color:var(--accent-ink);flex:none;font-variant-numeric:tabular-nums}
+.rank.untouched .pos{background:var(--line);color:var(--muted)}
+.rank .lbl{flex:1}
+.rank .lbl small{font-family:var(--mono);color:var(--muted);font-size:11.5px;margin-left:6px}
+.iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px;line-height:1}
+.iconbtn:disabled{opacity:.35;cursor:default}
+.linkbtn{border:0;background:none;color:var(--accent);font:600 13px var(--sans);cursor:pointer;padding:0;justify-self:start}
+.nav{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.btn{font:600 14px var(--sans);border-radius:6px;padding:10px 20px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--card);color:var(--accent)}
+.btn.danger{border-color:var(--bad);background:var(--card);color:var(--bad)}
+.btn.danger.armed{background:var(--bad);color:#fff}
+.btn:disabled{opacity:.4;cursor:default}
+button:focus-visible,input:focus-visible,.opt:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.score-big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.score-big b{font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--field);font-weight:600;color:var(--muted);font-size:12.5px}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:1px 9px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.mute{background:var(--field);color:var(--muted);border:1px solid var(--line)}
+.review{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.review li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:14px}
+.review .mk{font-weight:700}
+.review .mk.ok{color:var(--ok)} .review .mk.bad{color:var(--bad)}
+.review .sub{grid-column:2;color:var(--muted);font-size:13px}
+.bar{height:8px;background:var(--field);border-radius:4px;min-width:80px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.stack{display:grid;gap:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+h3{margin:0;font-size:16px}
+pre.out{margin:0;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px;font:12.5px/1.5 var(--mono);overflow-x:auto;max-height:260px}
+.warns{margin:0;padding-left:18px;display:grid;gap:4px;font-size:13.5px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500}
+.ex{font-size:11px;color:var(--muted);border:1px dashed var(--line);border-radius:4px;padding:0 5px;margin-left:6px}
+@media (max-width:520px){
+  .band h1{font-size:22px}
+  .card{padding:16px}
+  .body,.q-meta{padding-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <span class="sim">Bản mô phỏng biểu mẫu · không gửi dữ liệu đi đâu</span>
+    <div class="tabs" role="tablist">
+      <button id="tab-form" role="tab" aria-selected="true">Điền phiếu</button>
+      <button id="tab-resp" role="tab" aria-selected="false">Phản hồi <span id="resp-count"></span></button>
+    </div>
+  </div>
+  <main id="view"></main>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- Dữ liệu: chép từ mau_forms_thi_clb/de_thi.json ----------
+   Sửa đề thì sửa cả hai chỗ; tests/test_mau_forms_thi_clb.py đỏ nếu lệch. */
+const DIEM_CAU = 2;
+const CO = "Có, em làm bài thi ngay bây giờ", KHONG = "Không";
+const BUOI = [["thu_2","Thứ Hai"],["thu_3","Thứ Ba"],["thu_4","Thứ Tư"],["thu_5","Thứ Năm"],["thu_6","Thứ Sáu"]];
+const CLB = [
+ ["clb_covua","CLB Cờ vua","thu_2",[
+  ["Quân nào đi theo hình chữ L?",["Xe","Tượng","Mã","Hậu"],2],
+  ["Muốn nhập thành thì cần điều kiện nào?",["Vua chưa từng di chuyển","Vua đang bị chiếu","Có quân đứng giữa Vua và Xe","Xe đã di chuyển trước đó"],0],
+  ["Tốt đi tới hàng cuối cùng của bàn cờ thì sao?",["Bị loại khỏi bàn cờ","Được phong thành quân khác (trừ Vua)","Phải đứng yên tới hết ván","Quay về ô xuất phát"],1],
+  ["Trường hợp nào ván cờ là HOÀ?",["Một bên mất Hậu","Bên tới lượt không còn nước đi hợp lệ và không bị chiếu","Vua bị chiếu","Một bên mất cả hai Xe"],1],
+  ["Ký hiệu O-O nghĩa là gì?",["Nhập thành cánh Vua","Nhập thành cánh Hậu","Chiếu hết","Cầu hoà"],0]]],
+ ["clb_vanhoc","CLB Văn học","thu_2",[
+  ["Truyện Kiều là tác phẩm của ai?",["Nguyễn Du","Nguyễn Trãi","Hồ Xuân Hương","Nguyễn Đình Chiểu"],0],
+  ["Câu “Mặt trời xuống biển như hòn lửa” dùng biện pháp tu từ nào?",["So sánh","Ẩn dụ","Hoán dụ","Nói quá"],0],
+  ["Mỗi cặp câu thơ lục bát gồm những câu nào?",["Một câu 6 chữ và một câu 8 chữ","Hai câu 7 chữ","Một câu 5 chữ và một câu 7 chữ","Bốn câu 7 chữ"],0],
+  ["Tiểu thuyết Tắt đèn là của ai?",["Nam Cao","Ngô Tất Tố","Vũ Trọng Phụng","Nguyễn Công Hoan"],1],
+  ["Kể theo ngôi thứ nhất thì người kể xưng là gì?",["Tôi","Anh ấy","Họ","Gọi thẳng tên nhân vật"],0]]],
+ ["clb_nhiepanh","CLB Nhiếp ảnh","thu_2",[]],
+ ["clb_tienganh","CLB Tiếng Anh","thu_3",[
+  ["She ___ to school every day.",["go","goes","going","gone"],1],
+  ["Từ trái nghĩa với “ancient” là gì?",["modern","old","huge","quiet"],0],
+  ["I have lived here ___ 2020.",["since","for","from","at"],0],
+  ["If it rains tomorrow, we ___ at home.",["will stay","stayed","would stay","staying"],0],
+  ["Câu nào đúng ngữ pháp?",["He don't like tea.","He doesn't like tea.","He not like tea.","He doesn't likes tea."],1]]],
+ ["clb_mythuat","CLB Mỹ thuật","thu_3",[
+  ["Ba màu cơ bản trong hội hoạ truyền thống là gì?",["Đỏ, vàng, lam","Đỏ, lục, lam","Cam, tím, lục","Đen, trắng, xám"],0],
+  ["Màu bổ túc của màu đỏ là màu nào?",["Vàng","Lục","Cam","Tím"],1],
+  ["Luật xa gần giúp bức tranh có điều gì?",["Tươi màu hơn","Nhiều nét hơn","Cảm giác chiều sâu","Kích thước nhỏ hơn"],2],
+  ["Tranh dân gian Đông Hồ thường in trên loại giấy nào?",["Giấy điệp","Giấy báo","Giấy bóng kính","Giấy than"],0],
+  ["Pha màu lam với màu vàng thì được màu gì?",["Tím","Cam","Nâu","Lục"],3]]],
+ ["clb_bongda","CLB Bóng đá","thu_3",[]],
+ ["clb_robotics","CLB Robotics","thu_4",[
+  ["Cảm biến siêu âm trên robot dùng để làm gì?",["Đo nhiệt độ","Đo khoảng cách","Nhận biết màu","Đo độ ẩm"],1],
+  ["Vòng lặp trong lập trình dùng để làm gì?",["Lặp lại một nhóm lệnh","Dừng chương trình","Xoá biến","Nối dây điện"],0],
+  ["Động cơ servo khác động cơ DC thường ở điểm nào?",["Không cần điện","Chỉ quay một chiều","Điều khiển được góc quay chính xác","Luôn quay nhanh hơn"],2],
+  ["Robot tránh vật cản đo được khoảng cách dưới 10 cm thì nên làm gì?",["Tăng tốc đi thẳng","Tắt cảm biến","Dừng lại hoặc rẽ hướng khác","Đứng chờ mãi"],2],
+  ["Arduino là gì?",["Bo mạch vi điều khiển","Một loại pin","Phần mềm vẽ","Một loại cảm biến"],0]]],
+ ["clb_khoahoc","CLB Khoa học","thu_4",[
+  ["Ở áp suất tiêu chuẩn, nước sôi ở bao nhiêu độ C?",["90","100","50","0"],1],
+  ["Cây xanh tạo chất hữu cơ nhờ ánh sáng qua quá trình nào?",["Hô hấp","Thoát hơi nước","Quang hợp","Lên men"],2],
+  ["Đơn vị đo lực là gì?",["Niutơn (N)","Jun (J)","Oát (W)","Kilôgam (kg)"],0],
+  ["Khí nào chiếm tỉ lệ lớn nhất trong không khí?",["Oxy","Cacbonic","Hiđro","Nitơ"],3],
+  ["Trong thí nghiệm, “biến kiểm soát” là gì?",["Yếu tố giữ nguyên để so sánh công bằng","Yếu tố cố tình thay đổi","Kết quả đo được","Giả thuyết ban đầu"],0]]],
+ ["clb_kynang","CLB Kỹ năng sống","thu_4",[]],
+ ["clb_tinhoc","CLB Tin học","thu_5",[
+  ["1 byte bằng bao nhiêu bit?",["2","8","10","16"],1],
+  ["Hệ nhị phân dùng những chữ số nào?",["0 và 1","0 đến 9","1 và 2","A đến F"],0],
+  ["Số nhị phân 101 bằng bao nhiêu trong hệ thập phân?",["3","5","6","101"],1],
+  ["Thuật toán là gì?",["Một loại phần cứng","Một trang web","Dãy hữu hạn các bước để giải một bài toán","Một loại virus"],2],
+  ["Mật khẩu nào mạnh nhất?",["123456","password","ngaysinh","T0i#Hoc!2026"],3]]],
+ ["clb_amnhac","CLB Âm nhạc","thu_5",[
+  ["Có bao nhiêu tên nốt nhạc cơ bản?",["5","7","8","12"],1],
+  ["Một nốt tròn dài bằng mấy nốt đen?",["1","2","4","8"],2],
+  ["Ký hiệu # trong bản nhạc gọi là gì?",["Dấu thăng","Dấu giáng","Dấu lặng","Dấu nối"],0],
+  ["Nhịp 3/4 có ý nghĩa gì?",["Mỗi ô nhịp 3 phách, mỗi phách là một nốt đen","Mỗi ô nhịp 4 phách","Mỗi ô nhịp 3 phách, mỗi phách là một nốt trắng","Mỗi ô nhịp 2 phách"],0],
+  ["Bài Tiến quân ca do ai sáng tác?",["Trịnh Công Sơn","Văn Cao","Phạm Tuyên","Hoàng Việt"],1]]],
+ ["clb_tinhnguyen","CLB Tình nguyện","thu_5",[]],
+ ["clb_toan","CLB Toán tư duy","thu_6",[
+  ["Số tiếp theo của dãy 2, 4, 8, 16 là gì?",["18","20","24","32"],3],
+  ["Lớp có 30 học sinh, 40% là nữ. Lớp có bao nhiêu bạn nữ?",["10","12","14","18"],1],
+  ["Tổng ba góc trong một tam giác bằng bao nhiêu?",["90°","180°","270°","360°"],1],
+  ["Ba bạn bắt tay nhau, mỗi cặp bắt đúng một lần. Có bao nhiêu cái bắt tay?",["2","3","6","9"],1],
+  ["Số nguyên tố nhỏ nhất là số nào?",["0","1","2","3"],2]]],
+ ["clb_lichsu","CLB Lịch sử","thu_6",[
+  ["Chiến thắng Điện Biên Phủ diễn ra năm nào?",["1945","1954","1968","1975"],1],
+  ["Ngô Quyền đánh thắng quân Nam Hán trên sông nào?",["Sông Như Nguyệt","Sông Hồng","Sông Bạch Đằng","Sông Hương"],2],
+  ["Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập vào ngày nào?",["19/8/1945","2/9/1945","7/5/1954","30/4/1975"],1],
+  ["Vua Quang Trung đại phá quân Thanh vào năm nào?",["1771","1789","1802","1858"],1],
+  ["Bình Ngô đại cáo do ai viết?",["Lý Thường Kiệt","Trần Hưng Đạo","Nguyễn Trãi","Lê Lợi"],2]]],
+ ["clb_bongro","CLB Bóng rổ","thu_6",[]]
+].map(([id,name,buoi,de])=>({id,name,buoi,de:de.map(([q,opts,a])=>({q,opts,a}))}));
+
+const byId = Object.fromEntries(CLB.map(c=>[c.id,c]));
+const tenBuoi = Object.fromEntries(BUOI);
+const coThi = CLB.filter(c=>c.de.length);
+const lbl = c => `${c.name} (${c.id})`;
+
+/* ---------- Bố cục: giống bieu_mau.cac_phan() ---------- */
+const SECTIONS = [];
+let qNo = 0;
+const Q = (o)=>({...o, no:++qNo});
+SECTIONS.push({kicker:"Phần 1", title:"Thông tin học sinh", desc:"Ghi đúng mã trên thẻ học sinh. Mã sai là phiếu không khớp được với danh sách.", qs:[
+  Q({code:"student_id", type:"text", title:"Mã học sinh của em", req:true, ph:"Ví dụ: HS024"}),
+  Q({code:"name", type:"text", title:"Họ và tên của em", req:true, ph:"Ví dụ: Nguyễn Minh An"}),
+]});
+for (const [b,ten] of BUOI){
+  const cs = CLB.filter(c=>c.buoi===b);
+  SECTIONS.push({kicker:ten, title:`${ten} · Nguyện vọng`, desc:"Câu này không bắt buộc. Bỏ trống nghĩa là em bận buổi này.", buoi:b, qs:[
+    Q({code:b, type:"ranking", title:`${ten}: em muốn vào câu lạc bộ nào? Kéo thả, câu lạc bộ em thích nhất lên đầu.`, req:false, opts:cs.map(c=>c.id)})
+  ]});
+  for (const c of cs.filter(c=>c.de.length)){
+    SECTIONS.push({kicker:ten, title:`${ten} · Dự thi ${c.name}`, gate:c.id, qs:[
+      Q({code:"thi-"+c.id, type:"choice", title:`Em có dự thi ${c.name} không?`, req:true, opts:[CO,KHONG], club:c.id})
+    ]});
+    SECTIONS.push({kicker:ten, title:`${ten} · Đề thi ${c.name}`, desc:`${c.de.length} câu, mỗi câu ${DIEM_CAU} điểm. Chọn một đáp án cho mỗi câu.`, exam:c.id, qs:
+      c.de.map((d,i)=>Q({code:`${c.id}-${i+1}`, type:"choice", title:d.q, req:true, opts:d.opts, points:DIEM_CAU}))
+    });
+  }
+}
+
+/* ---------- Trạng thái ---------- */
+const KEY = "mo-phong-forms-thi-clb-v1";
+let state = { tab:"form", sec:0, hist:[], ans:{}, errs:{}, done:null, showKey:false };
+let responses = loadResp();
+
+function loadResp(){
+  try { const r = JSON.parse(localStorage.getItem(KEY)||"null"); if (Array.isArray(r)) return r; } catch(e){}
+  return sampleResponses();
+}
+function saveResp(){ try { localStorage.setItem(KEY, JSON.stringify(responses)); } catch(e){} }
+
+function sampleResponses(){
+  // Ví dụ để tab Phản hồi không trống; đánh dấu "ví dụ", xoá được.
+  const mk = (sid,name,rank,exams)=>{
+    const a = {student_id:sid, name};
+    for (const [b,ids] of Object.entries(rank)) a[b]=ids;
+    for (const c of coThi) a["thi-"+c.id]=KHONG;
+    for (const [cid,nd] of Object.entries(exams)){
+      a["thi-"+cid]=CO;
+      byId[cid].de.forEach((d,i)=>{ a[`${cid}-${i+1}`] = d.opts[i<nd ? d.a : (d.a+1)%d.opts.length]; });
+    }
+    return {ans:a, at:"2026-09-07T07:3"+sid.slice(-1)+":00", example:true};
+  };
+  return [
+    mk("HS001","Trần Quốc Dũng",{thu_2:["clb_covua","clb_vanhoc","clb_nhiepanh"],thu_4:["clb_robotics","clb_khoahoc","clb_kynang"]},{clb_covua:4,clb_robotics:5}),
+    mk("HS002","Lê Thu Hà",{thu_3:["clb_mythuat","clb_tienganh","clb_bongda"],thu_5:["clb_amnhac","clb_tinhoc","clb_tinhnguyen"]},{clb_mythuat:3,clb_amnhac:5,clb_tinhoc:4}),
+    mk("HS003","Phạm Gia Khoa",{thu_6:["clb_toan","clb_bongro","clb_lichsu"],thu_2:["clb_nhiepanh","clb_covua","clb_vanhoc"]},{clb_toan:5,clb_lichsu:2}),
+  ];
+}
+
+/* ---------- Tiện ích ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm = s => String(s??"").trim().replace(/\s+/g," ").toLowerCase();
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>t.hidden=true,1800); }
+
+function grade(ans){
+  // Giống chuyen_forms_sang_phan_mem.phan_tich(): chấm theo nội dung, không theo vị trí.
+  const exams=[];
+  for (const c of coThi){
+    if (!norm(ans["thi-"+c.id]).startsWith("có")) continue;
+    const dung = c.de.map((d,i)=> norm(ans[`${c.id}-${i+1}`])===norm(d.opts[d.a]));
+    const ranked = (ans[c.buoi]||[]).includes(c.id);
+    exams.push({club:c.id, dung, diem:DIEM_CAU*dung.filter(Boolean).length, max:DIEM_CAU*c.de.length, nap:ranked});
+  }
+  return exams;
+}
+
+/* ---------- Điền phiếu ---------- */
+function renderForm(){
+  if (state.done) return renderDone();
+  const s = SECTIONS[state.sec], n = SECTIONS.length;
+  const last = nextIndex(state.sec, true) >= n;
+  let h = `<div class="band"><h1>Đăng ký câu lạc bộ và thi tuyển</h1>
+    <p>Xếp nguyện vọng từng buổi từ Thứ Hai tới Thứ Sáu. Muốn thi câu lạc bộ nào thì chọn “Có” để làm đề thi của câu lạc bộ đó ngay.</p>
+    <div class="progress"><i style="width:${Math.round(100*(state.sec+1)/n)}%"></i></div>
+    <div class="prog-txt">Phần ${state.sec+1} / ${n}</div></div>`;
+  h += `<section class="card sec-title"><span class="sec-kicker">${esc(s.kicker)}</span><h2>${esc(s.title)}</h2>${s.desc?`<p>${esc(s.desc)}</p>`:""}</section>`;
+  for (const q of s.qs) h += renderQ(q);
+  h += `<div class="nav"><div class="row">
+      <button class="btn ghost" id="back" ${state.hist.length?"":"disabled"}>Quay lại</button>
+      <button class="linkbtn" id="autofill" type="button">Điền nhanh phần này</button></div>
+      <button class="btn" id="next">${last?"Gửi":"Tiếp"}</button></div>`;
+  $("#view").innerHTML = h;
+  bindForm(s);
+}
+
+function renderQ(q){
+  const err = state.errs[q.code];
+  const v = state.ans[q.code];
+  let h = `<section class="card q${err?" err":""}" id="q-${q.code}">
+    <div class="q-head"><span class="q-num">${q.no}.</span><span class="q-title">${esc(q.title)}${q.req?'<span class="req" aria-label="bắt buộc">*</span>':""}</span></div>
+    <div class="q-meta"><span class="code" title="Mã ở đầu câu hỏi trên Forms, dùng làm tên cột khi xuất Excel">[${esc(q.code)}]</span>${q.points?`<span class="pts">${q.points} điểm</span>`:""}${q.type==="ranking"?'<span class="pts">Xếp hạng</span>':""}</div>
+    <div class="body">`;
+  if (q.type==="text"){
+    h += `<input type="text" id="in-${q.code}" data-code="${q.code}" value="${esc(v||"")}" placeholder="${esc(q.ph||"")}" autocomplete="off">`;
+  } else if (q.type==="choice"){
+    q.opts.forEach((o,i)=>{
+      const sel = v===o;
+      h += `<label class="opt${sel?" sel":""}"><input type="radio" name="r-${q.code}" id="r-${q.code}-${i}" data-code="${q.code}" value="${esc(o)}" ${sel?"checked":""}><span>${esc(o)}</span></label>`;
+    });
+    if (q.club && v===CO && !(state.ans[byId[q.club].buoi]||[]).includes(q.club)){
+      h += `<div class="note">Em chưa xếp ${esc(byId[q.club].name)} ở câu nguyện vọng ${esc(tenBuoi[byId[q.club].buoi])}. Bài thi vẫn được chấm, nhưng điểm sẽ không được nạp vào phần mềm xếp CLB.</div>`;
+    }
+  } else if (q.type==="ranking"){
+    const touched = Array.isArray(v);
+    const order = touched ? v : q.opts;
+    h += `<ol class="rank${touched?"":" untouched"}" data-code="${q.code}">` + order.map((id,i)=>
+      `<li draggable="true" data-id="${id}"><span class="pos">${touched?i+1:"–"}</span><span class="lbl">${esc(byId[id].name)}<small>(${id})</small></span>
+        <button class="iconbtn" data-mv="-1" aria-label="Đưa ${esc(byId[id].name)} lên" ${touched&&i===0?"disabled":""}>↑</button>
+        <button class="iconbtn" data-mv="1" aria-label="Đưa ${esc(byId[id].name)} xuống" ${touched&&i===order.length-1?"disabled":""}>↓</button></li>`).join("") + `</ol>`;
+    h += touched
+      ? `<button class="linkbtn" data-clear="${q.code}" type="button">Bỏ xếp hạng (em bận buổi này)</button>`
+      : `<span class="hint">Chưa xếp. Kéo thả hoặc bấm mũi tên để bắt đầu. Forms buộc xếp đủ mọi câu lạc bộ trong câu: câu lạc bộ em ít muốn nhất để cuối.</span>`;
+  }
+  if (err) h += `<div class="errmsg">${esc(err)}</div>`;
+  return h + `</div></section>`;
+}
+
+function bindForm(s){
+  document.querySelectorAll('input[type=text][data-code]').forEach(el=>el.addEventListener("input",()=>{ state.ans[el.dataset.code]=el.value; }));
+  document.querySelectorAll('input[type=radio][data-code]').forEach(el=>el.addEventListener("change",()=>{
+    state.ans[el.dataset.code]=el.value; delete state.errs[el.dataset.code]; rerenderKeepScroll();
+  }));
+  document.querySelectorAll(".rank").forEach(bindRank);
+  document.querySelectorAll("[data-clear]").forEach(b=>b.addEventListener("click",()=>{ delete state.ans[b.dataset.clear]; rerenderKeepScroll(); }));
+  $("#back").addEventListener("click",()=>{ state.sec=state.hist.pop(); state.errs={}; renderForm(); window.scrollTo(0,0); });
+  $("#next").addEventListener("click",()=>goNext(s));
+  $("#autofill").addEventListener("click",()=>{ autofill(s); rerenderKeepScroll(); });
+}
+
+function bindRank(ol){
+  const code = ol.dataset.code;
+  const cur = ()=>[...ol.querySelectorAll("li")].map(li=>li.dataset.id);
+  const commit = arr=>{ state.ans[code]=arr; rerenderKeepScroll(); };
+  ol.querySelectorAll("[data-mv]").forEach(b=>b.addEventListener("click",e=>{
+    e.stopPropagation();
+    const arr=cur(), id=b.closest("li").dataset.id, i=arr.indexOf(id), j=i+Number(b.dataset.mv);
+    if (Array.isArray(state.ans[code]) && (j<0||j>=arr.length)) return;
+    if (j>=0 && j<arr.length){ [arr[i],arr[j]]=[arr[j],arr[i]]; }
+    commit(arr);
+  }));
+  let dragId=null;
+  ol.querySelectorAll("li").forEach(li=>{
+    li.addEventListener("dragstart",e=>{ dragId=li.dataset.id; li.classList.add("drag"); e.dataTransfer.effectAllowed="move"; try{e.dataTransfer.setData("text/plain",dragId);}catch(_){} });
+    li.addEventListener("dragend",()=>{ li.classList.remove("drag"); ol.querySelectorAll(".over").forEach(x=>x.classList.remove("over")); });
+    li.addEventListener("dragover",e=>{ e.preventDefault(); li.classList.add("over"); });
+    li.addEventListener("dragleave",()=>li.classList.remove("over"));
+    li.addEventListener("drop",e=>{
+      e.preventDefault(); if(!dragId) return;
+      const arr=cur(), from=arr.indexOf(dragId), to=arr.indexOf(li.dataset.id);
+      arr.splice(from,1); arr.splice(to,0,dragId);
+      dragId=null; commit(arr);
+    });
+  });
+}
+
+function rerenderKeepScroll(){ const y=window.scrollY; renderForm(); window.scrollTo(0,y); }
+
+function validate(s){
+  state.errs={};
+  for (const q of s.qs){
+    const v=state.ans[q.code];
+    if (!q.req) continue;
+    if (q.type==="text" ? !String(v||"").trim() : !v) state.errs[q.code]="Câu hỏi này là bắt buộc.";
+  }
+  return !Object.keys(state.errs).length;
+}
+
+// Rẽ nhánh: câu cổng trả lời "Không" thì nhảy qua phần đề thi ngay sau nó.
+function nextIndex(i, peek){
+  const s=SECTIONS[i];
+  if (s.gate){
+    const v=state.ans["thi-"+s.gate];
+    if (v===KHONG || (peek && v!==CO)) return i+2;
+  }
+  return i+1;
+}
+
+function goNext(s){
+  if (!validate(s)){ renderForm(); const f=document.querySelector(".q.err"); if(f) f.scrollIntoView({block:"center"}); return; }
+  const n=nextIndex(state.sec);
+  if (n>=SECTIONS.length) return submit();
+  state.hist.push(state.sec); state.sec=n; renderForm(); window.scrollTo(0,0);
+}
+
+function autofill(s){
+  const pick=a=>a[Math.floor(Math.random()*a.length)];
+  for (const q of s.qs){
+    if (q.type==="text" && !String(state.ans[q.code]||"").trim()){
+      state.ans[q.code] = q.code==="student_id" ? "HS"+String(100+Math.floor(Math.random()*900)) : pick(["Nguyễn","Trần","Lê","Vũ"])+" "+pick(["Minh","Thu","Gia","Bảo"])+" "+pick(["An","Linh","Nam","Vy"]);
+    } else if (q.type==="ranking"){
+      state.ans[q.code]=[...q.opts].sort(()=>Math.random()-.5);
+    } else if (q.type==="choice" && !state.ans[q.code]){
+      if (q.club) state.ans[q.code] = (state.ans[byId[q.club].buoi]||[]).slice(0,2).includes(q.club) ? CO : KHONG;
+      else { const c=byId[q.code.split("-")[0]], d=c.de[Number(q.code.split("-")[1])-1]; state.ans[q.code]= Math.random()<.75 ? d.opts[d.a] : pick(d.opts); }
+    }
+  }
+  state.errs={};
+}
+
+function submit(){
+  const ans = JSON.parse(JSON.stringify(state.ans));
+  // Phần bị rẽ nhánh bỏ qua thì không có câu trả lời, giống Forms.
+  const visited=new Set([...state.hist,state.sec]);
+  SECTIONS.forEach((s,i)=>{ if(!visited.has(i)) s.qs.forEach(q=>delete ans[q.code]); });
+  ans.student_id=String(ans.student_id||"").trim(); ans.name=String(ans.name||"").trim();
+  const rec={ans, at:new Date().toISOString()};
+  responses.push(rec); saveResp(); updateCount();
+  state.done=rec; renderForm(); window.scrollTo(0,0);
+}
+
+function renderDone(){
+  const r=state.done, ex=grade(r.ans);
+  const tong=ex.reduce((a,e)=>a+e.diem,0), toiDa=ex.reduce((a,e)=>a+e.max,0);
+  const dup = responses.findIndex(x=>x.ans.student_id===r.ans.student_id) !== responses.indexOf(r);
+  let h=`<div class="band"><h1>Đã ghi nhận phản hồi</h1><p>Cảm ơn ${esc(r.ans.name)} (${esc(r.ans.student_id)}). Dưới đây là phần giáo viên thấy khi chấm; trên Forms thật nên tắt “Show results automatically” để em làm sau không biết đáp án.</p></div>`;
+  if (dup) h+=`<div class="card note">Mã ${esc(r.ans.student_id)} đã nộp trước đó. Bộ chuyển đổi chỉ giữ phiếu đầu tiên, phiếu này sẽ bị bỏ.</div>`;
+  h+=`<section class="card stack"><div class="score-big"><b>${tong}</b><span class="hint">/ ${toiDa||0} điểm tổng · ${ex.length} bài thi</span></div>`;
+  if (!ex.length) h+=`<p class="hint">Em không đăng ký thi câu lạc bộ nào, chỉ gửi nguyện vọng.</p>`;
+  else {
+    h+=`<div class="tbl-wrap"><table><thead><tr><th>Câu lạc bộ</th><th>Buổi</th><th class="num">Điểm</th><th>Nạp vào phần mềm</th></tr></thead><tbody>`+
+      ex.map(e=>`<tr><td>${esc(byId[e.club].name)}</td><td>${esc(tenBuoi[byId[e.club].buoi])}</td><td class="num">${e.diem} / ${e.max}</td><td>${e.nap?'<span class="pill ok">Có</span>':'<span class="pill warn">Không, chưa xếp nguyện vọng</span>'}</td></tr>`).join("")+`</tbody></table></div>`;
+    h+=`<button class="linkbtn" id="togglekey">${state.showKey?"Ẩn":"Xem"} chi tiết đúng sai</button>`;
+    if (state.showKey) for (const e of ex){
+      const c=byId[e.club];
+      h+=`<h3>${esc(c.name)}</h3><ul class="review">`+c.de.map((d,i)=>{
+        const mine=r.ans[`${c.id}-${i+1}`], ok=e.dung[i];
+        return `<li><span class="mk ${ok?"ok":"bad"}">${ok?"✓":"✗"}</span><span>${esc(d.q)}</span>
+          <span class="sub">Em chọn: ${esc(mine||"(bỏ trống)")}${ok?"":` · Đáp án: ${esc(d.opts[d.a])}`}</span></li>`;
+      }).join("")+`</ul>`;
+    }
+  }
+  const nv=BUOI.filter(([b])=>Array.isArray(r.ans[b]));
+  h+=`<h3>Nguyện vọng</h3>`+(nv.length?`<div class="tbl-wrap"><table><tbody>`+nv.map(([b,t])=>`<tr><td>${t}</td><td>${r.ans[b].map((id,i)=>`${i+1}. ${esc(byId[id].name)}`).join(" · ")}</td></tr>`).join("")+`</tbody></table></div>`:`<p class="hint">Không xếp buổi nào.</p>`);
+  h+=`</section><div class="nav"><button class="btn ghost" id="toresp">Xem tất cả phản hồi</button><button class="btn" id="again">Điền phiếu mới</button></div>`;
+  $("#view").innerHTML=h;
+  const tk=$("#togglekey"); if(tk) tk.addEventListener("click",()=>{ state.showKey=!state.showKey; renderDone(); });
+  $("#again").addEventListener("click",()=>{ state={...state, sec:0, hist:[], ans:{}, errs:{}, done:null, showKey:false}; renderForm(); window.scrollTo(0,0); });
+  $("#toresp").addEventListener("click",()=>setTab("resp"));
+}
+
+/* ---------- Phản hồi + xuất cho phần mềm ---------- */
+function analyse(){
+  const seen=new Map(), warns=[], kept=[];
+  responses.forEach((r,i)=>{
+    const sid=r.ans.student_id, dong=i+2;
+    if (!sid){ warns.push(`dòng ${dong}: phiếu không có mã học sinh, bỏ cả phiếu`); return; }
+    if (seen.has(sid)){ warns.push(`dòng ${dong} ${sid}: nộp lần nữa, BỎ phiếu này, giữ phiếu đầu ở dòng ${seen.get(sid)}`); return; }
+    seen.set(sid,dong);
+    const ex=grade(r.ans);
+    ex.filter(e=>!e.nap).forEach(e=>warns.push(`dòng ${dong} ${sid}: ${e.club}: làm bài thi nhưng không xếp CLB này ở nguyện vọng ${byId[e.club].buoi}, điểm không nạp`));
+    if (!BUOI.some(([b])=>Array.isArray(r.ans[b]))) warns.push(`dòng ${dong} ${sid}: không xếp nguyện vọng buổi nào`);
+    kept.push({r, ex});
+  });
+  return {kept, warns};
+}
+
+function csv(rows){ return rows.map(r=>r.map(v=>{ v=String(v??""); return /[",\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v; }).join(",")).join("\n"); }
+function tsv(rows){ return rows.map(r=>r.map(v=>String(v??"").replace(/[\t\n]/g," ")).join("\t")).join("\n"); }
+
+function exports_(kept){
+  const nMax=Math.max(1,...kept.map(k=>k.ex.filter(e=>e.nap).length));
+  const h2=["student_id","name","reserve_group"]; for(let i=1;i<=nMax;i++) h2.push("test_club_"+i,"score_"+i);
+  const f2=[h2, ...kept.map(({r,ex})=>{ const row=[r.ans.student_id,r.ans.name,""]; ex.filter(e=>e.nap).forEach(e=>row.push(e.club,e.diem)); while(row.length<h2.length) row.push(""); return row; })];
+  const h3=["student_id","name","reserve_group"];
+  for (const [b] of BUOI){ const n=Math.max(1,...kept.map(k=>(k.r.ans[b]||[]).length)); for(let i=1;i<=n;i++) h3.push(`${b}_pref_${i}`); }
+  const f3=[h3, ...kept.map(({r})=>h3.map(col=>{ if(col==="student_id") return r.ans.student_id; if(col==="name") return r.ans.name;
+      const m=col.match(/^(.+)_pref_(\d+)$/); return m ? ((r.ans[m[1]]||[])[m[2]-1]||"") : ""; }))];
+  const hd=["Mã HS","Họ tên",...coThi.map(c=>c.name),"Số CLB đã thi"];
+  const fd=[hd, ...kept.map(({r,ex})=>{ const d=Object.fromEntries(ex.map(e=>[e.club,e.diem])); return [r.ans.student_id,r.ans.name,...coThi.map(c=>d[c.id]??""),ex.length]; })];
+  return {
+    f2:{name:"02_chon_CLB_muon_thi.csv", text:csv(f2)},
+    f3:{name:"03_xep_hang_nguyen_vong.csv", text:csv(f3)},
+    diem:{name:"Bảng điểm (dán thẳng vào Excel)", text:tsv(fd)},
+  };
+}
+
+let outSel="diem", clearArmed=false;
+function renderResp(){
+  const {kept,warns}=analyse(), out=exports_(kept);
+  const stats=coThi.map(c=>{ const ds=kept.flatMap(k=>k.ex.filter(e=>e.club===c.id).map(e=>e.diem)); return {c, n:ds.length, tb:ds.length?ds.reduce((a,b)=>a+b,0)/ds.length:null}; });
+  let h=`<div class="band"><h1>Phản hồi</h1><p>${responses.length} phiếu, ${kept.length} học sinh sau khi bỏ phiếu trùng. Các phiếu có nhãn “ví dụ” là dữ liệu mẫu, xoá được.</p></div>`;
+  h+=`<section class="card stack"><h3>Điểm trung bình từng câu lạc bộ</h3><div class="tbl-wrap"><table><thead><tr><th>Câu lạc bộ</th><th>Buổi</th><th class="num">Số bài</th><th class="num">Điểm TB</th><th style="width:40%"></th></tr></thead><tbody>`+
+    stats.map(s=>`<tr><td>${esc(s.c.name)}</td><td>${tenBuoi[s.c.buoi]}</td><td class="num">${s.n}</td><td class="num">${s.tb==null?"–":s.tb.toFixed(1)}</td><td><div class="bar"><i style="width:${s.tb==null?0:s.tb*10}%"></i></div></td></tr>`).join("")+`</tbody></table></div></section>`;
+  h+=`<section class="card stack"><h3>Từng phiếu</h3><div class="tbl-wrap"><table><thead><tr><th>Dòng</th><th>Mã HS</th><th>Họ tên</th>${BUOI.map(([b,t])=>`<th>${t}</th>`).join("")}${coThi.map(c=>`<th class="num" title="${esc(c.name)}">${esc(c.name.replace("CLB ",""))}</th>`).join("")}</tr></thead><tbody>`+
+    responses.map((r,i)=>{ const ex=Object.fromEntries(grade(r.ans).map(e=>[e.club,e]));
+      return `<tr><td class="num">${i+2}</td><td>${esc(r.ans.student_id)}${r.example?'<span class="ex">ví dụ</span>':""}</td><td>${esc(r.ans.name)}</td>`+
+        BUOI.map(([b])=>`<td>${Array.isArray(r.ans[b])?esc(byId[r.ans[b][0]].name.replace("CLB ",""))+(r.ans[b].length>1?` +${r.ans[b].length-1}`:""):'<span class="hint">bận</span>'}</td>`).join("")+
+        coThi.map(c=>{ const e=ex[c.id]; return `<td class="num">${e?`<span class="pill ${e.nap?"ok":"warn"}">${e.diem}</span>`:""}</td>`; }).join("")+`</tr>`; }).join("")+
+    `</tbody></table></div><p class="hint">Cột buổi hiện nguyện vọng 1 và số nguyện vọng còn lại. Điểm màu vàng là bài thi không nạp vì em chưa xếp CLB đó.</p></section>`;
+  h+=`<section class="card stack"><h3>Cảnh báo khi chuyển đổi</h3>`+(warns.length?`<ul class="warns">${warns.map(w=>`<li>${esc(w)}</li>`).join("")}</ul>`:`<p class="hint">Không có cảnh báo nào.</p>`)+`</section>`;
+  h+=`<section class="card stack"><h3>Xuất cho phần mềm xếp CLB</h3>
+    <p class="hint">Cùng định dạng bộ chuyển đổi ghi ra. Trang mô phỏng không tải tệp xuống được, nên bấm sao chép rồi dán vào tệp .csv hoặc thẳng vào Excel. Tệp 01_danh_sach_CLB.csv lấy từ de_thi.json.</p>
+    <div class="row">${Object.entries(out).map(([k,v])=>`<button class="btn ${k===outSel?"":"ghost"}" data-out="${k}">${esc(v.name)}</button>`).join("")}</div>
+    <pre class="out" id="outtxt">${esc(out[outSel].text)}</pre>
+    <div class="row"><button class="btn" id="copy">Sao chép</button></div></section>`;
+  h+=`<div class="nav"><button class="btn danger${clearArmed?" armed":""}" id="clear">${clearArmed?"Bấm lần nữa để xoá hết":"Xoá mọi phản hồi"}</button><button class="btn ghost" id="reset">Nạp lại phiếu ví dụ</button></div>`;
+  $("#view").innerHTML=h;
+  document.querySelectorAll("[data-out]").forEach(b=>b.addEventListener("click",()=>{ outSel=b.dataset.out; renderResp(); }));
+  $("#copy").addEventListener("click",()=>{
+    const text=out[outSel].text;
+    const fallback=()=>{ const r=document.createRange(); r.selectNodeContents($("#outtxt")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Đã bôi đen, nhấn Ctrl+C để sao chép"); };
+    try { navigator.clipboard.writeText(text).then(()=>toast("Đã sao chép "+out[outSel].name), fallback); } catch(e){ fallback(); }
+  });
+  $("#clear").addEventListener("click",()=>{
+    if(!clearArmed){ clearArmed=true; renderResp(); setTimeout(()=>{ if(clearArmed){ clearArmed=false; if(state.tab==="resp") renderResp(); } },4000); return; }
+    clearArmed=false; responses=[]; saveResp(); updateCount(); renderResp(); toast("Đã xoá mọi phản hồi");
+  });
+  $("#reset").addEventListener("click",()=>{ responses=sampleResponses().concat(responses.filter(r=>!r.example)); saveResp(); updateCount(); renderResp(); });
+}
+
+/* ---------- Khung ---------- */
+function updateCount(){ $("#resp-count").textContent = "("+responses.length+")"; }
+function setTab(t){
+  state.tab=t; clearArmed=false;
+  $("#tab-form").setAttribute("aria-selected", t==="form"); $("#tab-resp").setAttribute("aria-selected", t==="resp");
+  t==="form" ? renderForm() : renderResp(); window.scrollTo(0,0);
+}
+$("#tab-form").addEventListener("click",()=>setTab("form"));
+$("#tab-resp").addEventListener("click",()=>setTab("resp"));
+updateCount(); renderForm();
+</script>

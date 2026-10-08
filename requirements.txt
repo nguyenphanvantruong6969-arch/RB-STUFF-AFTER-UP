@@ -1,0 +1,12 @@
+# Goi CHAY phan mem. Ghim DUNG phien ban da build va chay that tren Windows
+# (log build run 33124799256, xem BAN_GIAO.md): ban build tung hong vi mot
+# goi phu thuoc tu len phien ban moi ma khong ai doi gi. Muon nang cap thi
+# nang co chu dinh, build thu, roi moi sua con so o day.
+pywebview==6.2.1
+# pywebview tren Windows di qua pythonnet -> .NET — mat xich de hong nhat
+# khi dong goi, nen ghim ca hai goi nay du chung chi la phu thuoc gian tiep.
+pythonnet==3.1.0 ; sys_platform == "win32"
+clr_loader==0.3.1 ; sys_platform == "win32"
+# Doc thang file .xlsx (Microsoft Forms xuat ra dinh dang nay).
+# Python thuan, khong can .NET — khong keo theo rui ro dong goi nhu pythonnet.
+openpyxl==3.1.5

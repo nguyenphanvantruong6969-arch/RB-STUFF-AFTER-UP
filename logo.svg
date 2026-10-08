@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Bieu tuong ung dung. Nguon goc: hoc sinh thiet ke, nop ngay 30/08/2026.
+       Sinh logo.png va logo.ico bang: ./.venv/bin/python tao_logo.py -->
+  <g transform="translate(56 56)">
+    <circle cx="200" cy="200" r="200" fill="#CC785C"/>
+    <g stroke="#F4EFE8" stroke-width="6" stroke-linecap="round">
+      <line x1="200" y1="200" x2="95"  y2="120"/>
+      <line x1="200" y1="200" x2="20"  y2="200"/>
+      <line x1="200" y1="200" x2="88"  y2="270"/>
+      <line x1="200" y1="200" x2="115" y2="368"/>
+      <line x1="200" y1="200" x2="285" y2="368"/>
+      <line x1="200" y1="200" x2="312" y2="270"/>
+      <line x1="200" y1="200" x2="380" y2="200"/>
+      <line x1="200" y1="200" x2="305" y2="120"/>
+      <line x1="200" y1="200" x2="150" y2="30"/>
+      <line x1="200" y1="200" x2="245" y2="55"/>
+    </g>
+    <g fill="#F4EFE8">
+      <circle cx="95"  cy="120" r="9"/>
+      <circle cx="20"  cy="200" r="12"/>
+      <circle cx="88"  cy="270" r="9"/>
+      <circle cx="115" cy="368" r="12"/>
+      <circle cx="285" cy="368" r="9"/>
+      <circle cx="312" cy="270" r="12"/>
+      <circle cx="380" cy="200" r="9"/>
+      <circle cx="305" cy="120" r="12"/>
+      <circle cx="150" cy="30"  r="9"/>
+      <circle cx="245" cy="55"  r="12"/>
+    </g>
+    <rect x="158" y="158" width="84" height="84" rx="8" fill="#F4EFE8"/>
+    <rect x="167" y="167" width="66" height="66" rx="4" fill="none" stroke="#CC785C" stroke-width="3"/>
+    <g fill="#CC785C">
+      <circle cx="167" cy="167" r="3.5"/>
+      <circle cx="233" cy="167" r="3.5"/>
+      <circle cx="167" cy="233" r="3.5"/>
+      <circle cx="233" cy="233" r="3.5"/>
+    </g>
+    <g stroke="#CC785C" stroke-width="3" stroke-linecap="round">
+      <line x1="182" y1="192" x2="218" y2="192"/>
+      <line x1="182" y1="202" x2="218" y2="202"/>
+      <line x1="182" y1="212" x2="204" y2="212"/>
+    </g>
+  </g>
+</svg>

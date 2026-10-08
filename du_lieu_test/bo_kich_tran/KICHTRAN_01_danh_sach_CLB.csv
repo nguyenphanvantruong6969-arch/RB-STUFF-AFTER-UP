@@ -1,0 +1,37 @@
+﻿club_id,name,capacity,reserve_capacity,reserve_group,buoi
+clb_tinhoc,CLB Tin học,12,3,chinh_sach,thu_2
+clb_bongro,CLB Bóng rổ,12,0,,thu_2
+clb_tranbien,CLB Tranh biện,10,2,khoi_10,thu_2
+clb_nhiepanh,CLB Nhiếp ảnh,10,0,,thu_2
+clb_amnhac,CLB Âm nhạc,12,0,,thu_2
+clb_lamphim,CLB Làm phim,8,0,,thu_2
+clb_covua,CLB Cờ vua,8,0,,thu_2
+clb_thienvan,CLB Thiên văn,10,0,,thu_2
+clb_vanhoc,CLB Văn học,10,0,,thu_2
+clb_bongban,CLB Bóng bàn,12,0,,thu_2
+clb_tiengnhat,CLB Tiếng Nhật,12,0,,thu_2
+clb_yoga,CLB Yoga,12,0,,thu_2
+clb_robotics,CLB Robotics,10,2,chinh_sach,thu_4
+clb_bongda,CLB Bóng đá,14,3,chinh_sach,thu_4
+clb_mythuat,CLB Mỹ thuật,10,2,khoi_10,thu_4
+clb_tienganh,CLB Tiếng Anh,12,0,,thu_4
+clb_gamedev,CLB Lập trình game,8,0,,thu_4
+clb_sankhau,CLB Sân khấu,10,0,,thu_4
+clb_nauan,CLB Nấu ăn,12,0,,thu_4
+clb_caulong,CLB Cầu lông,12,0,,thu_4
+clb_khoahoc,CLB Khoa học,10,0,,thu_4
+clb_khoinghiep,CLB Khởi nghiệp,10,0,,thu_4
+clb_thuphap,CLB Thư pháp,10,0,,thu_4
+clb_dienkinh,CLB Điền kinh,12,0,,thu_4
+clb_guitar,CLB Guitar,10,2,khoi_10,thu_6
+clb_nhayhiendai,CLB Nhảy hiện đại,10,0,,thu_6
+clb_baochi,CLB Báo chí,10,2,chinh_sach,thu_6
+clb_boiloi,CLB Bơi lội,12,0,,thu_6
+clb_toanhoc,CLB Toán học,10,0,,thu_6
+clb_hoahoc,CLB Hoá học,8,0,,thu_6
+clb_tinhnguyen,CLB Tình nguyện,14,0,,thu_6
+clb_lamvuon,CLB Làm vườn,12,0,,thu_6
+clb_cotuong,CLB Cờ tướng,10,0,,thu_6
+clb_thucong,CLB Thủ công,10,0,,thu_6
+clb_dulich,CLB Du lịch,12,0,,thu_6
+clb_duongsinh,CLB Dưỡng sinh,12,0,,thu_6

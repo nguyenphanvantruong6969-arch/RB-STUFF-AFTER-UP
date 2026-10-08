@@ -1,0 +1,964 @@
+<title>Khảo Sát Phân Bổ Câu Lạc Bộ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --paper:      #F6F7F5;
+    --surface:    #FFFFFF;
+    --sunk:       #EDEFEC;
+    --ink:        #171A18;
+    --ink-soft:   #4E5652;
+    --ink-faint:  #838C87;
+    --rule:       #D5DAD6;
+    --rule-soft:  #E6E9E6;
+    --pine:       #16624B;
+    --pine-wash:  #E4EFEA;
+    --mark:       #A32E19;
+    --mark-wash:  #F8E8E3;
+    --amber:      #8A5B00;
+    --amber-wash: #F6EEDC;
+
+    --f-head: "Manrope", "Segoe UI", system-ui, sans-serif;
+    --f-body: "Lora", Georgia, "Times New Roman", serif;
+    --f-mono: "IBM Plex Mono", "Noto Sans Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #121513;
+      --surface:    #1A1E1B;
+      --sunk:       #21261F;
+      --ink:        #E8EBE7;
+      --ink-soft:   #ADB5AF;
+      --ink-faint:  #7F8883;
+      --rule:       #333A35;
+      --rule-soft:  #252B27;
+      --pine:       #62BE9C;
+      --pine-wash:  #16281F;
+      --mark:       #E5876F;
+      --mark-wash:  #2E1B15;
+      --amber:      #D3A254;
+      --amber-wash: #2B2314;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #121513;
+    --surface:    #1A1E1B;
+    --sunk:       #21261F;
+    --ink:        #E8EBE7;
+    --ink-soft:   #ADB5AF;
+    --ink-faint:  #7F8883;
+    --rule:       #333A35;
+    --rule-soft:  #252B27;
+    --pine:       #62BE9C;
+    --pine-wash:  #16281F;
+    --mark:       #E5876F;
+    --mark-wash:  #2E1B15;
+    --amber:      #D3A254;
+    --amber-wash: #2B2314;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 22px 90px;
+  }
+
+  /* ---------- masthead ---------- */
+  header.masthead { margin-bottom: 34px; }
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--pine);
+    margin: 0 0 12px;
+  }
+  h1 {
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: clamp(28px, 6vw, 40px);
+    line-height: 1.12;
+    letter-spacing: -.02em;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .standfirst {
+    font-size: 17px;
+    color: var(--ink-soft);
+    margin: 0 0 24px;
+    max-width: 60ch;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--surface);
+    overflow: hidden;
+  }
+  .fact {
+    flex: 1 1 120px;
+    padding: 12px 14px;
+    border-right: 1px solid var(--rule-soft);
+  }
+  .fact:last-child { border-right: 0; }
+  .fact dt {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 4px;
+  }
+  .fact dd {
+    margin: 0;
+    font-family: var(--f-head);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- headings ---------- */
+  h2 {
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -.015em;
+    margin: 52px 0 14px;
+    padding-bottom: 9px;
+    border-bottom: 2px solid var(--ink);
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: var(--f-head);
+    font-weight: 700;
+    font-size: 17px;
+    margin: 30px 0 10px;
+    letter-spacing: -.01em;
+  }
+  p { margin: 0 0 14px; }
+  .lede { color: var(--ink-soft); max-width: 62ch; }
+
+  /* ---------- section band ---------- */
+  .band {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin: 46px 0 8px;
+    padding: 13px 16px;
+    background: var(--pine-wash);
+    border-left: 4px solid var(--pine);
+    border-radius: 0 3px 3px 0;
+  }
+  .band-letter {
+    flex: 0 0 auto;
+    width: 30px; height: 30px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--pine);
+    color: var(--pine-wash);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .band-title {
+    font-family: var(--f-head);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -.01em;
+  }
+
+  /* ---------- question card ---------- */
+  .q {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 4px solid var(--rule);
+    border-radius: 0 3px 3px 0;
+    padding: 16px 18px;
+    margin: 12px 0;
+  }
+  .q.load { border-left-color: var(--mark); }
+  .q-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .q-num {
+    font-family: var(--f-mono);
+    font-weight: 500;
+    font-size: 12px;
+    color: var(--ink-faint);
+    letter-spacing: .06em;
+    white-space: nowrap;
+  }
+  .q.load .q-num { color: var(--mark); }
+  .chip {
+    font-family: var(--f-mono);
+    font-size: 9.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .chip.new  { color: var(--pine);  background: var(--pine-wash);  border: 1px solid var(--pine); }
+  .chip.req  { color: var(--amber); background: var(--amber-wash); }
+  .chip.load { color: var(--mark);  background: var(--mark-wash); }
+  .q-stem {
+    font-family: var(--f-head);
+    font-weight: 700;
+    font-size: 16.5px;
+    line-height: 1.42;
+    letter-spacing: -.008em;
+    margin: 4px 0 12px;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+  .q-stem em { font-style: italic; font-weight: 500; }
+
+  ul.opts { list-style: none; margin: 0; padding: 0; }
+  ul.opts li {
+    position: relative;
+    padding: 4px 0 4px 26px;
+    font-size: 15px;
+    color: var(--ink-soft);
+    border-top: 1px solid var(--rule-soft);
+  }
+  ul.opts li:first-child { border-top: 0; }
+  ul.opts li::before {
+    content: "";
+    position: absolute;
+    left: 4px; top: 12px;
+    width: 11px; height: 11px;
+    border: 1.5px solid var(--rule);
+    border-radius: 50%;
+  }
+
+  .why {
+    margin: 12px 0 0;
+    padding-top: 10px;
+    border-top: 1px dashed var(--rule);
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  .why b { color: var(--ink); font-weight: 600; }
+
+  .dl {
+    display: block;
+    margin: 10px 0;
+    padding: 12px 14px;
+    background: var(--sunk);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .dl:hover, .dl:focus-visible { border-color: var(--pine); }
+  .dl:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+  .dl-name {
+    display: block;
+    font-family: var(--f-head);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--pine);
+    margin-bottom: 3px;
+  }
+  .dl-what { display: block; font-size: 14px; color: var(--ink-soft); }
+  .dl-url {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    word-break: break-all;
+  }
+
+  /* ---------- callouts ---------- */
+  .note {
+    border-left: 3px solid var(--rule);
+    background: var(--sunk);
+    padding: 13px 16px;
+    margin: 14px 0;
+    border-radius: 0 3px 3px 0;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  .note p:last-child { margin-bottom: 0; }
+  .note .note-tag {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+  .note.branch { border-left-color: var(--pine); }
+  .note.branch .note-tag { color: var(--pine); }
+
+  .alarm {
+    border: 2px solid var(--mark);
+    background: var(--mark-wash);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin: 26px 0;
+  }
+  .alarm h3 {
+    margin-top: 0;
+    color: var(--mark);
+    font-size: 17px;
+  }
+  .alarm p:last-child { margin-bottom: 0; }
+
+  /* ---------- tables ---------- */
+  .table-wrap { overflow-x: auto; margin: 16px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    min-width: 460px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+  }
+  thead th {
+    font-family: var(--f-mono);
+    font-size: 10.5px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    border-bottom: 1.5px solid var(--rule);
+    font-weight: 500;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+  td strong { font-weight: 600; }
+  .yes { color: var(--pine); font-weight: 600; }
+  .no  { color: var(--mark); font-weight: 600; }
+  .no s { opacity: .75; }
+
+  code {
+    font-family: var(--f-mono);
+    font-size: .88em;
+    background: var(--sunk);
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: var(--ink);
+  }
+
+  blockquote {
+    margin: 16px 0;
+    padding: 14px 18px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  blockquote p:last-child { margin-bottom: 0; }
+
+  ol.reasons { padding-left: 0; list-style: none; counter-reset: r; margin: 0; }
+  ol.reasons > li {
+    counter-increment: r;
+    position: relative;
+    padding: 14px 0 14px 42px;
+    border-top: 1px solid var(--rule-soft);
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  ol.reasons > li:first-child { border-top: 0; }
+  ol.reasons > li::before {
+    content: counter(r);
+    position: absolute;
+    left: 0; top: 15px;
+    width: 26px; height: 26px;
+    display: grid; place-items: center;
+    border-radius: 50%;
+    background: var(--sunk);
+    color: var(--pine);
+    font-family: var(--f-head);
+    font-weight: 800;
+    font-size: 13px;
+  }
+  ol.reasons b { color: var(--ink); font-weight: 600; }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-size: 13.5px;
+    color: var(--ink-faint);
+    font-style: italic;
+  }
+
+  @media (max-width: 520px) {
+    .wrap { padding: 26px 15px 60px; }
+    .fact { flex: 1 1 50%; border-bottom: 1px solid var(--rule-soft); }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Công cụ đo · không phải dữ liệu</p>
+    <h1>Khảo sát hiện trạng phân bổ câu lạc bộ</h1>
+    <p class="standfirst">
+      Bộ câu hỏi để dựng biểu mẫu trên Microsoft Forms. Mỗi câu ở đây tồn tại vì <strong>báo cáo đang khẳng
+      định một điều mà chưa có số liệu nào đỡ</strong>. Khảo sát chỉ đo hiện trạng — không
+      có câu nào hỏi ý kiến về giải pháp.
+    </p>
+    <dl class="facts">
+      <div class="fact"><dt>Nền tảng</dt><dd>MS&nbsp;Forms</dd></div>
+      <div class="fact"><dt>Số câu</dt><dd>16</dd></div>
+      <div class="fact"><dt>Dạng câu</dt><dd>Trắc nghiệm</dd></div>
+      <div class="fact"><dt>Ước tính</dt><dd>≈ 2:45</dd></div>
+      <div class="fact"><dt>Rẽ nhánh</dt><dd>2 chỗ</dd></div>
+      <div class="fact"><dt>Bắt buộc</dt><dd>8 câu</dd></div>
+    </dl>
+  </header>
+
+  <h2>Mỗi câu kiểm chứng khẳng định nào</h2>
+  <p class="lede">
+    Khi bảo vệ, giám khảo chỉ cần hỏi <em>“em biết điều đó từ đâu?”</em>. Bảng này là câu
+    trả lời. Ba dòng in đậm là ba chỗ trước đây <strong>không có câu nào chạm tới</strong>.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th style="width:62%">Báo cáo khẳng định</th><th>Câu kiểm chứng</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>phân bổ thực hiện dựa trên <strong>thứ tự đăng ký</strong></td><td>Câu 3, 4</td></tr>
+        <tr><td>học sinh có đam mê <strong>bị loại vì đăng ký muộn</strong></td><td>Câu 10</td></tr>
+        <tr><td>nhiều học sinh đăng ký <strong>vội vàng</strong>, không xét sự phù hợp</td><td>Câu 5, 6</td></tr>
+        <tr><td><strong>học sinh tự bỏ CLB mình muốn</strong> vì sợ không tới lượt</td><td><strong>Câu 7</strong> — mới</td></tr>
+        <tr><td>ảnh hưởng đến <strong>cơ hội tham gia, trải nghiệm học tập</strong></td><td><strong>Câu 11, 12</strong> — mới</td></tr>
+        <tr><td><strong>câu lạc bộ</strong> không có cơ hội chọn học sinh phù hợp</td><td><strong>Câu 15, 16</strong> — mới</td></tr>
+        <tr><td>mức độ hài lòng với quy trình</td><td>Câu 13, 14</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="note-tag">Câu giữ cho cả khảo sát khỏi vô nghĩa</span>
+    <p>
+      <b>Câu 8 hỏi lần gần nhất em được ghi mấy nguyện vọng.</b> Nếu trường chỉ cho chọn
+      <b>một</b> CLB thì cả khái niệm “nguyện vọng thứ mấy” (Câu 9) không tồn tại, và báo
+      cáo phải viết lại theo hướng khác. Vì thế Câu 8 phải hỏi, và phải hỏi <b>trước</b> Câu 9.
+    </p>
+  </div>
+
+  <h2>Lời mở đầu — dán vào phần mô tả của Form</h2>
+  <blockquote>
+    <p>
+      Khảo sát này tìm hiểu <strong>cách trường đang xếp học sinh vào câu lạc bộ</strong> và
+      bạn thấy cách đó thế nào. Kết quả dùng cho một đề tài nghiên cứu khoa học của học sinh.
+    </p>
+    <p>
+      <strong>Khảo sát ẩn danh</strong> — không hỏi tên, không hỏi email, không có cách nào
+      truy ra ai trả lời. Mất khoảng <strong>3 phút</strong>. Không có câu trả lời đúng hay
+      sai; bạn thấy sao thì chọn vậy.
+    </p>
+  </blockquote>
+
+  <!-- ============ PHẦN A ============ -->
+  <div class="band">
+    <span class="band-letter">A</span>
+    <span class="band-title">Đôi nét về bạn</span>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 1</span><span class="chip req">Bắt buộc</span></div>
+    <p class="q-stem">Bạn đang học khối mấy?</p>
+    <ul class="opts">
+      <li>Khối 6</li><li>Khối 7</li><li>Khối 8</li><li>Khối 9</li>
+      <li>Khối 10</li><li>Khối 11</li><li>Khối 12</li>
+    </ul>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 2</span><span class="chip req">Bắt buộc</span></div>
+    <p class="q-stem">Bạn đã đăng ký câu lạc bộ ở trường mấy lần rồi?</p>
+    <ul class="opts">
+      <li>Đây là lần đầu</li>
+      <li>2 lần</li>
+      <li>3 lần trở lên</li>
+      <li>Chưa đăng ký lần nào</li>
+    </ul>
+  </div>
+
+  <div class="note branch">
+    <span class="note-tag">Rẽ nhánh 1</span>
+    <p>
+      Chọn câu → <b>“…”</b> (More settings) → <b>Add branching</b> → ô <b>Go to</b>.
+      Đáp án <b>“Chưa đăng ký lần nào”</b> → <b>Phần E</b>, bỏ qua Phần B, C, D.
+    </p>
+    <p>
+      Em chưa từng đăng ký thì không có trải nghiệm để trả lời Phần B và C. Câu 13 lại hỏi
+      <em>“hài lòng với kết quả <b>mình</b> nhận được”</em> — em không có kết quả nào để hài
+      lòng, ép trả lời là ép đoán bừa.
+    </p>
+    <p>
+      Em đó vẫn đóng góp một số đo có ích: <b>bao nhiêu phần trăm học sinh không đăng ký CLB
+      lần nào</b> — con số nói về độ với tới của cả chương trình.
+    </p>
+  </div>
+
+  <!-- ============ PHẦN B ============ -->
+  <div class="band">
+    <span class="band-letter">B</span>
+    <span class="band-title">Quy trình thực tế diễn ra thế nào</span>
+  </div>
+
+  <div class="q load">
+    <div class="q-head"><span class="q-num">Câu 3</span><span class="chip req">Bắt buộc</span><span class="chip load">Câu chịu lực</span></div>
+    <p class="q-stem">Theo bạn, lần gần nhất trường xếp học sinh vào CLB chủ yếu dựa vào điều gì?</p>
+    <ul class="opts">
+      <li>Ai đăng ký trước thì được trước</li>
+      <li>Kết quả bài kiểm tra hoặc buổi thử của CLB</li>
+      <li>Phỏng vấn hoặc xét hồ sơ</li>
+      <li>Bốc thăm ngẫu nhiên</li>
+      <li>Giáo viên hoặc ban tổ chức tự quyết định</li>
+      <li>Tôi không rõ</li>
+    </ul>
+    <p class="why"><b>Câu quan trọng nhất của cả khảo sát.</b> Cả bản báo cáo đứng trên khẳng
+    định “xét theo thứ tự đăng ký”.</p>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 4</span></div>
+    <p class="q-stem">Bạn biết điều đó bằng cách nào?</p>
+    <ul class="opts">
+      <li>Trường hoặc CLB thông báo rõ ràng từ đầu</li>
+      <li>Nghe bạn bè hoặc anh chị khoá trên nói</li>
+      <li>Tự suy ra từ kết quả mình nhận được</li>
+      <li>Tôi có hỏi nhưng không được cho biết</li>
+      <li>Tôi không biết cách xét là gì</li>
+    </ul>
+    <p class="why"><b>Đo độ minh bạch, không đo quy trình.</b> Nó cho biết học sinh
+    <b>thật sự biết</b> hay chỉ <b>đoán</b> — thiếu câu này thì Câu 3 rất dễ bị đọc quá tay.</p>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 5</span></div>
+    <p class="q-stem">Từ khi trường mở đăng ký đến khi bạn nộp, khoảng bao lâu?</p>
+    <ul class="opts">
+      <li>Trong vòng vài phút đầu</li>
+      <li>Trong ngày đầu tiên</li>
+      <li>Sau vài ngày</li>
+      <li>Sát hạn cuối</li>
+      <li>Không nhớ</li>
+    </ul>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 6</span></div>
+    <p class="q-stem">Lúc chọn CLB, bạn có kịp tìm hiểu về CLB đó không?</p>
+    <ul class="opts">
+      <li>Tìm hiểu kỹ rồi mới chọn</li>
+      <li>Có xem qua nhưng không kỹ</li>
+      <li>Chọn vội cho kịp hạn</li>
+      <li>Chọn theo bạn bè</li>
+      <li>Không nhớ</li>
+    </ul>
+  </div>
+
+  <div class="q load">
+    <div class="q-head"><span class="q-num">Câu 7</span><span class="chip new">Câu mới</span><span class="chip load">Câu chịu lực</span></div>
+    <p class="q-stem">Có bao giờ bạn <em>không</em> đăng ký CLB mình thích nhất vì nghĩ
+      “chắc hết chỗ rồi” hoặc “chắc không tới lượt mình” không?</p>
+    <ul class="opts">
+      <li>Có, và tôi đã chọn CLB khác cho chắc ăn</li>
+      <li>Có nghĩ tới, nhưng vẫn đăng ký CLB mình thích</li>
+      <li>Chưa bao giờ nghĩ tới chuyện đó</li>
+      <li>Không nhớ</li>
+    </ul>
+    <p class="why"><b>Đo chuyện học sinh tự bỏ nguyện vọng thật của mình</b> — tức là
+    <b>khai không thật</b>, đúng thứ mà tính <em>khai thật có lợi nhất</em> của thuật toán
+    chấp nhận trì hoãn xử lý. Hiện <b>chưa có bằng chứng nào</b> chuyện này xảy ra ở trường.
+    Câu hỏi về <b>hành vi đã xảy ra</b>, không hỏi ý kiến về giải pháp — nên không phải câu mớm.</p>
+  </div>
+
+  <!-- ============ PHẦN C ============ -->
+  <div class="band">
+    <span class="band-letter">C</span>
+    <span class="band-title">Kết quả, và điều xảy ra sau đó</span>
+  </div>
+
+  <div class="q load">
+    <div class="q-head"><span class="q-num">Câu 8</span><span class="chip req">Bắt buộc</span><span class="chip new">Câu mới</span><span class="chip load">Câu chịu lực</span></div>
+    <p class="q-stem">Lần đăng ký gần nhất, bạn được ghi <em>bao nhiêu nguyện vọng</em> (bao nhiêu CLB)?</p>
+    <ul class="opts">
+      <li>Chỉ 1 CLB duy nhất</li>
+      <li>2 CLB</li>
+      <li>3 CLB</li>
+      <li>4 CLB trở lên</li>
+      <li>Không nhớ</li>
+    </ul>
+    <p class="why"><b>Phải đứng trước Câu 9, không được đảo.</b> Nếu đa số trả lời
+    “chỉ 1 CLB” thì con số đáng viết vào báo cáo lại là số đo của chính dự án: cắt danh sách
+    nguyện vọng còn 1 thì trung bình <b>48 em chưa được xếp</b>; để 6 nguyện vọng thì còn
+    <b>0,3 em</b> — <code>SO_LIEU_DA_KIEM_CHUNG.md</code> mục 3c.</p>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 9</span><span class="chip req">Bắt buộc</span></div>
+    <p class="q-stem">Lần gần nhất, bạn được xếp vào nguyện vọng thứ mấy?</p>
+    <ul class="opts">
+      <li>Nguyện vọng 1 — CLB mình thích nhất</li>
+      <li>Nguyện vọng 2</li>
+      <li>Nguyện vọng 3 trở đi</li>
+      <li>Không được vào CLB nào</li>
+      <li>Không nhớ</li>
+    </ul>
+  </div>
+
+  <div class="q load">
+    <div class="q-head"><span class="q-num">Câu 10</span><span class="chip load">Câu chịu lực</span></div>
+    <p class="q-stem">Bạn đã từng không vào được CLB mình thật sự thích chỉ vì đăng ký muộn chưa?</p>
+    <ul class="opts">
+      <li>Có, nhiều lần</li>
+      <li>Có, một lần</li>
+      <li>Chưa bao giờ</li>
+      <li>Không rõ</li>
+    </ul>
+    <p class="why"><b>Kiểm chứng luận điểm trung tâm của báo cáo.</b> Nếu số liệu không đỡ thì
+    <b>sửa báo cáo, không sửa số liệu</b>.</p>
+  </div>
+
+  <div class="q load">
+    <div class="q-head"><span class="q-num">Câu 11</span><span class="chip new">Câu mới</span><span class="chip load">Câu chịu lực</span></div>
+    <p class="q-stem">Với CLB được xếp vào gần nhất, bạn tham gia thế nào?</p>
+    <ul class="opts">
+      <li>Tham gia đều, thấy hợp với mình</li>
+      <li>Tham gia đều, nhưng thấy không hợp</li>
+      <li>Tham gia thưa dần rồi bỏ</li>
+      <li>Bỏ ngay từ đầu, hoặc xin đổi CLB</li>
+      <li>Tôi không được vào CLB nào</li>
+    </ul>
+    <p class="why"><b>Đo hệ quả, không đo cảm nhận.</b> “Bỏ CLB giữa chừng” là một sự việc
+    đếm được — và là câu duy nhất đưa được con số cho khẳng định về <em>cơ hội tham gia hoạt
+    động ngoại khoá và trải nghiệm học tập</em>.</p>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 12</span><span class="chip new">Câu mới</span></div>
+    <p class="q-stem">Sau khi có kết quả, bạn có gặp trường hợp: bạn muốn vào CLB của một bạn
+      khác, và bạn đó lại muốn vào CLB của bạn không?</p>
+    <ul class="opts">
+      <li>Có, và hai bên đã đổi được cho nhau</li>
+      <li>Có, nhưng không đổi được</li>
+      <li>Không gặp trường hợp nào như vậy</li>
+      <li>Không nhớ</li>
+    </ul>
+    <p class="why">⚠ Câu này có một chỗ rất dễ viết nhầm vào báo cáo — xem khối cảnh báo bên dưới.</p>
+  </div>
+
+  <!-- ============ PHẦN D ============ -->
+  <div class="band">
+    <span class="band-letter">D</span>
+    <span class="band-title">Mức độ hài lòng</span>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 13</span><span class="chip req">Bắt buộc</span></div>
+    <p class="q-stem">Bạn hài lòng tới đâu với <em>KẾT QUẢ</em> phân bổ mình nhận được?</p>
+    <ul class="opts">
+      <li>1 — Rất không hài lòng</li>
+      <li>2 — Không hài lòng</li>
+      <li>3 — Bình thường</li>
+      <li>4 — Hài lòng</li>
+      <li>5 — Rất hài lòng</li>
+    </ul>
+    <p class="why"><b>Vì sao là trắc nghiệm 5 mức chứ không phải thang đo:</b> Quick Import của
+    Microsoft Forms <b>không nhập được thang Likert</b>. Sau khi nhập, muốn đẹp hơn thì đổi sang
+    dạng <em>Rating</em> (5 sao) ngay trong Forms — nội dung phân tích không đổi.</p>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 14</span><span class="chip req">Bắt buộc</span></div>
+    <p class="q-stem">Bạn hài lòng tới đâu với <em>CÁCH TRƯỜNG XÉT</em> để phân bổ?</p>
+    <ul class="opts">
+      <li>1 — Rất không hài lòng</li>
+      <li>2 — Không hài lòng</li>
+      <li>3 — Bình thường</li>
+      <li>4 — Hài lòng</li>
+      <li>5 — Rất hài lòng</li>
+    </ul>
+    <p class="why"><b>Tách khỏi Câu 13 là có chủ ý.</b> Một em được nguyện vọng 1 vẫn có thể
+    thấy cách xét là bất công. Gộp hai câu lại là che mất đúng phát hiện đáng giá nhất.</p>
+  </div>
+
+  <!-- ============ PHẦN E ============ -->
+  <div class="band">
+    <span class="band-letter">E</span>
+    <span class="band-title">Nếu bạn ở trong ban tổ chức câu lạc bộ</span>
+  </div>
+
+  <div class="q">
+    <div class="q-head"><span class="q-num">Câu 15</span><span class="chip req">Bắt buộc</span><span class="chip new">Câu mới</span></div>
+    <p class="q-stem">Bạn có đang hoặc từng ở trong ban chủ nhiệm / ban tổ chức của một CLB không?</p>
+    <ul class="opts">
+      <li>Có</li>
+      <li>Không</li>
+    </ul>
+  </div>
+
+  <div class="note branch">
+    <span class="note-tag">Rẽ nhánh 2</span>
+    <p>Đáp án <b>“Không”</b> → <b>End of the form</b>. Đáp án <b>“Có”</b> → đi tiếp Câu 16
+    (mặc định, không cần đặt gì).</p>
+  </div>
+
+  <div class="q load">
+    <div class="q-head"><span class="q-num">Câu 16</span><span class="chip new">Câu mới</span><span class="chip load">Câu chịu lực</span></div>
+    <p class="q-stem">Khi nhận thành viên mới, CLB của bạn có được chọn theo tiêu chí riêng của CLB không?</p>
+    <ul class="opts">
+      <li>Có — CLB tự chọn theo tiêu chí của mình</li>
+      <li>Có tổ chức kiểm tra hoặc buổi thử, nhưng danh sách cuối vẫn do trường chốt</li>
+      <li>Không — nhận theo danh sách trường đưa xuống</li>
+      <li>Tôi không rõ</li>
+    </ul>
+    <p class="why"><b>Câu duy nhất lấy được bằng chứng từ phía câu lạc bộ.</b> Báo cáo khẳng
+    định các CLB không có cơ hội chọn học sinh phù hợp — mà cả khảo sát trước đây chỉ hỏi
+    phía học sinh.</p>
+  </div>
+
+  <!-- ============ CẢNH BÁO ============ -->
+  <div class="alarm">
+    <h3>⚠ Câu 12 KHÔNG phải là “đếm cặp phá vỡ”</h3>
+    <p>
+      Hai em cùng muốn đổi CLB cho nhau là <strong>trao đổi cùng có lợi</strong> giữa
+      <em>hai học sinh</em>. <strong>Cặp phá vỡ</strong> (blocking pair) là chuyện khác hẳn:
+      một <em>học sinh</em> và một <em>câu lạc bộ</em> cùng muốn ghép với nhau hơn kết quả
+      hiện tại.
+    </p>
+    <p>
+      Một phương án ghép cặp <strong>ổn định vẫn có thể để lại</strong> những cặp đổi như ở
+      Câu 12. Đó là chỗ <strong>đánh đổi giữa tính ổn định và tính tối ưu</strong> của bài
+      toán ghép cặp — không phải lỗi của thuật toán, và không phải điều thuật toán hứa sẽ
+      xoá bỏ.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:50%">Viết thế này được</th><th>KHÔNG viết thế này</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="yes">“X% học sinh gặp trường hợp muốn đổi CLB cho nhau”</td>
+            <td class="no"><s>“khảo sát đếm được X cặp phá vỡ”</s></td>
+          </tr>
+          <tr>
+            <td class="yes">“cách làm hiện tại để lại những trao đổi cùng có lợi không thực hiện được”</td>
+            <td class="no"><s>“thuật toán xoá bỏ được X cặp này”</s></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Câu 12 đáng hỏi vì nó đo <strong>chi phí thật của cách làm hiện tại</strong>, không phải
+      vì nó chứng minh thuật toán đúng. Viết nhầm hai khái niệm là giám khảo bắt ngay — và đó
+      là loại lỗi làm mất điểm phần cơ sở lý thuyết.
+    </p>
+  </div>
+
+  <!-- ============ QUYẾT ĐỊNH THIẾT KẾ ============ -->
+  <h2>Tám quyết định thiết kế, và lý do</h2>
+  <ol class="reasons">
+    <li><b>Mọi câu sự việc đều có lối thoát “Tôi không rõ”.</b> Không có nó thì học sinh đoán
+    bừa, và dữ liệu thu về trông như sự thật nhưng thực chất là bịa. Nếu phần lớn chọn
+    “không rõ” ở Câu 3 thì <b>đó cũng là một phát hiện</b> — quy trình không minh bạch — và
+    báo cáo phải viết thận trọng chứ không khẳng định chắc nịch.</li>
+
+    <li><b>Tách Câu 13 và Câu 14 làm hai câu riêng.</b> Một em được nguyện vọng 1 vẫn có thể
+    thấy cách xét là bất công. Gộp lại là che mất đúng phát hiện đáng giá nhất.</li>
+
+    <li><b>Câu 3 và Câu 10 là hai câu chịu lực.</b> Cả bản báo cáo đứng trên hai khẳng định:
+    <em>xét theo thứ tự đăng ký</em>, và <em>người có đam mê bị loại vì đăng ký muộn</em>.
+    Nếu số liệu không đỡ thì sửa báo cáo, không sửa số liệu.</li>
+
+    <li><b>Câu 4 đo độ minh bạch, không đo quy trình.</b> Đáp án <em>“Tôi có hỏi nhưng không
+    được cho biết”</em> là loại câu trả lời nặng ký nhất ở đây — nó phân biệt <em>không ai
+    nói</em> với <em>nói rồi mà em không nhớ</em>.</li>
+
+    <li><b>Câu 8 phải đứng trước Câu 9, không được đảo.</b> Câu 8 quyết định Câu 9 có nghĩa
+    hay không.</li>
+
+    <li><b>Câu 7 đo cái mà thuật toán của dự án khắc phục được</b> — học sinh tự bỏ nguyện
+    vọng thật vì đoán mình không tới lượt. Hỏi về hành vi đã xảy ra, không hỏi ý kiến.</li>
+
+    <li><b>Câu 11 đo hệ quả, không đo cảm nhận.</b> “Bỏ CLB giữa chừng” là sự việc đếm được.</li>
+
+    <li><b>Cố ý không có câu nào hỏi ý kiến về giải pháp.</b> Hỏi <em>“bạn thấy cách xét có
+    tính nguyện vọng thì công bằng hơn không?”</em> là <b>câu hỏi mớm</b>. Giám khảo bắt ngay,
+    và nó làm hỏng giá trị của toàn bộ khảo sát.</li>
+  </ol>
+
+  <!-- ============ CÀI ĐẶT FORMS ============ -->
+  <h2>Nhập vào Microsoft Forms</h2>
+
+  <h3>Tải hai tệp Word</h3>
+  <p class="lede">
+    Bấm nút <b>Download raw file</b> ở góc trên bên phải khung tệp. Cần đăng nhập GitHub. Muốn tải
+    thẳng không qua trang xem thì đổi <code>/blob/</code> thành <code>/raw/</code>.
+  </p>
+  <a class="dl" href="https://github.com/nguyenphanvantruong6969-arch/truong/blob/claude/project-testing-development-zf9ajs/rbda-kiosk/KHAO_SAT_NHAP_FORMS.docx">
+    <span class="dl-name">① KHAO_SAT_NHAP_FORMS.docx</span>
+    <span class="dl-what">Tệp <b>đem nhập</b> — 16 câu hỏi</span>
+    <span class="dl-url">github.com/…/rbda-kiosk/KHAO_SAT_NHAP_FORMS.docx</span>
+  </a>
+  <a class="dl" href="https://github.com/nguyenphanvantruong6969-arch/truong/blob/claude/project-testing-development-zf9ajs/rbda-kiosk/KHAO_SAT_HUONG_DAN_FORMS.docx">
+    <span class="dl-name">② KHAO_SAT_HUONG_DAN_FORMS.docx</span>
+    <span class="dl-what">Tệp <b>đọc, đừng nhập</b> — cài đặt, rẽ nhánh, danh sách soát</span>
+    <span class="dl-url">github.com/…/rbda-kiosk/KHAO_SAT_HUONG_DAN_FORMS.docx</span>
+  </a>
+
+  <h3>Các bước</h3>
+  <ol class="reasons">
+    <li>Mở <b>forms.office.com</b> bằng tài khoản trường.</li>
+    <li>Chọn <b>Quick import</b> (Nhập nhanh) trên trang chủ.</li>
+    <li>Chọn tệp <code>KHAO_SAT_NHAP_FORMS.docx</code> từ ổ đĩa máy. Forms chỉ nhận tệp trên máy;
+    giới hạn 10 MB.</li>
+    <li>Làm tiếp phần cài đặt và rẽ nhánh bên dưới <b>trước khi phát cho ai</b>.</li>
+  </ol>
+
+  <div class="alarm">
+    <h3>⚠ Quick Import không mang theo ba thứ</h3>
+    <p>
+      <strong>Rẽ nhánh</strong>, <strong>dấu bắt buộc</strong>, và <strong>thang Likert</strong> —
+      cả ba phải làm tay sau khi nhập. Từng bước nằm trong
+      <code>KHAO_SAT_HUONG_DAN_FORMS.docx</code>.
+    </p>
+    <p>
+      Và Microsoft ghi rõ <strong>bản tiếng Anh chuyển đổi chính xác hơn các ngôn ngữ khác</strong>.
+      Khảo sát này toàn tiếng Việt, nên <strong>phải soát lại từng câu</strong> sau khi nhập — lỗi
+      hay gặp nhất là một câu trắc nghiệm bị biến thành ô văn bản tự do.
+    </p>
+  </div>
+
+  <h2>Cài đặt bắt buộc trong Microsoft Forms</h2>
+  <p class="lede">Vào <b>Settings</b> — dấu ba chấm góc trên bên phải → Settings.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th style="width:30%">Cài đặt</th><th style="width:16%">Giá trị</th><th>Lý do</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ai được điền biểu mẫu</td>
+          <td>Trong tổ chức</td>
+          <td>Chỉ người trong trường trả lời được; người ngoài không vào được</td>
+        </tr>
+        <tr>
+          <td><strong>Ghi lại tên</strong><br><em>(Record name)</em></td>
+          <td class="no">TẮT</td>
+          <td><strong class="no">⚠ MẶC ĐỊNH LÀ BẬT với tài khoản trường học.</strong> Bật là mỗi phản hồi kèm tên và email người trả lời. Đây là chỗ <strong>nguy hiểm hơn hẳn Google Forms</strong>, nơi mục tương đương mặc định đã TẮT. Tắt xong thì cột người trả lời hiện <strong>“Anonymous”</strong> cho mọi phản hồi, kể cả người đang đăng nhập.</td>
+        </tr>
+        <tr>
+          <td>Một phản hồi mỗi người</td>
+          <td class="no">TẮT</td>
+          <td>Bật lên là buộc đăng nhập và dễ lần ra danh tính</td>
+        </tr>
+        <tr>
+          <td>Câu hỏi bắt buộc <em>(Required)</em></td>
+          <td>8 câu</td>
+          <td>Chỉ Câu <strong>1, 2, 3, 8, 9, 13, 14, 15</strong>. Bắt buộc hết thì học sinh bỏ giữa chừng hoặc chọn bừa</td>
+        </tr>
+        <tr>
+          <td>Xáo thứ tự câu hỏi</td>
+          <td class="no">TẮT</td>
+          <td>Câu 8 phải đứng trước Câu 9, xáo lên là hỏng mạch</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <span class="note-tag">Người trả lời phần lớn là trẻ vị thành niên</span>
+    <p>
+      Kiểm lại mục <b>Ghi lại tên</b> <b>một lần nữa</b> ngay trước khi gửi đường dẫn cho các bạn
+      — nó <b>bật sẵn</b>, không phải tắt sẵn.
+    </p>
+  </div>
+
+  <h3>Hai chỗ rẽ nhánh</h3>
+  <p class="lede">
+    Chọn câu → <b>“…”</b> (More settings) → <b>Add branching</b> → mỗi đáp án hiện ra ô <b>Go to</b>.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th style="width:18%">Ở câu</th><th style="width:42%">Đáp án</th><th>Go to</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Câu 2</td><td>“Chưa đăng ký lần nào”</td><td><strong>Phần E</strong></td></tr>
+        <tr><td>Câu 15</td><td>“Không”</td><td><strong>End of the form</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lede">Mọi đáp án còn lại để nguyên — Forms mặc định đi tiếp câu kế.</p>
+
+  <div class="note">
+    <span class="note-tag">Trước khi phát</span>
+    <p>
+      <b>≈ 2 phút 45 giây là ƯỚC TÍNH, không phải số đo.</b> Hãy <b>tự bấm giờ một lần</b> khi
+      điền thử form. Số bấm được mới là số đưa vào báo cáo.
+    </p>
+  </div>
+
+  <!-- ============ DỮ LIỆU THẬT ============ -->
+  <h2>Phản hồi thu về là dữ liệu thật</h2>
+  <p class="lede">
+    Toàn bộ <code>du_lieu_test/</code> là dữ liệu <strong>máy sinh</strong>, đẩy lên GitHub
+    thoải mái. <strong>Phản hồi khảo sát thì khác hẳn.</strong>
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th style="width:34%">Thứ gì</th><th>Quy tắc</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bảng tính phản hồi</td>
+          <td><strong class="no">Không được vào kho git.</strong> Microsoft Forms đặt tên tệp xuất ra dạng <code>&lt;tên biểu mẫu&gt;(1-53).xlsx</code> — luật chặn cũ viết cho Google Forms <strong>không bắt được kiểu tên đó</strong>. Đã sửa <code>.gitignore</code> ngày 02/09 và thử lại <strong>8 kiểu tên</strong>, gồm cả tên tiếng Việt có dấu; thư mục gốc dự án nay chặn luôn mọi <code>.xlsx</code> và <code>.csv</code> làm lưới chắn cuối.</td>
+        </tr>
+        <tr>
+          <td>Đưa vào báo cáo</td>
+          <td>Chỉ <strong>số liệu đã tổng hợp</strong> — tỉ lệ phần trăm, biểu đồ. Không đưa bảng thô, không đưa câu trả lời của từng người.</td>
+        </tr>
+        <tr>
+          <td>Tệp này</td>
+          <td><span class="yes">Vào git bình thường</span> — đây là <strong>công cụ đo</strong>, không phải dữ liệu.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Bộ câu hỏi này: AI hỗ trợ và tư vấn chọn lựa câu hỏi nhằm tối đa hóa thông tin trên mỗi câu
+    hỏi nhằm giúp thời gian thực hiện biểu mẫu ở mức hợp lí. Học sinh xem xét, chọn lọc, sửa và
+    đưa ra quyết định cuối cùng. Học sinh tự tạo biểu mẫu, tự phát, tự thu phản hồi và tự phân
+    tích — AI không tham gia thu thập dữ liệu (xem BAN_GIAO.md mục 6).
+  </footer>
+
+</div>

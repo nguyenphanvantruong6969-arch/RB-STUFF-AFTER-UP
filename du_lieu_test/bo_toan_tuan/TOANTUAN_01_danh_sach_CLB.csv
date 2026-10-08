@@ -1,0 +1,85 @@
+﻿club_id,name,capacity,reserve_capacity,reserve_group,buoi
+clb_tinhoc,CLB Tin học,8,2,chinh_sach,thu_2
+clb_bongro,CLB Bóng rổ,10,0,,thu_2
+clb_tranbien,CLB Tranh biện,12,3,khoi_10,thu_2
+clb_nhiepanh,CLB Nhiếp ảnh,12,0,,thu_2
+clb_amnhac,CLB Âm nhạc,14,0,,thu_2
+clb_lamphim,CLB Làm phim,14,0,,thu_2
+clb_covua,CLB Cờ vua,14,0,,thu_2
+clb_thienvan,CLB Thiên văn,16,0,,thu_2
+clb_vanhoc,CLB Văn học,16,0,,thu_2
+clb_bongban,CLB Bóng bàn,16,0,,thu_2
+clb_tiengnhat,CLB Tiếng Nhật,20,0,,thu_2
+clb_yoga,CLB Yoga,22,0,,thu_2
+clb_laptrinh,CLB Lập trình,8,2,chinh_sach,thu_3
+clb_caulong,CLB Cầu lông,10,0,,thu_3
+clb_mythuatso,CLB Mỹ thuật số,12,3,khoi_10,thu_3
+clb_guitar,CLB Guitar,12,0,,thu_3
+clb_hungbien,CLB Hùng biện,14,0,,thu_3
+clb_covay,CLB Cờ vây,14,0,,thu_3
+clb_kichnoi,CLB Kịch nói,14,0,,thu_3
+clb_sinhhoc,CLB Sinh học,16,0,,thu_3
+clb_tienghan,CLB Tiếng Hàn,16,0,,thu_3
+clb_leonui,CLB Leo núi,16,0,,thu_3
+clb_origami,CLB Origami,20,0,,thu_3
+clb_khieuvu,CLB Khiêu vũ,22,0,,thu_3
+clb_robotics,CLB Robotics,8,2,chinh_sach,thu_4
+clb_bongda,CLB Bóng đá,10,0,,thu_4
+clb_mythuat,CLB Mỹ thuật,12,3,khoi_10,thu_4
+clb_tienganh,CLB Tiếng Anh,12,0,,thu_4
+clb_gamedev,CLB Lập trình game,14,0,,thu_4
+clb_sankhau,CLB Sân khấu,14,0,,thu_4
+clb_nauan,CLB Nấu ăn,14,0,,thu_4
+clb_khoahoc,CLB Khoa học,16,0,,thu_4
+clb_khoinghiep,CLB Khởi nghiệp,16,0,,thu_4
+clb_thuphap,CLB Thư pháp,16,0,,thu_4
+clb_dienkinh,CLB Điền kinh,20,0,,thu_4
+clb_lambanh,CLB Làm bánh,22,0,,thu_4
+clb_toanhoc,CLB Toán học,8,2,chinh_sach,thu_5
+clb_boiloi,CLB Bơi lội,10,0,,thu_5
+clb_hoihoa,CLB Hội hoạ,12,3,khoi_10,thu_5
+clb_piano,CLB Piano,12,0,,thu_5
+clb_tiengphap,CLB Tiếng Pháp,14,0,,thu_5
+clb_mohinh,CLB Mô hình,14,0,,thu_5
+clb_thehinh,CLB Thể hình,14,0,,thu_5
+clb_tamly,CLB Tâm lý học,16,0,,thu_5
+clb_dohoa,CLB Thiết kế đồ hoạ,16,0,,thu_5
+clb_camhoa,CLB Cắm hoa,16,0,,thu_5
+clb_dacau,CLB Đá cầu,20,0,,thu_5
+clb_docsach,CLB Đọc sách,22,0,,thu_5
+clb_baochi,CLB Báo chí,8,2,chinh_sach,thu_6
+clb_nhayhiendai,CLB Nhảy hiện đại,10,0,,thu_6
+clb_hoahoc,CLB Hoá học,12,3,khoi_10,thu_6
+clb_tinhnguyen,CLB Tình nguyện,12,0,,thu_6
+clb_lamvuon,CLB Làm vườn,14,0,,thu_6
+clb_cotuong,CLB Cờ tướng,14,0,,thu_6
+clb_thucong,CLB Thủ công,14,0,,thu_6
+clb_dulich,CLB Du lịch,16,0,,thu_6
+clb_duongsinh,CLB Dưỡng sinh,16,0,,thu_6
+clb_violin,CLB Violin,16,0,,thu_6
+clb_tiengtrung,CLB Tiếng Trung,20,0,,thu_6
+clb_bongchuyen,CLB Bóng chuyền,22,0,,thu_6
+clb_dienanh,CLB Điện ảnh,8,2,chinh_sach,thu_7
+clb_marketing,CLB Marketing,10,0,,thu_7
+clb_vatly,CLB Vật lý,12,3,khoi_10,thu_7
+clb_taekwondo,CLB Taekwondo,12,0,,thu_7
+clb_hopxuong,CLB Hợp xướng,14,0,,thu_7
+clb_truyentranh,CLB Vẽ truyện tranh,14,0,,thu_7
+clb_moitruong,CLB Môi trường,14,0,,thu_7
+clb_lichsu,CLB Lịch sử,16,0,,thu_7
+clb_boardgame,CLB Boardgame,16,0,,thu_7
+clb_trong,CLB Trống,16,0,,thu_7
+clb_bongnem,CLB Bóng ném,20,0,,thu_7
+clb_theu,CLB Thêu,22,0,,thu_7
+clb_camtrai,CLB Cắm trại,8,2,chinh_sach,chu_nhat
+clb_podcast,CLB Podcast,10,0,,chu_nhat
+clb_dangoai,CLB Dã ngoại,12,3,khoi_10,chu_nhat
+clb_xedap,CLB Xe đạp,12,0,,chu_nhat
+clb_nauchay,CLB Nấu chay,14,0,,chu_nhat
+clb_kynangsong,CLB Kỹ năng sống,14,0,,chu_nhat
+clb_vetuong,CLB Vẽ tường,14,0,,chu_nhat
+clb_suachua,CLB Sửa chữa,16,0,,chu_nhat
+clb_chamsocthu,CLB Chăm sóc thú,16,0,,chu_nhat
+clb_thiennhien,CLB Thiên nhiên,16,0,,chu_nhat
+clb_caphesach,CLB Cà phê sách,20,0,,chu_nhat
+clb_bongbauduc,CLB Bóng bầu dục,22,0,,chu_nhat

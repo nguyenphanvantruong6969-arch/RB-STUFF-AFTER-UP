@@ -1,0 +1,3 @@
+# Goi de DONG GOI thanh .exe — khong can de chay phan mem tu ma nguon.
+-r requirements.txt
+pyinstaller>=6.0,<7

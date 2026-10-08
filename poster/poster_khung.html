@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8">
+<title>Khung poster ba lá</title>
+<link rel="stylesheet" href="../assets/fonts/fonts.css">
+<style>
+@page { size: 200.0cm 150.0cm; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width:200.0cm; height:150.0cm; }
+body { background:#F3F4F1; color:#1C2321; font-family:"IBM Plex Sans",sans-serif;
+       -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+.board { position:relative; width:200.0cm; height:150.0cm; overflow:hidden; background:#F3F4F1; }
+.board > * { position:absolute; }
+.strip { top:0; height:1.2cm; }
+.card { background:#FFFFFF; border:0.08cm solid #DBDCD5; border-radius:0.6cm; }
+.card.muted { background:#DCE9E0; border-color:#DCE9E0; }
+.head { font-family:"Be Vietnam Pro",sans-serif; font-weight:700; font-size:60pt; line-height:1;
+        height:2.9cm; display:flex; align-items:center; gap:0.8cm; }
+.head .num { flex:none; display:inline-grid; place-items:center; width:2.9cm; height:2.9cm;
+             border-radius:50%; background:#C98A1F; color:#FFFFFF; font-size:37pt; }
+.head.small { font-size:36pt; height:2cm; color:#3F6B52; }
+.hint { color:#5B6570; font-style:italic; line-height:1.4; border:0.1cm dashed #DBDCD5;
+        border-radius:0.4cm; padding:0.8cm 1cm; overflow:hidden; }
+.note { font-size:24pt; color:#5B6570; line-height:1.2; }
+.img { border:0.08cm solid #DBDCD5; border-radius:0.3cm; object-fit:contain; background:#fff; }
+.qr { border:0.14cm dashed #5B6570; border-radius:0.4cm; background:#F3F4F1; display:grid; place-items:center;
+      text-align:center; font-size:24pt; color:#5B6570; }
+.bullet { width:2.4cm; height:2.4cm; border-radius:50%; background:#27805A; color:#fff; display:grid;
+          place-items:center; font:700 30pt "Be Vietnam Pro"; }
+.stat { background:#FFFFFF; border:0.08cm solid #DBDCD5; border-left:0.6cm solid #27805A;
+        border-radius:0.6cm; padding:1.2cm 1.6cm; display:flex; flex-direction:column; gap:0.35cm; }
+.stat .v { font:700 110pt/1 "Be Vietnam Pro"; color:#27805A; letter-spacing:-0.02em; }
+.stat .m { font-size:24pt; color:#1C2321; font-weight:600; }
+.stat .h { font-size:24pt; color:#5B6570; font-style:italic; margin-top:auto;
+           border-top:0.08cm dashed #DBDCD5; padding-top:0.4cm; }
+.top { background:#1C2321; color:#F3F4F1; border-radius:0.6cm; padding:2.2cm 3cm; display:flex;
+       flex-direction:column; justify-content:center; gap:0.9cm; }
+.top .kicker { font-weight:600; font-size:40pt; letter-spacing:0.12em; color:#C98A1F; }
+.top h1 { font-family:"Be Vietnam Pro",sans-serif; font-weight:700; font-size:140pt; line-height:1.02; }
+.top .sub { font-size:48pt; color:#DBDCD5; }
+
+.guide { inset:0; pointer-events:none; }
+.guide > * { position:absolute; }
+.g-safe { background:repeating-linear-gradient(45deg, rgba(184,74,62,.16) 0 0.5cm, transparent 0.5cm 1.2cm); }
+.g-fold { top:0; height:150.0cm; border-left:0.2cm dashed #B84A3E; transform:translateX(-0.1cm); }
+.g-foldlabel { top:75.0cm; transform:translate(-50%,-50%) rotate(-90deg); background:#B84A3E; color:#fff;
+               font:600 30pt "IBM Plex Sans"; padding:0.3cm 1.2cm; border-radius:0.3cm; }
+.g-dim { top:147.6cm; height:1.8cm; border-left:0.12cm solid #B84A3E; border-right:0.12cm solid #B84A3E;
+         display:grid; place-items:center; }
+.g-dim::before { content:""; position:absolute; left:0; right:0; top:50%; border-top:0.12cm solid #B84A3E; }
+.g-dim span, .g-vdim span { position:relative; background:#B84A3E; color:#fff; font:600 34pt "IBM Plex Sans";
+                            padding:0.1cm 1cm; border-radius:0.3cm; }
+.g-vdim { left:0.6cm; top:0; width:1.8cm; height:150.0cm; border-top:0.12cm solid #B84A3E;
+          border-bottom:0.12cm solid #B84A3E; display:grid; place-items:center; }
+.g-vdim::before { content:""; position:absolute; top:0; bottom:0; left:50%; border-left:0.12cm solid #B84A3E; }
+.g-vdim span { transform:rotate(-90deg); white-space:nowrap; }
+.g-note { background:rgba(255,255,255,.96); border:0.2cm solid #B84A3E; border-radius:0.6cm;
+          padding:2cm 2.4cm; font-size:30pt; line-height:1.4; color:#1C2321; }
+.g-note h3 { font:700 40pt "Be Vietnam Pro"; color:#B84A3E; margin-bottom:0.8cm; }
+.g-note h3.ban { margin-top:1.4cm; }
+.g-note ul { padding-left:1.4cm; }
+.g-note ul.ban { display:flex; flex-wrap:wrap; gap:0.4cm 2.4cm; list-style:"✕  "; font-weight:600; }
+</style></head>
+<body><div class="board">
+<div class="strip" style="left:0;width:50.0cm;background:#3F6B52"></div>
+<div class="strip" style="left:50.0cm;width:100.0cm;background:#C98A1F"></div>
+<div class="strip" style="left:150.0cm;width:50.0cm;background:#3F6B52"></div>
+<div class="card plain" style="left:3.0cm;top:3.0cm;width:44.5cm;height:44.0cm;"></div>
+<h2 class="head" style="left:4.8cm;top:4.6cm;width:40.9cm"><span class="num">01</span><span>Vấn đề</span></h2>
+<p class="hint" style="left:4.8cm;top:8.5cm;width:40.9cm;height:36.7cm;font-size:32pt">[ T1 — em viết 2–3 câu. Hiện nay xếp học sinh vào CLB thế nào? Ai thiệt, thiệt ra sao? ]</p>
+<div class="card plain" style="left:3.0cm;top:49.5cm;width:44.5cm;height:54.0cm;"></div>
+<h2 class="head" style="left:4.8cm;top:51.1cm;width:40.9cm"><span class="num">02</span><span>Dùng thế nào</span></h2>
+<img class="img" src="hinh/giao_dien_van_hanh.png" style="left:4.8cm;top:55.0cm;width:40.9cm;height:25.5625cm;">
+<p class="note" style="left:4.8cm;top:80.9625cm;width:40.9cm">Ảnh chụp giao diện thật · dữ liệu mô phỏng</p>
+<p class="hint" style="left:4.8cm;top:82.9625cm;width:40.9cm;height:18.737500000000004cm;font-size:32pt">[ T2 — em viết: người dùng làm mấy bước? Mỗi bước một dòng. ]</p>
+<div class="card plain" style="left:3.0cm;top:106.0cm;width:44.5cm;height:40.0cm;"></div>
+<h2 class="head" style="left:4.8cm;top:107.6cm;width:40.9cm"><span class="num">03</span><span>Xem thử</span></h2>
+<div class="qr" style="left:4.8cm;top:111.5cm;width:20.0cm;height:20.0cm;"><span>[ QR tới video demo<br>KHÔNG trỏ tới GitHub ]</span></div>
+<p class="hint" style="left:26.3cm;top:111.5cm;width:19.4cm;height:20.0cm;font-size:32pt">[ T3 — em viết 1 câu mời xem demo / dùng thử tại gian ]</p>
+<header class="top" style="left:52.5cm;top:3.0cm;width:95.0cm;height:27.0cm;">
+  <p class="kicker">[ H1 — LĨNH VỰC DỰ THI ]</p>
+  <h1>[ H2 — THÔNG ĐIỆP CHÍNH,<br>MỘT CÂU, TỐI ĐA HAI DÒNG ]</h1>
+  <p class="sub">[ H3 — tên đề tài đầy đủ ]</p>
+</header>
+<div class="card plain" style="left:52.5cm;top:32.5cm;width:61.0cm;height:57.0cm;"></div>
+<img class="img" src="hinh/giao_dien_ket_qua.png" style="left:54.3cm;top:34.3cm;width:57.4cm;height:35.875cm;">
+<p class="note" style="left:54.3cm;top:70.575cm;width:57.4cm">Ảnh chụp giao diện thật · tab Kết quả · dữ liệu mô phỏng (120 học sinh, 10 CLB)</p>
+<p class="hint" style="left:54.3cm;top:72.575cm;width:57.4cm;height:15.125000000000005cm;font-size:32pt">[ G1 — em viết 1–2 câu: ảnh này cho thấy phần mềm làm được gì? ]</p>
+<div class="stat" style="left:116.0cm;top:32.5cm;width:31.5cm;height:17.666666666666668cm;"><div class="v">0</div><div class="m">cặp phá vỡ · mọi lần bốc thăm, mọi bộ dữ liệu mô phỏng</div><div class="h">[ S1 — em viết 1 dòng: con số này nghĩa là gì? ]</div></div>
+<div class="stat" style="left:116.0cm;top:52.16666666666667cm;width:31.5cm;height:17.666666666666668cm;"><div class="v">0,14 giây</div><div class="m">xếp 2 000 học sinh · 40 CLB · dữ liệu mô phỏng</div><div class="h">[ S2 — em viết 1 dòng: con số này nghĩa là gì? ]</div></div>
+<div class="stat" style="left:116.0cm;top:71.83333333333334cm;width:31.5cm;height:17.666666666666668cm;"><div class="v">816</div><div class="m">bài kiểm thử tự động</div><div class="h">[ S3 — em viết 1 dòng: con số này nghĩa là gì? ]</div></div>
+<div class="card plain" style="left:52.5cm;top:92.0cm;width:95.0cm;height:54.0cm;"></div>
+<h2 class="head" style="left:54.3cm;top:93.6cm;width:91.4cm"><span class="num">04</span><span>Cách hoạt động</span></h2>
+<img class="img" src="hinh/so_do_5_lop.png" style="left:54.3cm;top:97.5cm;width:91.4cm;height:38.845000000000006cm;">
+<p class="hint" style="left:54.3cm;top:137.145cm;width:91.4cm;height:7.05499999999999cm;font-size:32pt">[ G2 — em viết 1–2 câu tóm tắt sơ đồ. Nhãn "Sơ đồ do AI tạo ra" đã có sẵn trong hình — giữ nguyên. ]</p>
+<div class="card plain" style="left:152.5cm;top:3.0cm;width:44.5cm;height:58.0cm;"></div>
+<h2 class="head" style="left:154.3cm;top:4.6cm;width:40.9cm"><span class="num">05</span><span>Lợi ích</span></h2>
+<span class="bullet" style="left:154.3cm;top:8.6cm">1</span>
+<p class="hint" style="left:157.5cm;top:8.5cm;width:37.699999999999996cm;height:11.875cm;font-size:32pt">[ P1 — một lợi ích, tối đa 2 dòng ]</p>
+<span class="bullet" style="left:154.3cm;top:21.275000000000002cm">2</span>
+<p class="hint" style="left:157.5cm;top:21.175cm;width:37.699999999999996cm;height:11.875cm;font-size:32pt">[ P2 — một lợi ích, tối đa 2 dòng ]</p>
+<span class="bullet" style="left:154.3cm;top:33.95cm">3</span>
+<p class="hint" style="left:157.5cm;top:33.85cm;width:37.699999999999996cm;height:11.875cm;font-size:32pt">[ P3 — một lợi ích, tối đa 2 dòng ]</p>
+<span class="bullet" style="left:154.3cm;top:46.62500000000001cm">4</span>
+<p class="hint" style="left:157.5cm;top:46.525000000000006cm;width:37.699999999999996cm;height:11.875cm;font-size:32pt">[ P4 — một lợi ích, tối đa 2 dòng ]</p>
+<div class="card plain" style="left:152.5cm;top:63.5cm;width:44.5cm;height:66.0cm;"></div>
+<h2 class="head" style="left:154.3cm;top:65.1cm;width:40.9cm"><span class="num">06</span><span>Đã kiểm chứng</span></h2>
+<img class="img" src="hinh/bieu_do_khai_gian.png" style="left:154.3cm;top:69.0cm;width:40.9cm;height:19.4275cm;">
+<img class="img" src="hinh/bieu_do_nguyen_vong.png" style="left:154.3cm;top:89.22749999999999cm;width:40.9cm;height:25.5625cm;">
+<p class="hint" style="left:154.3cm;top:115.58999999999999cm;width:40.9cm;height:12.11000000000001cm;font-size:32pt">[ P5 — em viết 1–2 câu: hai biểu đồ này nói gì với học sinh? ]</p>
+<div class="card muted" style="left:152.5cm;top:132.0cm;width:44.5cm;height:14.0cm;"></div>
+<h2 class="head small" style="left:154.3cm;top:133.2cm;width:40.9cm"><span>Tuyên bố sử dụng AI</span></h2>
+<p class="hint" style="left:154.3cm;top:135.79999999999998cm;width:40.9cm;height:9.200000000000001cm;font-size:24pt">[ P6 — theo Phụ lục 1: phần nào có AI hỗ trợ ]</p>
+
+</div></body></html>
