@@ -1,0 +1,2622 @@
+{
+ "meta": {
+  "tieu_de": "Sổ đăng ký thay đổi mã nguồn chương trình phân bổ RB-DA, theo ngành",
+  "nguon": "Đọc từ bản build PhanBoCauLacBo.exe (uu.zip); số dòng Lxxx là dòng của tệp .py gốc lúc build, lấy từ bảng dòng bytecode. Hãy định vị theo TÊN HÀM, dùng số dòng để kiểm tra.",
+  "ngay": "2026-10-07",
+  "ky_hieu": {
+   "R": "cần làm cho ngành",
+   "O": "tuỳ chọn / tuỳ cấu hình",
+   "-": "không cần"
+  },
+  "quy_mo": {
+   "S": "một hàm hoặc một hằng",
+   "M": "vài hàm cùng một tệp, có test",
+   "L": "nhiều tệp hoặc nhiều lớp",
+   "XL": "thuật toán mới hoặc bài toán mở"
+  },
+  "trong_so_cong_suc": {
+   "S": 1,
+   "M": 2,
+   "L": 4,
+   "XL": 8,
+   "ghi_chu": "phán đoán của người lập, không phải số đo"
+  },
+  "gioi_han": [
+   "Không có tests/ và docs/ trong gói; chưa chạy bộ test của dự án.",
+   "Số đo trên dữ liệu tự sinh, không phải dữ liệu thật.",
+   "Phụ thuộc giữa các mục (phu_thuoc) là đề xuất kỹ thuật của người lập."
+  ]
+ },
+ "bat_bien": [
+  "Cấu hình mặc định phải cho kết quả TRÙNG KHÍT với trước khi sửa (cùng dữ liệu, cùng seed): so từng dòng match_results trên 3 bộ dữ liệu × 20 seed.",
+  "compute_club_priority KHÔNG được nhận thứ hạng nguyện vọng hay kết cục buổi trước (ràng buộc chống nội sinh); thêm tiêu chí mới cũng không được đọc chúng.",
+  "Cơ chế số bốc thăm (STB): khoá sau lần chạy đầu, seed khoá cùng bộ số, sinh bằng crc32 (không dùng hash()), em đến muộn chèn ngẫu nhiên đều nhưng giữ thứ tự tương đối của em cũ.",
+  "run_history không bao giờ bị ghi đè hay xoá; mọi lần chạy ghi thêm một dòng.",
+  "Pipeline giữ nguyên thứ tự: sao lưu → kiểm dữ liệu → khoá seed/STB → giải → sanity/verify → ghi trong MỘT giao dịch → xuất; lỗi thì rollback.",
+  "Hợp đồng giữa giao diện và backend là {ok, data, errors} với errors = [{code, params}]; thông báo lỗi chỉ có một nguồn (i18n_errors.py → tao_i18n_js.py).",
+  "Hợp đồng cột CSV (club_id, student_id, test_club_k, score_k, pref_k, <buoi>_pref_k) chỉ đổi khi mục tương ứng ghi rõ; di_tru_schema phải chạy lặp an toàn và có sao lưu.",
+  "Mọi hàm lựa chọn mới phải qua test thay thế được (substitutability) và luật tổng cầu trước khi đăng ký; nếu không thoả, phải báo rõ 'không bảo đảm ổn định'."
+ ],
+ "thu_tu_lam_chung": [
+  "Z6",
+  "Z3",
+  "Z7",
+  "Z4",
+  "Z5",
+  "Z2",
+  "Z1",
+  "B1",
+  "B2",
+  "A1",
+  "A2",
+  "A3",
+  "A4",
+  "A5",
+  "A6",
+  "A7",
+  "A8",
+  "A9",
+  "A10",
+  "A11",
+  "A12",
+  "B3",
+  "C1",
+  "C2",
+  "C3",
+  "E1",
+  "E2",
+  "E3",
+  "G1",
+  "G2",
+  "G3",
+  "G4",
+  "G5"
+ ],
+ "nganh": [
+  {
+   "ma": "DT",
+   "ten": "Phân bổ đề tài, đồ án, người hướng dẫn",
+   "so_muc_R_rieng": 3,
+   "diem_cong_suc": 10,
+   "diem_cong_suc_ke_ca_tien_de": 10,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A7",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z4",
+    "Z5",
+    "A1",
+    "A5",
+    "A10",
+    "C1",
+    "C3",
+    "E3"
+   ],
+   "tien_de_ngoai_R": []
+  },
+  {
+   "ma": "KTX",
+   "ten": "Ký túc xá, nhà ở sinh viên, nhà ở xã hội",
+   "so_muc_R_rieng": 8,
+   "diem_cong_suc": 20,
+   "diem_cong_suc_ke_ca_tien_de": 26,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "A4",
+    "A11",
+    "B3",
+    "C1",
+    "E1",
+    "E2"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "A3",
+    "G1"
+   ]
+  },
+  {
+   "ma": "SK",
+   "ten": "Sự kiện, hội nghị (workshop, phản biện, gặp doanh nghiệp)",
+   "so_muc_R_rieng": 9,
+   "diem_cong_suc": 22.5,
+   "diem_cong_suc_ke_ca_tien_de": 32.5,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "A7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A9",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A10",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G4",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "Z2",
+    "A4",
+    "A6",
+    "A8",
+    "E1",
+    "E3",
+    "G2"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "A3",
+    "A5",
+    "G3"
+   ]
+  },
+  {
+   "ma": "NT",
+   "ten": "Hoạt động ngoài trường, trại hè, khoá ngắn, tình nguyện",
+   "so_muc_R_rieng": 9,
+   "diem_cong_suc": 23.5,
+   "diem_cong_suc_ke_ca_tien_de": 23.5,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A9",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "Z1",
+    "A1",
+    "A5",
+    "A8",
+    "A11",
+    "A12",
+    "C1",
+    "C2",
+    "G4"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4"
+   ]
+  },
+  {
+   "ma": "YT",
+   "ten": "Y tế (học viên thực hành, luân khoa, nội trú)",
+   "so_muc_R_rieng": 8,
+   "diem_cong_suc": 26,
+   "diem_cong_suc_ke_ca_tien_de": 28,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A11",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "Z2",
+    "B1",
+    "A1",
+    "A2",
+    "A4",
+    "A7",
+    "A8",
+    "A9",
+    "A10",
+    "A12",
+    "C1",
+    "C3",
+    "E1",
+    "G3"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "G1"
+   ]
+  },
+  {
+   "ma": "VL",
+   "ten": "Nền tảng việc làm tự do, crowdsourcing",
+   "so_muc_R_rieng": 8,
+   "diem_cong_suc": 28,
+   "diem_cong_suc_ke_ca_tien_de": 38,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "B3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G4",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "A4",
+    "A5",
+    "A7",
+    "C3",
+    "E2",
+    "G2",
+    "G5"
+   ],
+   "tien_de_ngoai_R": [
+    "A3",
+    "G1",
+    "G3"
+   ]
+  },
+  {
+   "ma": "KT",
+   "ten": "Kỹ thuật – sản xuất (kỹ sư vào dự án, tác vụ vào máy)",
+   "so_muc_R_rieng": 10,
+   "diem_cong_suc": 29,
+   "diem_cong_suc_ke_ca_tien_de": 33,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G4",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "A6",
+    "A9",
+    "A12",
+    "C2",
+    "E1",
+    "E3",
+    "G2"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "G3"
+   ]
+  },
+  {
+   "ma": "HP",
+   "ten": "Phân bổ học phần, môn tự chọn",
+   "so_muc_R_rieng": 10,
+   "diem_cong_suc": 29.5,
+   "diem_cong_suc_ke_ca_tien_de": 37.5,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A8",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A9",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G4",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "Z2",
+    "A1",
+    "A4",
+    "A12",
+    "C3",
+    "E1",
+    "E3"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "A3",
+    "G3"
+   ]
+  },
+  {
+   "ma": "TS",
+   "ten": "Tuyển sinh cấp trường (lớp 6, lớp 10, trường tư, chọn ngành)",
+   "so_muc_R_rieng": 13,
+   "diem_cong_suc": 37.0,
+   "diem_cong_suc_ke_ca_tien_de": 39.0,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "A7",
+    "A9",
+    "C2",
+    "G3"
+   ],
+   "tien_de_ngoai_R": [
+    "G1"
+   ]
+  },
+  {
+   "ma": "NS",
+   "ten": "Nhân sự nội bộ (tân tuyển, thực tập, luân chuyển, giáo viên)",
+   "so_muc_R_rieng": 13,
+   "diem_cong_suc": 37.0,
+   "diem_cong_suc_ke_ca_tien_de": 43.0,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "A4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "A8",
+    "A9",
+    "A10",
+    "B3"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "A3",
+    "G1"
+   ]
+  },
+  {
+   "ma": "LG",
+   "ten": "Logistics – vận tải (đơn hàng cho xe, tài xế cho tuyến)",
+   "so_muc_R_rieng": 12,
+   "diem_cong_suc": 44,
+   "diem_cong_suc_ke_ca_tien_de": 50,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z5",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A9",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A12",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "G4",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G5",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "A5",
+    "A7",
+    "C2",
+    "G2"
+   ],
+   "tien_de_ngoai_R": [
+    "G1",
+    "G3"
+   ]
+  },
+  {
+   "ma": "TC",
+   "ten": "Tài chính – ngân hàng (chia khách hàng, hồ sơ thẩm định)",
+   "so_muc_R_rieng": 17,
+   "diem_cong_suc": 50.5,
+   "diem_cong_suc_ke_ca_tien_de": 52.5,
+   "ke_hoach": [
+    {
+     "id": "Z6",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z7",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "Z4",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "Z1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A5",
+     "vai_tro": "tien_de"
+    },
+    {
+     "id": "A10",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "A12",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "B3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "C3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "E3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G1",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G2",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G3",
+     "vai_tro": "bat_buoc"
+    },
+    {
+     "id": "G4",
+     "vai_tro": "bat_buoc"
+    }
+   ],
+   "tuy_chon": [
+    "Z5",
+    "Z2",
+    "A7"
+   ],
+   "tien_de_ngoai_R": [
+    "Z4",
+    "A5"
+   ]
+  }
+ ],
+ "muc": [
+  {
+   "id": "Z1",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Tách thuật ngữ CLB / học sinh khỏi mã (gói từ vựng theo ngành)",
+   "tep": "i18n.js, i18n_errors.py → i18n_loi.js, index.html, api*.py, rbda_priority_pipeline.py",
+   "dong": "schema L1251–1290; giao diện: toàn bộ",
+   "ham": "UI_STRINGS, MESSAGES, DEFAULT_SCHEMA",
+   "hien_trang": "Thuật ngữ gắn cứng ở mọi tầng: 144/191 chuỗi SQL nhắc bảng clubs/students; 76/464 hàm có club/student/hoc_sinh trong tên; giao diện có 252 chữ 'CLB' và 231 chữ 'học sinh'; 84/340 thông báo lỗi nhắc CLB hoặc học sinh. Giao diện đã song ngữ vi/en qua một bảng (I18N.t) và thông báo lỗi chỉ có MỘT nguồn (i18n_errors.py → tao_i18n_js.py).",
+   "thay_doi": "Lớp giao diện, thông báo, tệp xuất: thêm 'gói từ vựng' (tên đơn vị, tên ứng viên, tên buổi) nạp theo cấu hình — rẻ vì cơ chế I18N đã có. Lớp SQL và tên hàm: giữ club_id / student_id làm tên nội bộ; chỉ đổi khi bán ra ngoài và sau khi có bộ test hồi quy.",
+   "muc": "Sửa mã",
+   "quy_mo": "M (giao diện) – L (nếu đổi tên SQL)",
+   "trong_so": 2,
+   "rui_ro": "Thấp với giao diện. Đổi tên cột CSV (club_id, student_id) là đổi 'hợp đồng' mà người dùng đã quen.",
+   "kiem_nhan": "Chạy lại bộ test hiện có; so từng tệp xuất trước/sau trên 3 bộ dữ liệu.",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "R",
+    "DT": "R",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Gần như không đổi: 'khoá / đợt' ≈ 'CLB'.",
+    "DT": "Đơn vị = đề tài (+ giảng viên); ứng viên = sinh viên.",
+    "KTX": "Đơn vị = phòng / toà; ứng viên = người ở.",
+    "TS": "Đơn vị = ngành / trường; ứng viên = thí sinh.",
+    "HP": "Đơn vị = học phần / lớp.",
+    "NS": "Đơn vị = vị trí / phòng ban.",
+    "KT": "Đơn vị = dự án / máy; ứng viên = kỹ sư / tác vụ.",
+    "VL": "Đơn vị = việc; ứng viên = người làm.",
+    "LG": "Đơn vị = xe / tuyến; ứng viên = đơn hàng.",
+    "TC": "Đơn vị = chuyên viên; ứng viên = khách hàng / hồ sơ.",
+    "YT": "Đơn vị = bệnh viện / khoa; ứng viên = bác sĩ / học viên.",
+    "SK": "Đơn vị = phiên / workshop."
+   }
+  },
+  {
+   "id": "Z2",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Một nguồn cho giới hạn nhập (10 nguyện vọng, 5 CLB thi mỗi buổi)",
+   "tep": "rbda_priority_pipeline.py; js/05_quan_ly.js; js/04_nhap_tai_cho.js; api_quan_ly.py",
+   "dong": "rbda L91, L96; 05_quan_ly.js L33–34; 04_nhap_tai_cho.js L397–445; api_quan_ly L430–476",
+   "ham": "TRAN_NGUYEN_VONG_MOI_BUOI, TRAN_CLB_THI_MOI_BUOI",
+   "hien_trang": "Hai hằng (10 và 5) được khai báo hai lần: một ở Python, một bản sao ở JS rồi dùng trong form nhập tại chỗ. Con số 10 đến từ giới hạn câu hỏi xếp hạng của Microsoft Forms (chú thích trong submit_preferences), không phải từ thuật toán.",
+   "thay_doi": "Đưa vào một tệp cấu hình theo triển khai; backend gửi giá trị cho giao diện lúc khởi động để hai bên không lệch. Kiểm lại thời gian chạy với danh sách dài.",
+   "muc": "Cấu hình → Sửa mã",
+   "quy_mo": "S",
+   "trong_so": 1,
+   "rui_ro": "Thấp. Lý thuyết: DA chỉ chống khai gian trọn vẹn khi danh sách không bị cắt ngắn, nên nới trần là có lợi.",
+   "kiem_nhan": "Test: đổi cấu hình thì Python và giao diện cùng đổi; chạy lại thử tải với danh sách dài.",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "R",
+    "HP": "O",
+    "NS": "-",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "O",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "Bỏ trần 10 thành tham số; quy mô 10⁴–10⁵ thí sinh.",
+    "KT": "Sở thích sinh từ dữ liệu nên danh sách dài (hàng chục–trăm).",
+    "VL": "Như KT.",
+    "LG": "Như KT.",
+    "HP": "Số lựa chọn mỗi khung giờ.",
+    "SK": "Nhiều phiên → danh sách dài.",
+    "TC": "Danh sách ứng viên dài.",
+    "YT": "Xếp hạng đầy đủ các bệnh viện."
+   }
+  },
+  {
+   "id": "Z3",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Tách _run_pipeline_da_khoa (573 dòng) thành các bước có điểm móc",
+   "tep": "api.py",
+   "dong": "L744–1316",
+   "ham": "PipelineAPI._run_pipeline_da_khoa",
+   "hien_trang": "Một phương thức làm tất cả: sao lưu (L824) → kiểm dữ liệu (L840–847) → chọn buổi chạy (L858–871) → khoá seed và STB (L903–1027) → gọi run_rbda_nhieu_buoi (L1046) → sanity + verify_stability từng buổi, có vấn đề thì rollback (L1052–1071) → ảnh chụp ket_qua_truoc, match_results, run_history (L1086–1248) → xuất CSV (L1256–1263). Tất cả trong một giao dịch.",
+   "thay_doi": "Tách thành danh sách bước (validate → prepare → solve → check → persist → export), mỗi bước nhận và trả một đối tượng ngữ cảnh; thêm điểm móc trước và sau 'solve' để từng ngành chèn bước riêng (loại cặp cấm, vòng mức tối thiểu, sinh sở thích, phê duyệt).",
+   "muc": "Sửa mã",
+   "quy_mo": "L",
+   "trong_so": 4,
+   "rui_ro": "Đây là hàm quan trọng nhất của phần mềm (docstring _ket_noi_ghi dặn 'để nguyên'). Phải giữ thứ tự khoá và rollback.",
+   "kiem_nhan": "Test trùng khít (3 bộ × 20 seed) và test rollback.",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "R",
+    "DT": "R",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "SK": "Chèn bước loại cặp cấm.",
+    "NT": "Chèn vòng đóng khoá dưới mức tối thiểu.",
+    "TC": "Chèn bước chờ phê duyệt hai người.",
+    "KT": "Chèn bước sinh sở thích từ dữ liệu.",
+    "HP": "Chèn bước kiểm không trùng lịch, đủ tín chỉ.",
+    "TS": "Chèn xét tuyển bổ sung.",
+    "LG": "Chèn bộ gom lô.",
+    "YT": "Chèn kiểm trần vùng / cặp đôi."
+   }
+  },
+  {
+   "id": "Z4",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Kiểm chứng ổn định nhanh (verify_stability)",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L456–524 (gọi hàm lựa chọn ở L511)",
+   "ham": "verify_stability",
+   "hien_trang": "Với mỗi cặp (học sinh, CLB học sinh ưa hơn) gọi lại club_choice_function trên tập 'đang giữ + 1' (L511), tức sắp xếp lại cả tập mỗi lần. Đo trên mã thật (20 CLB, tỉ lệ chỗ 1,0): ở 10.000 học sinh run_rbda mất 1,08 s còn verify_stability mất 22–24 s (≈20 lần; hai lần đo).",
+   "thay_doi": "Sắp sẵn danh sách thứ hạng của từng CLB một lần rồi tra vị trí bằng tìm kiếm nhị phân. Giữ bản gốc làm 'bản chậm' để đối chiếu (file kèm: de_xuat_verify_nhanh.py).",
+   "muc": "Sửa mã",
+   "quy_mo": "S",
+   "trong_so": 1,
+   "rui_ro": "Bản nhanh gắn với đúng cấu trúc hai lượt (dự trữ rồi phổ thông). Hàm lựa chọn khác phải dùng bản chậm hoặc có bản nhanh riêng.",
+   "kiem_nhan": "Đã thử (kiem_verify_nhanh.py): 7 cấu hình, danh sách cặp phá vỡ giống hệt bản gốc, gồm 3 kết quả thật (0 cặp) và 4 kết quả hoán đổi với 23.110 cặp nhân tạo; ở 10.000 học sinh 22,4 s → 0,09 s.",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "O",
+    "DT": "O",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "O",
+    "NS": "O",
+    "KT": "O",
+    "VL": "R",
+    "LG": "R",
+    "TC": "O",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "10⁴–10⁵ thí sinh: bản chậm không dùng được.",
+    "VL": "Quy mô nền tảng.",
+    "LG": "Quy mô đơn hàng theo lô."
+   }
+  },
+  {
+   "id": "Z5",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Trần vòng lặp và tài liệu về số vòng",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L315 (max_rounds=1000), L372, L429–434",
+   "ham": "run_rbda",
+   "hien_trang": "Docstring nói số vòng 'đúng bằng độ dài danh sách nguyện vọng dài nhất' và trần 1000 gấp 100 lần mức cần. Bộ thử tải 204 lần chạy của chính dự án cho thấy khác: danh sách 3 mục → tối đa 37 vòng, 5 mục → 84, 10 mục → 227 (trung vị 9 / 14 / 18). Trần 1000 chỉ gấp ≈4,4 lần mức cao nhất đã thấy. Các lần chạy tự sinh của tôi (2.000–50.000 học sinh) chỉ 21–33 vòng nên chưa chạm trần; khi chạm, L429 ném RuntimeError và coi là 'dữ liệu hỏng'.",
+   "thay_doi": "Đổi chốt chặn thành cận chứng minh được: số vòng ≤ tổng độ dài các danh sách nguyện vọng (mỗi vòng có ít nhất một đề nghị, mỗi em đề nghị tối đa len(prefs) lần). Sửa docstring.",
+   "muc": "Sửa mã",
+   "quy_mo": "S",
+   "trong_so": 1,
+   "rui_ro": "Thấp.",
+   "kiem_nhan": "Test với dữ liệu tạo chuỗi đẩy dài (cascade).",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "O",
+    "DT": "O",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "O",
+    "NS": "O",
+    "KT": "O",
+    "VL": "R",
+    "LG": "R",
+    "TC": "O",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "Quy mô lớn, danh sách dài.",
+    "VL": "Quy mô nền tảng.",
+    "LG": "Quy mô đơn hàng."
+   }
+  },
+  {
+   "id": "Z6",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Bộ test và dữ liệu mô phỏng cho từng hàm mới",
+   "tep": "tests/ (không có trong gói zip); du_lieu_test/tao_*.py; du_lieu_test/thu_tai/",
+   "dong": "—",
+   "ham": "TestTrungKhit; chay_thu_tai.py",
+   "hien_trang": "Tài liệu ghi 37 tệp test, 483 ca, 25 lỗi đã tìm và sửa (10 lỗi im lặng). Có test canh 'trùng khít' khi thêm nhiều buổi và test đối chứng ngược cho bộ đếm cặp phá vỡ. Các bộ sinh dữ liệu chỉ sinh dữ liệu câu lạc bộ.",
+   "thay_doi": "Mỗi hàm lựa chọn đăng ký mới phải qua: (1) thuộc tính thay thế được và luật tổng cầu bằng kiểm thử ngẫu nhiên trên tập nhỏ; (2) cấu hình mặc định cho kết quả trùng khít; (3) bộ sinh dữ liệu của ngành đó và chạy lại bộ thử tải.",
+   "muc": "Viết mới",
+   "quy_mo": "M mỗi ngành",
+   "trong_so": 2,
+   "rui_ro": "Thiếu (1) thì DA có thể không cho kết quả ổn định, và người dùng chỉ thấy cặp phá vỡ ở bước verify làm hỏng cả lần chạy.",
+   "kiem_nhan": "Chính là bộ test.",
+   "phu_thuoc": [],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "R",
+    "DT": "R",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "TC": "Test cho hàm ba lô: kỳ vọng là KHÔNG ổn định, phải đo tỉ lệ cặp phá vỡ.",
+    "LG": "Như TC.",
+    "DT": "Test cặp phá vỡ của SPA.",
+    "KT": "Test đủ vai trò.",
+    "HP": "Test không trùng lịch và đủ tín chỉ."
+   }
+  },
+  {
+   "id": "Z7",
+   "nhom": "Z",
+   "pham_vi": "chung",
+   "ten": "Cổng cắm cho hàm ưu tiên, hàm lựa chọn, luật đủ tư cách",
+   "tep": "rbda_priority_pipeline.py; api.py",
+   "dong": "rbda L357, L404, L511; api.py L1041",
+   "ham": "run_rbda, verify_stability, default_reserve_eligible_fn",
+   "hien_trang": "run_rbda gọi compute_club_priority (L357) và club_choice_function (L404) theo tên; verify_stability gọi club_choice_function (L511) theo tên; api.py L1041 chọn luật đủ tư cách bằng cách gọi default_reserve_eligible_fn. Chưa có tham số nào để thay.",
+   "thay_doi": "Thêm ba tham số (priority_fn, choice_fn, eligible_fn) có mặc định bằng hàm hiện tại; run_rbda_nhieu_buoi và run_full_pipeline chuyển tiếp; đăng ký theo tên trong cấu hình ngành.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Thấp nếu mặc định giữ nguyên (test trùng khít).",
+   "kiem_nhan": "Test trùng khít mặc định.",
+   "phu_thuoc": [
+    "Z6",
+    "Z3"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "R",
+    "DT": "R",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {}
+  },
+  {
+   "id": "A1",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Hàm ưu tiên theo ngành (thay compute_club_priority)",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L123–191 (+ L1723–1753 hop_ung_vien)",
+   "ham": "compute_club_priority",
+   "hien_trang": "Khoá cứng: Tầng 1 (có điểm) sắp theo −điểm rồi số bốc thăm; Tầng 2 (không điểm) sắp theo số bốc thăm; Tầng 1 luôn đứng trước. Mỗi cặp (CLB, ứng viên) chỉ có MỘT điểm. Hàm cố ý không nhận thứ hạng nguyện vọng (ràng buộc chống nội sinh ghi trong docstring).",
+   "thay_doi": "Cho phép khoá ưu tiên là bộ tiêu chí có thứ tự (nhóm → điểm tổng hợp có trọng số → tiêu chí phụ → bốc thăm) cấu hình theo ngành. GIỮ nguyên ràng buộc: không đưa thứ hạng nguyện vọng hay kết cục buổi trước vào.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Nếu tiêu chí phụ đọc được thứ hạng nguyện vọng hoặc kết cục buổi trước thì mở kênh khai gian. Với trường hợp kết cục buổi trước, TN7d của dự án đã đo: 113/300 em tìm ra cách giấu bớt buổi có lợi.",
+   "kiem_nhan": "Test chống nội sinh: đổi nguyện vọng của một em không được đổi khoá ưu tiên của CLB nào.",
+   "phu_thuoc": [
+    "Z7"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "R",
+    "DT": "O",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "O",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "SK": "Tầng theo loại vé (VIP, diễn giả) rồi bốc thăm.",
+    "KTX": "Khoảng cách (km) + điểm hoàn cảnh tính từ dữ liệu.",
+    "TS": "Điểm tổ hợp + điểm cộng + khu vực cho từng (thí sinh, ngành); quy tắc ở ngưỡng.",
+    "NS": "Điểm đánh giá + thâm niên; quản lý xếp tay một phần (khớp Tầng 1/2).",
+    "KT": "Điểm tính từ chi phí, thời gian, năng lực máy.",
+    "VL": "Điểm phù hợp tính từ hồ sơ.",
+    "LG": "Chi phí / khoảng cách.",
+    "TC": "Tải hiện tại + chuyên môn; quản lý duyệt.",
+    "NT": "Dùng điểm phỏng vấn hiện có.",
+    "DT": "Hai tầng hiện có khớp (đã phỏng vấn / chưa).",
+    "HP": "Điều kiện tiên quyết là bộ lọc (A5), không phải ưu tiên.",
+    "YT": "Xếp hạng đầy đủ nên ít hoà điểm."
+   }
+  },
+  {
+   "id": "A2",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Luật hoà điểm: bốc thăm hay tiêu chí khác",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L123–191, L757–814, L1086–1109, L1112–1182",
+   "ham": "compute_club_priority, sinh_stb_theo_buoi, generate_stb_lottery, chen_stb_cho_hoc_sinh_moi",
+   "hien_trang": "Hoà điểm và Tầng 2 luôn do số bốc thăm (STB) quyết định. STB là một hoán vị dùng chung, khoá sau lần chạy đầu, hoán vị lại mỗi buổi (stb_ngay); học sinh đến muộn được chèn ngẫu nhiên đều. Không có lựa chọn khác.",
+   "thay_doi": "Thêm chính sách hoà điểm: 'boc_tham' (hiện tại) | 'tieu_chi_phu' (xác định, ghi log) | 'nhan_het' (nhận mọi người bằng điểm ở ngưỡng, vượt chỉ tiêu). Giữ nguyên cơ chế khoá và seed cho nhánh bốc thăm.",
+   "muc": "Sửa mã",
+   "quy_mo": "S–M",
+   "trong_so": 1.5,
+   "rui_ro": "'nhan_het' làm số người vượt capacity nên phải sửa sanity_check_result (L2128 kiểm 'không CLB nào vượt capacity').",
+   "kiem_nhan": "Test sanity có cờ vượt chỉ tiêu; báo cáo ghi rõ chính sách đã dùng.",
+   "phu_thuoc": [
+    "A1"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "R",
+    "HP": "-",
+    "NS": "R",
+    "KT": "-",
+    "VL": "-",
+    "LG": "-",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "Công lập thường không chấp nhận bốc thăm: cần 'nhận hết' hoặc tiêu chí phụ; tư thục có thể dùng bốc thăm.",
+    "NS": "Bốc thăm không được chấp nhận trong nhân sự: dùng thâm niên / khoảng cách, bốc thăm chỉ là bước cuối có log.",
+    "TC": "Tiêu chí phụ xác định (tải hiện tại, thâm niên); vẫn ghi seed nếu có bốc thăm.",
+    "YT": "Ít hoà điểm; giữ bốc thăm làm bước cuối."
+   }
+  },
+  {
+   "id": "A3",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Hàm lựa chọn theo ngành (thay / bổ sung club_choice_function)",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L236–292; gọi ở L404 (run_rbda) và L511 (verify_stability)",
+   "ham": "club_choice_function",
+   "hien_trang": "Hai lượt: lượt dự trữ lấy tối đa reserve_capacity em đủ tư cách theo thứ hạng; lượt phổ thông lấy phần còn lại trong số chưa được chọn. Một hàm duy nhất cho mọi CLB; sức chứa là một con số.",
+   "thay_doi": "Đăng ký thêm hàm lựa chọn theo ngành: hai tầng đề tài–giảng viên, theo ô vai trò, chỉ tiêu dọc/ngang chồng lấn, trần theo vùng, mức tối thiểu và trần cứng, ba lô theo khối lượng. Mỗi hàm kèm bản kiểm chứng tương ứng (Z4, Z6).",
+   "muc": "Viết mới",
+   "quy_mo": "L (XL với ba lô)",
+   "trong_so": 4,
+   "rui_ro": "DA chỉ giữ bảo đảm ổn định khi hàm lựa chọn thay thế được và thoả luật tổng cầu. Ba lô (TC, LG) không thoả nên mất bảo đảm (xem A12).",
+   "kiem_nhan": "Test thay thế được + tổng cầu (Z6).",
+   "phu_thuoc": [
+    "Z7"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "O",
+    "DT": "R",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "O",
+    "NS": "O",
+    "KT": "R",
+    "VL": "O",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "DT": "Hai tầng: đề tài trong giảng viên (SPA).",
+    "KT": "Mỗi ô vai trò có sức chứa và ưu tiên riêng; chứng chỉ là bộ lọc.",
+    "TS": "Chỉ tiêu dọc/ngang chồng lấn; chọn thứ tự xử lý dự trữ.",
+    "YT": "Trần theo vùng = dự trữ trên nhiều bệnh viện.",
+    "NT": "Trần cứng cho trại ngủ đêm (nam/nữ); mức tối thiểu.",
+    "LG": "Tải trọng, thể tích nhiều chiều (ba lô): không thay thế được.",
+    "TC": "Sức chứa theo khối lượng hồ sơ (ba lô): không thay thế được.",
+    "SK": "Dùng dự trữ mềm hiện có cho VIP.",
+    "KTX": "Dùng dự trữ mềm cho hoàn cảnh khó khăn.",
+    "HP": "Dự trữ mềm theo ngành và năm học.",
+    "NS": "Dự trữ mềm cho ưu tiên nội bộ.",
+    "VL": "Dự trữ mềm cho người mới."
+   }
+  },
+  {
+   "id": "A4",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Dự trữ cứng / mềm và thứ tự xử lý dự trữ",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L236–292; schema clubs L1251",
+   "ham": "club_choice_function",
+   "hien_trang": "Dự trữ luôn mềm (suất thừa chuyển thành chỗ phổ thông) và luôn xét TRƯỚC lượt phổ thông. Không có lựa chọn.",
+   "thay_doi": "Thêm tham số loai_du_tru ('mem' | 'cung') và thu_tu ('du_tru_truoc' | 'pho_thong_truoc'); ghi vào run_meta và tệp xuất để người đọc biết.",
+   "muc": "Sửa mã",
+   "quy_mo": "S–M",
+   "trong_so": 1.5,
+   "rui_ro": "Thứ tự xử lý làm đổi kết quả, nên phải công bố.",
+   "kiem_nhan": "Test hai thứ tự cho kết quả khác nhau trên ví dụ nhỏ; báo cáo ghi lựa chọn.",
+   "phu_thuoc": [
+    "A3"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "O",
+    "NS": "R",
+    "KT": "-",
+    "VL": "O",
+    "LG": "-",
+    "TC": "-",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "Thứ tự xử lý dự trữ đổi kết quả; phải công bố.",
+    "NT": "Trần cứng số chỗ nữ/nam.",
+    "NS": "Nhóm 'người đang giữ vị trí'."
+   }
+  },
+  {
+   "id": "A5",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Điều kiện đủ tư cách đa thuộc tính và bộ lọc cứng",
+   "tep": "rbda_priority_pipeline.py; api.py",
+   "dong": "rbda L1709–1720, L1723–1753; api.py L1041; schema L1251, L1290",
+   "ham": "default_reserve_eligible_fn, hop_ung_vien",
+   "hien_trang": "Đủ tư cách = so sánh chuỗi students.reserve_group == clubs.reserve_group; mỗi bên chỉ MỘT nhãn. Không có bước loại ứng viên không đủ điều kiện (tiên quyết, chứng chỉ, giới tính) trước khi chạy.",
+   "thay_doi": "Bảng thuộc tính nhiều giá trị (ứng viên–nhãn, đơn vị–nhãn yêu cầu); tách hai loại điều kiện: (a) bộ lọc cứng loại khỏi danh sách trước DA, (b) nhãn dự trữ (ưu tiên).",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Bộ lọc đổi danh sách nguyện vọng: cần cảnh báo ứng viên không còn lựa chọn nào.",
+   "kiem_nhan": "Test: ứng viên bị lọc không bao giờ được ghép; cảnh báo ở báo cáo sức khoẻ dữ liệu.",
+   "phu_thuoc": [
+    "Z7",
+    "B2"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "O",
+    "DT": "O",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "O",
+    "LG": "O",
+    "TC": "O",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "HP": "Môn tiên quyết = bộ lọc.",
+    "KT": "Chứng chỉ an toàn = bộ lọc.",
+    "YT": "Chứng chỉ hành nghề.",
+    "KTX": "Giới tính, loại phòng, hoàn cảnh.",
+    "TS": "Nhiều diện ưu tiên trên một thí sinh.",
+    "NS": "'Người đang giữ vị trí' + kỹ năng."
+   }
+  },
+  {
+   "id": "A6",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Mức tối thiểu và vòng đóng–mở lại",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L218–233 (loi_suc_chua); L877–985, vòng ngoài quanh run_rbda ở L973; schema L1251",
+   "ham": "loi_suc_chua, run_rbda_nhieu_buoi",
+   "hien_trang": "Chỉ có trần (capacity), không có mức tối thiểu. loi_suc_chua là luật duy nhất cho sức chứa (ba nơi dùng chung). Schema ép capacity > 0.",
+   "thay_doi": "Thêm min_capacity; vòng ngoài: chạy DA → đóng đơn vị dưới mức tối thiểu → trả người về → chạy lại, tới khi mọi đơn vị mở đều đạt mức hoặc hết đơn vị để đóng. Đây là xấp xỉ: bài toán chính xác khó.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Mất ổn định chặt chẽ; kết quả phụ thuộc thứ tự đóng.",
+   "kiem_nhan": "Báo cáo đơn vị bị đóng; kiểm mọi đơn vị mở đều đạt mức tối thiểu.",
+   "phu_thuoc": [
+    "Z3",
+    "A3"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "R",
+    "NS": "-",
+    "KT": "O",
+    "VL": "-",
+    "LG": "-",
+    "TC": "-",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Khoá / trại không đủ người thì đóng.",
+    "HP": "Lớp dưới sĩ số tối thiểu.",
+    "YT": "Bệnh viện tuyến dưới cần mức tối thiểu."
+   }
+  },
+  {
+   "id": "A7",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Sức chứa hai tầng và ghép nhiều–nhiều",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L299–311 (MatchResult), L315–452 (run_rbda), L236–292",
+   "ham": "MatchResult, run_rbda",
+   "hien_trang": "Mỗi ứng viên nhận ĐÚNG một đơn vị mỗi buổi; mỗi đơn vị có một sức chứa. MatchResult.assignment là dict {ứng viên: đơn vị} nên không biểu diễn được một ứng viên – nhiều đơn vị hay hai tầng sức chứa.",
+   "thay_doi": "Hai tầng (đề tài trong giảng viên) = thuật toán SPA: hàm lựa chọn hai tầng + kết quả {ứng viên: đơn vị}; nhiều–nhiều: mỗi bài cần k phản biện, mỗi phản biện nhận tối đa m bài.",
+   "muc": "Viết mới",
+   "quy_mo": "L",
+   "trong_so": 4,
+   "rui_ro": "Định nghĩa cặp phá vỡ khác: phải viết lại verify_stability.",
+   "kiem_nhan": "Test cặp phá vỡ SPA.",
+   "phu_thuoc": [
+    "A3"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "R",
+    "DT": "R",
+    "KTX": "-",
+    "TS": "O",
+    "HP": "-",
+    "NS": "-",
+    "KT": "R",
+    "VL": "O",
+    "LG": "O",
+    "TC": "O",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "DT": "Đề tài + giảng viên (SPA).",
+    "SK": "Mỗi bài cần k phản biện, mỗi phản biện ≤ m bài.",
+    "KT": "Ô theo vai trò trong dự án."
+   }
+  },
+  {
+   "id": "A8",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Nhu cầu nhiều đơn vị và ràng buộc xuyên buổi",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L877–985 (run_rbda_nhieu_buoi), L988–1009 (verify_stability_tuan), L703–737",
+   "ham": "run_rbda_nhieu_buoi, verify_stability_tuan",
+   "hien_trang": "Mỗi buổi chạy run_rbda ĐỘC LẬP (L973); mỗi em tối đa một CLB mỗi buổi; verify_stability_tuan dựa vào việc 'không ràng buộc nào nối hai buổi' (docstring L988). Đúng với lịch tách rời; sai nếu có trần tổng, điều kiện tiên quyết, môn đi kèm.",
+   "thay_doi": "Giữ chạy độc lập cho trường hợp tách rời. Với ràng buộc xuyên buổi cần cơ chế đa đơn vị (vd chọn lần lượt có thứ tự ngẫu nhiên) và định nghĩa ổn định mới cho cả tuần.",
+   "muc": "Viết mới",
+   "quy_mo": "XL",
+   "trong_so": 8,
+   "rui_ro": "Ổn định từng buổi không còn kéo theo ổn định cả tuần.",
+   "kiem_nhan": "Test cho cả tuần; đo tỉ lệ vi phạm trên dữ liệu mô phỏng.",
+   "phu_thuoc": [
+    "A3",
+    "Z3"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "R",
+    "NS": "O",
+    "KT": "-",
+    "VL": "-",
+    "LG": "-",
+    "TC": "-",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "HP": "Tín chỉ tối thiểu/tối đa, môn tiên quyết, đủ k môn không trùng giờ: viết mới.",
+    "NS": "Luân chuyển nhiều vòng, không quay lại phòng ban đã qua.",
+    "YT": "Luân khoa nhiều giai đoạn.",
+    "NT": "Chọn nhiều khoá vẫn tách rời được: chỉ cấu hình.",
+    "SK": "Phiên song song tách rời được: chỉ cấu hình."
+   }
+  },
+  {
+   "id": "A9",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Lịch tổng quát thay cho nhãn buổi",
+   "tep": "rbda_priority_pipeline.py; api_bao_cao.py",
+   "dong": "rbda L99–116, L575–700 (so_thu_trong_tuan L605, khoa_sap_buoi L649, nhom_theo_buoi L683); api_bao_cao L159–275",
+   "ham": "gom_theo_buoi, so_thu_trong_tuan, khoa_sap_buoi, nhom_theo_buoi",
+   "hien_trang": "'Buổi' là nhãn chuỗi; hai CLB cùng nhãn = trùng giờ. Nhận ra thứ trong tuần (thu_2, t2, monday, thu_3_tiet_9) để sắp thứ tự ngày; nhãn lạ vẫn chạy nhưng xếp cuối theo vần chữ cái. Không có khoảng thời gian chồng lấn một phần.",
+   "thay_doi": "Thêm khoảng thời gian (ngày, bắt đầu, kết thúc) cho mỗi đơn vị; xung đột = giao khoảng khác rỗng; thứ tự xét buổi theo ngày thật. Giữ nhãn cho trường học.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Thứ tự xét buổi ảnh hưởng kết quả ở một số chế độ bốc thăm; chế độ đang dùng (stb_ngay) đã khoá nên ít rủi ro.",
+   "kiem_nhan": "Test trùng khít với nhãn cũ; test chồng lấn một phần.",
+   "phu_thuoc": [
+    "B2"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "R",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "R",
+    "NS": "O",
+    "KT": "O",
+    "VL": "-",
+    "LG": "R",
+    "TC": "-",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Đợt có ngày bắt đầu, kết thúc (thay 'buổi trong tuần').",
+    "SK": "Workshop chồng lấn một phần; xuất .ics.",
+    "HP": "Lịch học, phòng.",
+    "LG": "Khung giờ giao.",
+    "NS": "Ca trực.",
+    "KT": "Ca / lịch rảnh.",
+    "YT": "Lịch luân khoa."
+   }
+  },
+  {
+   "id": "A10",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Cặp cấm / xung đột lợi ích",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L1723–1753 (hop_ung_vien), L456–524 (verify_stability), L1016–1083 (validate_data_integrity)",
+   "ham": "hop_ung_vien, verify_stability, validate_data_integrity",
+   "hien_trang": "Không có khái niệm cặp bị cấm: bất kỳ (ứng viên, đơn vị) trong danh sách nguyện vọng đều có thể được ghép.",
+   "thay_doi": "Bảng cặp cấm (ứng viên, đơn vị); loại ở hop_ung_vien (trước DA); thêm kiểm 'không cặp cấm nào được ghép' ở verify và sanity; cảnh báo ở báo cáo sức khoẻ dữ liệu.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Loại cặp cấm tương đương rút khỏi danh sách nên kết quả vẫn ổn định theo danh sách đã lọc.",
+   "kiem_nhan": "Test: không cặp cấm nào xuất hiện trong kết quả.",
+   "phu_thuoc": [
+    "Z3",
+    "A5"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "R",
+    "DT": "O",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "-",
+    "NS": "O",
+    "KT": "-",
+    "VL": "-",
+    "LG": "-",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "SK": "Phản biện – tác giả.",
+    "TC": "Người có quan hệ với khách hàng không được thẩm định hồ sơ đó.",
+    "DT": "Quan hệ thân thuộc giảng viên – sinh viên.",
+    "NS": "Quan hệ nội bộ.",
+    "YT": "Quan hệ thân thuộc."
+   }
+  },
+  {
+   "id": "A11",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Đăng ký theo nhóm / cặp đôi",
+   "tep": "rbda_priority_pipeline.py",
+   "dong": "L315–452; schema preferences L1271",
+   "ham": "run_rbda",
+   "hien_trang": "Mỗi ứng viên xếp hạng độc lập (mỗi dòng preferences là một cặp ứng viên–đơn vị); không biểu diễn được 'hai người muốn cùng nơi'.",
+   "thay_doi": "Nghiên cứu mở: ghép có cặp đôi có thể KHÔNG có kết quả ổn định. Đề xuất heuristic có báo cáo mức vi phạm, hoặc giới hạn nhóm ở mức đơn vị lớn (toà nhà, thành phố) thay vì ghép bạn cùng phòng.",
+   "muc": "Viết mới",
+   "quy_mo": "XL",
+   "trong_so": 8,
+   "rui_ro": "Mất bảo đảm ổn định; phải công bố rõ.",
+   "kiem_nhan": "Đo tỉ lệ nhóm bị tách trên dữ liệu mô phỏng.",
+   "phu_thuoc": [
+    "A3"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "O",
+    "TS": "-",
+    "HP": "-",
+    "NS": "-",
+    "KT": "-",
+    "VL": "-",
+    "LG": "-",
+    "TC": "-",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "YT": "Cặp đôi muốn cùng thành phố: bắt buộc.",
+    "KTX": "Nhóm 2–4 người; không ghép bạn cùng phòng bằng DA.",
+    "NT": "Nhóm bạn đi cùng."
+   }
+  },
+  {
+   "id": "A12",
+   "nhom": "A",
+   "pham_vi": "theo_nganh",
+   "ten": "Ổn định là chỉ số chất lượng, không phải điều kiện chặn",
+   "tep": "api.py",
+   "dong": "L1052–1071 (sanity_problems, stability_problems → rollback)",
+   "ham": "_run_pipeline_da_khoa",
+   "hien_trang": "Nếu verify_stability tìm thấy BẤT KỲ cặp phá vỡ nào thì cả lần chạy bị rollback (L1062–1071). Hợp lý khi hàm lựa chọn thay thế được; sai khi hàm lựa chọn là ba lô.",
+   "thay_doi": "Thêm chế độ 'bao_dam' (hiện tại) và 'do_luong': ghi số cặp phá vỡ vào báo cáo và run_history rồi vẫn lưu kết quả; ngưỡng cảnh báo cấu hình được.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Bỏ bảo đảm lý thuyết: phải ghi trong báo cáo và hợp đồng.",
+   "kiem_nhan": "Test: ở chế độ đo lường, kết quả vẫn được lưu và số cặp phá vỡ được ghi.",
+   "phu_thuoc": [
+    "Z3"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "O",
+    "NS": "-",
+    "KT": "O",
+    "VL": "-",
+    "LG": "R",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "LG": "Tải trọng / thể tích kiểu ba lô: đo cặp phá vỡ như chỉ số.",
+    "TC": "Sức chứa theo khối lượng hồ sơ.",
+    "YT": "Khi có cặp đôi.",
+    "KT": "Khi có ô vai trò.",
+    "NT": "Khi dùng mức tối thiểu xấp xỉ.",
+    "HP": "Khi có ràng buộc xuyên buổi."
+   }
+  },
+  {
+   "id": "B1",
+   "nhom": "B",
+   "pham_vi": "theo_nganh",
+   "ten": "Điểm và thuộc tính theo cặp (đang là một số thực ≥ 0)",
+   "tep": "rbda_priority_pipeline.py; api_cham_diem.py; api_nhap.py",
+   "dong": "schema L1265 (club_scores), L1260–1271; api_cham_diem L69–137; api_nhap L996–1194",
+   "ham": "club_scores.score",
+   "hien_trang": "Mỗi cặp (ứng viên, đơn vị) có đúng một điểm, kiểu REAL, NOT NULL, CHECK (score >= 0). Không có chỗ cho nhiều tiêu chí, điểm âm (điểm rủi ro, chi phí), ngày hay khoảng cách.",
+   "thay_doi": "Bảng thuộc tính theo cặp dạng khoá–giá trị (hoặc cột JSON) rồi hàm ưu tiên đọc ra; bỏ CHECK ≥ 0 hoặc đổi theo kiểu thuộc tính; migrate bằng di_tru_schema (L1568) vì đã có sao lưu và dựng lại bảng.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Dữ liệu cũ phải còn chạy được (di_tru_schema idempotent).",
+   "kiem_nhan": "Test migration trên app.db cũ; test trùng khít.",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "-",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "Điểm tổ hợp, điểm cộng, nhiều thang.",
+    "KTX": "Km, điểm hoàn cảnh.",
+    "NS": "Điểm năng lực.",
+    "TC": "Tải, chuyên môn.",
+    "KT": "Chi phí, thời gian: có thể âm.",
+    "VL": "Điểm phù hợp.",
+    "LG": "Khoảng cách, chi phí."
+   }
+  },
+  {
+   "id": "B2",
+   "nhom": "B",
+   "pham_vi": "theo_nganh",
+   "ten": "Bảng thực thể mới theo ngành",
+   "tep": "rbda_priority_pipeline.py; api_quan_ly.py",
+   "dong": "schema L1240–1300; di_tru_schema L1568–1666",
+   "ham": "DEFAULT_SCHEMA, di_tru_schema",
+   "hien_trang": "Schema nghiệp vụ chỉ có 6 bảng: students, clubs, club_test_selection, club_scores, preferences, match_results (cộng bảng kiểm toán). di_tru_schema nâng cấp idempotent, có sao lưu.",
+   "thay_doi": "Mỗi ngành thêm bảng riêng và màn hình quản lý, dùng đúng cơ chế di_tru_schema.",
+   "muc": "Viết mới",
+   "quy_mo": "M mỗi ngành",
+   "trong_so": 2,
+   "rui_ro": "Thấp nếu tuân theo di_tru_schema.",
+   "kiem_nhan": "Test migration + test nhập/xuất bảng mới.",
+   "phu_thuoc": [
+    "Z6"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "R",
+    "DT": "R",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Đợt, lệ phí, trạng thái thanh toán.",
+    "SK": "Vé, phiên, diễn giả.",
+    "DT": "Giảng viên; quan hệ đề tài–giảng viên.",
+    "KTX": "Phòng/giường, hợp đồng, người đang ở.",
+    "TS": "Tổ hợp xét tuyển, đối tượng ưu tiên, điểm cộng.",
+    "HP": "Lịch học, phòng, tín chỉ, môn tiên quyết.",
+    "NS": "Kỹ năng, chứng chỉ, địa điểm, định biên.",
+    "KT": "Kỹ năng, chứng chỉ, lịch rảnh, vai trò.",
+    "VL": "Hồ sơ, ngân sách, thanh toán.",
+    "LG": "Bản đồ/GPS, khung giờ, tải trọng.",
+    "TC": "Khách hàng, chuyên viên, khối lượng hồ sơ.",
+    "YT": "Lịch luân khoa nhiều giai đoạn, chứng chỉ hành nghề."
+   }
+  },
+  {
+   "id": "B3",
+   "nhom": "B",
+   "pham_vi": "theo_nganh",
+   "ten": "Sinh danh sách sở thích từ dữ liệu",
+   "tep": "mô-đun mới (thay nguồn của api_nhap.import_preferences_csv)",
+   "dong": "api_nhap L814–994",
+   "ham": "import_preferences_csv",
+   "hien_trang": "Nguồn nguyện vọng duy nhất là người dùng tự xếp (Forms, CSV, kiosk). Không có bên nào sinh thứ hạng từ dữ liệu.",
+   "thay_doi": "Mô-đun sinh thứ hạng từ chi phí, thời gian, khoảng cách, năng lực; ghi lại cách tính để kiểm toán.",
+   "muc": "Viết mới",
+   "quy_mo": "L",
+   "trong_so": 4,
+   "rui_ro": "Chất lượng kết quả phụ thuộc hàm sở thích; kênh khai gian chuyển sang dữ liệu đầu vào.",
+   "kiem_nhan": "So sánh với xếp hạng thủ công trên mẫu nhỏ.",
+   "phu_thuoc": [
+    "B1",
+    "Z3"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "O",
+    "TS": "-",
+    "HP": "-",
+    "NS": "O",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "-"
+   },
+   "rieng_theo_nganh": {
+    "KT": "Máy / tác vụ không có người xếp hạng.",
+    "LG": "Đơn hàng – xe theo khoảng cách, chi phí.",
+    "VL": "Gợi ý danh sách ngắn.",
+    "TC": "Khách hàng không xếp hạng chuyên viên."
+   }
+  },
+  {
+   "id": "C1",
+   "nhom": "C",
+   "pham_vi": "theo_nganh",
+   "ten": "Nhập dữ liệu: ánh xạ cột và kết nối hệ thống nguồn",
+   "tep": "api_nhap.py",
+   "dong": "L240–320 (detect_csv_kind, import_csv_auto), L339–425, L814–994, L996–1194",
+   "ham": "import_csv_auto, import_clubs_csv, import_preferences_csv, import_test_selection_csv",
+   "hien_trang": "Nhập CSV/Excel theo hợp đồng cột cố định (club_id, name, capacity, reserve_*; student_id, test_club_k, score_k, pref_k hoặc <buoi>_pref_k); nhận loại tệp theo tiêu đề; đã có kiểm Excel cắt số 0 đầu, trùng hoa/thường, trùng dòng. Chưa có kết nối API.",
+   "thay_doi": "Tầng ánh xạ cột (tệp cấu hình theo nguồn) và bộ kết nối (REST hoặc CSV định kỳ) đặt trước import_csv_auto; giữ nguyên các kiểm tra dữ liệu.",
+   "muc": "Sửa mã",
+   "quy_mo": "L",
+   "trong_so": 4,
+   "rui_ro": "Mỗi nguồn có lỗi dữ liệu riêng; phải giữ các kiểm tra 'im lặng' đã có.",
+   "kiem_nhan": "Test với tệp mẫu của từng nguồn.",
+   "phu_thuoc": [
+    "B2"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "R",
+    "DT": "O",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "SK": "Hệ thống bán vé.",
+    "HP": "Phần mềm quản lý đào tạo.",
+    "NS": "Phần mềm nhân sự.",
+    "KT": "ERP / quản lý dự án.",
+    "VL": "API thời gian thực + thanh toán.",
+    "LG": "TMS, GPS.",
+    "TC": "Triển khai tại chỗ, dữ liệu không ra khỏi ngân hàng.",
+    "TS": "Điểm từ Sở hoặc nhà trường."
+   }
+  },
+  {
+   "id": "C2",
+   "nhom": "C",
+   "pham_vi": "theo_nganh",
+   "ten": "Xuất lịch và thông báo (.ics, thư)",
+   "tep": "api_xuat.py; api_bao_cao.py",
+   "dong": "api_xuat L825–1080, L81–148; api_bao_cao L226–275",
+   "ham": "_export_csv_da_khoa, _xuat_excel, get_thoi_khoa_bieu",
+   "hien_trang": "Xuất CSV (UTF-8 BOM, số kiểu Việt Nam) và Excel nhiều trang; thời khoá biểu tuần là bảng chứ không phải lịch cá nhân.",
+   "thay_doi": "Thêm xuất .ics cho từng người và mẫu thông báo.",
+   "muc": "Viết mới",
+   "quy_mo": "S–M",
+   "trong_so": 1.5,
+   "rui_ro": "Thấp.",
+   "kiem_nhan": "Mở thử .ics trong Outlook/Google Calendar.",
+   "phu_thuoc": [
+    "A9"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "R",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "O",
+    "HP": "R",
+    "NS": "-",
+    "KT": "O",
+    "VL": "-",
+    "LG": "O",
+    "TC": "-",
+    "YT": "-"
+   },
+   "rieng_theo_nganh": {
+    "SK": "Lịch cá nhân .ics là bắt buộc.",
+    "HP": "Thời khoá biểu cá nhân."
+   }
+  },
+  {
+   "id": "C3",
+   "nhom": "C",
+   "pham_vi": "theo_nganh",
+   "ten": "Giải trình từng cá nhân (vì sao không trúng / không có chỗ)",
+   "tep": "api_bao_cao.py; api_xuat.py",
+   "dong": "api_bao_cao L368–479; api_xuat L468–541",
+   "ham": "get_phan_bo_nguyen_vong, get_em_chua_co_cho, get_thay_doi_ket_qua",
+   "hien_trang": "Có thống kê phân bố nguyện vọng, danh sách em chưa có chỗ kèm nguyện vọng đã khai, và so sánh với lần chạy trước. Chưa có bản giải trình từng người: 'ở nguyện vọng k đơn vị đã đầy tới thứ hạng nào, em đứng thứ mấy'.",
+   "thay_doi": "Sinh từ MatchResult.rejection_log và base_rank (đã có sẵn trong kết quả): với mỗi nguyện vọng bị từ chối, vòng nào, thứ hạng của em và thứ hạng cuối được nhận.",
+   "muc": "Viết mới",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Lộ thông tin xếp hạng của người khác: chỉ hiện ngưỡng, không hiện tên.",
+   "kiem_nhan": "Test: bản giải trình khớp kết quả và không chứa mã người khác.",
+   "phu_thuoc": [
+    "Z7"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "-",
+    "DT": "O",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "O",
+    "NS": "R",
+    "KT": "-",
+    "VL": "O",
+    "LG": "-",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TS": "Phúc khảo: điểm chuẩn từng nguyện vọng.",
+    "TC": "Kiểm toán: lý do mỗi phân công.",
+    "NS": "Giải thích quyết định nhân sự.",
+    "KTX": "Giải thích phân phòng."
+   }
+  },
+  {
+   "id": "E1",
+   "nhom": "E",
+   "pham_vi": "theo_nganh",
+   "ten": "Máy chủ nhiều người dùng, phân quyền, mã hoá",
+   "tep": "browser_host.py; rbda_priority_pipeline.py; api.py",
+   "dong": "browser_host L186–208, L535–634; rbda L1416–1441; api.py L78–103",
+   "ham": "_Handler._authorized, _host_hop_le, serve, connect_db",
+   "hien_trang": "Chạy trên MỘT máy Windows: pywebview hoặc máy chủ cục bộ 127.0.0.1 với MỘT token và chặn DNS rebinding; dữ liệu là MỘT tệp app.db (SQLite, không WAL, khoá ghi trong tiến trình). Không có tài khoản, vai trò, mã hoá dữ liệu lúc nghỉ.",
+   "thay_doi": "Chế độ máy chủ: tài khoản và vai trò (nhập, chấm, chạy, duyệt, xem), mã hoá tệp CSDL hoặc chuyển sang CSDL máy chủ. browser_host.py là điểm xuất phát vì đã có kiểm tra Host, token.",
+   "muc": "Viết mới",
+   "quy_mo": "XL",
+   "trong_so": 8,
+   "rui_ro": "Bề mặt tấn công lớn hơn nhiều khi rời khỏi 127.0.0.1.",
+   "kiem_nhan": "Kiểm thử phân quyền; rà soát bảo mật độc lập.",
+   "phu_thuoc": [
+    "Z3"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "O",
+    "NS": "R",
+    "KT": "O",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "TC": "Triển khai tại chỗ, phân quyền theo vai trò, mã hoá.",
+    "NS": "Vai trò HR / quản lý.",
+    "TS": "Cấp tỉnh, nhiều đơn vị.",
+    "VL": "Nền tảng web nhiều người dùng.",
+    "LG": "Nhiều điều phối viên."
+   }
+  },
+  {
+   "id": "E2",
+   "nhom": "E",
+   "pham_vi": "theo_nganh",
+   "ten": "Nhật ký kiểm toán và phê duyệt hai người",
+   "tep": "api.py; rbda_priority_pipeline.py",
+   "dong": "api.py L565–584; schema run_history/run_meta/stb_lock; dau_van_tay_du_lieu L1756–1793",
+   "ham": "get_run_history, dau_van_tay_du_lieu",
+   "hien_trang": "Đã có: run_history không bao giờ ghi đè (seed, thời điểm, STB có vẽ lại không, buổi đã chạy), khoá STB cùng hạt giống, dấu vân tay SHA-256 của dữ liệu đầu vào, ảnh chụp ket_qua_truoc. Chưa có: danh tính người chạy / người duyệt; nhật ký chống sửa (ai ghi được app.db thì sửa được run_history).",
+   "thay_doi": "Thêm cột người chạy, người duyệt; bước 'chờ duyệt' trước khi ghi match_results; chuỗi băm nối các dòng nhật ký.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Thấp.",
+   "kiem_nhan": "Test: không chạy được nếu thiếu người duyệt khi bật chế độ này.",
+   "phu_thuoc": [
+    "Z3"
+   ],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "O",
+    "TS": "R",
+    "HP": "-",
+    "NS": "R",
+    "KT": "-",
+    "VL": "O",
+    "LG": "-",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "TC": "Phê duyệt hai người; ghi đầu vào nào, ai chạy.",
+    "TS": "Công bố kết quả có ký.",
+    "NS": "Duyệt quyết định.",
+    "YT": "Quyết định có hệ quả nghề nghiệp."
+   }
+  },
+  {
+   "id": "E3",
+   "nhom": "E",
+   "pham_vi": "theo_nganh",
+   "ten": "Dữ liệu cá nhân: đồng ý, thời hạn lưu, xoá",
+   "tep": "api_quan_ly.py; api_xuat.py; rbda_priority_pipeline.py",
+   "dong": "api_quan_ly L569–638, L519–546; api_xuat L594–809; rbda L1756–1793",
+   "ham": "reset_data, delete_student, export_du_lieu_dau_vao",
+   "hien_trang": "Có xoá toàn bộ / xoá học sinh (luôn sao lưu trước; run_history giữ lại). Chưa có: ghi nhận đồng ý (cha mẹ nếu là trẻ em), thời hạn lưu theo loại dữ liệu, xoá theo hạn, nhật ký truy cập. Các bản sao lưu app.db.bak-* cũng chứa dữ liệu nên phải nằm trong chính sách xoá.",
+   "thay_doi": "Bảng đồng ý và thời hạn lưu; tác vụ xoá / ẩn danh theo hạn, kể cả bản sao lưu; xuất dữ liệu tối thiểu. Pháp lý: Luật 91/2025/QH15 hiệu lực 01/01/2026 (nên nhờ chuyên gia pháp lý kiểm tra điều khoản cụ thể).",
+   "muc": "Sửa mã",
+   "quy_mo": "M–L",
+   "trong_so": 3,
+   "rui_ro": "Rủi ro pháp lý nếu bán cho tổ chức xử lý dữ liệu nhạy cảm.",
+   "kiem_nhan": "Test: xoá theo hạn xoá cả bản sao lưu.",
+   "phu_thuoc": [
+    "B2"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "O",
+    "DT": "O",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "O",
+    "NS": "R",
+    "KT": "O",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Trẻ em: đồng ý của cha mẹ.",
+    "TS": "Dữ liệu thí sinh, giấy tờ tuỳ thân.",
+    "KTX": "Hoàn cảnh gia đình nhạy cảm.",
+    "NS": "Xoá khi nghỉ việc.",
+    "TC": "Dữ liệu tài chính khách hàng + quy định ngân hàng.",
+    "YT": "Chỉ dữ liệu nhân sự, không đưa dữ liệu bệnh nhân vào.",
+    "VL": "Thanh toán.",
+    "LG": "Vị trí cá nhân."
+   }
+  },
+  {
+   "id": "G1",
+   "nhom": "G",
+   "pham_vi": "theo_nganh",
+   "ten": "Đến muộn / sức chứa giảm: tiếp tục DA từ trạng thái cũ (nâng cấp 1)",
+   "tep": "rbda_priority_pipeline.py; api.py",
+   "dong": "rbda L315–452, L299–311, L1112–1182; api.py L858–871, L1013–1027",
+   "ham": "run_rbda, MatchResult, chen_stb_cho_hoc_sinh_moi, chi_buoi",
+   "hien_trang": "Mọi lần chạy đọc toàn bộ app.db rồi chạy lại từ đầu. Đã có: chạy riêng một buổi (chi_buoi), chèn STB cho em đến muộn mà giữ thứ tự tương đối của em cũ, ảnh chụp và so sánh kết quả. MatchResult lưu assignment, rank_in_student_pref, base_rank, rejection_log nên trạng thái cuối của DA khôi phục được.",
+   "thay_doi": "run_rbda nhận trạng thái ban đầu (held, next_choice_idx) khôi phục từ MatchResult; base_rank giữ dạng có chỉ mục để chèn ứng viên mới thay vì sắp lại; cửa sổ chạy lại theo chu kỳ.",
+   "muc": "Sửa mã",
+   "quy_mo": "M",
+   "trong_so": 2,
+   "rui_ro": "Kết quả đã công bố vẫn có thể bị hạ chỗ (đã đo, xem mục 3.3): cần G3.",
+   "kiem_nhan": "Đã thử: tiếp tục từ trạng thái cũ cho đúng kết quả của chạy lại toàn bộ (38/38 lần, 4 cấu hình).",
+   "phu_thuoc": [
+    "Z3",
+    "Z4"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "R",
+    "DT": "-",
+    "KTX": "O",
+    "TS": "O",
+    "HP": "R",
+    "NS": "O",
+    "KT": "R",
+    "VL": "O",
+    "LG": "O",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Đăng ký muộn.",
+    "SK": "Khách đến tại chỗ.",
+    "HP": "Tuần thêm–bớt môn.",
+    "KT": "Máy hỏng = giảm sức chứa.",
+    "TC": "Khách hàng mới."
+   }
+  },
+  {
+   "id": "G2",
+   "nhom": "G",
+   "pham_vi": "theo_nganh",
+   "ten": "Huỷ / sức chứa tăng: rút lui (nâng cấp 2)",
+   "tep": "rbda_priority_pipeline.py; api_quan_ly.py",
+   "dong": "rbda L315–452; api_quan_ly L495–546",
+   "ham": "reset_student_entry, delete_student",
+   "hien_trang": "delete_student CHẶN nếu em đã có trong match_results (L519–546): hiện chưa có đường rút lui sau khi đã chạy, chỉ chạy lại toàn bộ.",
+   "thay_doi": "Rút lui = bỏ em khỏi trạng thái, giải phóng chỗ, cho người xếp sau lên theo chuỗi chỗ trống (hoặc chạy lại có kiểm soát).",
+   "muc": "Sửa mã",
+   "quy_mo": "M–L",
+   "trong_so": 3,
+   "rui_ro": "Có biến thể chưa có chứng minh; phương án 'ít chuyển chỗ' đổi phúc lợi lấy ít xáo trộn.",
+   "kiem_nhan": "Test: kết quả sau rút lui ổn định theo verify.",
+   "phu_thuoc": [
+    "G1"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "R",
+    "TS": "R",
+    "HP": "R",
+    "NS": "R",
+    "KT": "O",
+    "VL": "O",
+    "LG": "O",
+    "TC": "R",
+    "YT": "R"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Huỷ vì chưa đóng phí.",
+    "KTX": "Trả phòng giữa kỳ.",
+    "TS": "Xét tuyển bổ sung sau khi có người không nhập học.",
+    "HP": "Rút môn.",
+    "NS": "Nghỉ việc.",
+    "TC": "Chuyên viên nghỉ việc, chia lại danh mục.",
+    "YT": "Rút lui."
+   }
+  },
+  {
+   "id": "G3",
+   "nhom": "G",
+   "pham_vi": "theo_nganh",
+   "ten": "Bảo vệ người đã công bố (nâng cấp 3)",
+   "tep": "rbda_priority_pipeline.py; api.py; api_xuat.py",
+   "dong": "rbda L236–292, L456–524; api.py L1086–1104; api_xuat L468–541",
+   "ham": "club_choice_function, ket_qua_truoc, get_thay_doi_ket_qua",
+   "hien_trang": "ket_qua_truoc là bản chụp ngay trước lần chạy; get_thay_doi_ket_qua phân loại mới được xếp / mất chỗ / đổi CLB. Nhưng không có cờ 'đã công bố' để chặn việc hạ chỗ.",
+   "thay_doi": "Cờ đã_công_bố trên match_results; hàm lựa chọn có 'tập được bảo vệ' (dự trữ mềm cho nhóm đã công bố) cộng ngân sách cặp phá vỡ chấp nhận được.",
+   "muc": "Viết mới",
+   "quy_mo": "L",
+   "trong_so": 4,
+   "rui_ro": "Tăng cặp phá vỡ; có thể bị giữ chỗ ảo.",
+   "kiem_nhan": "Đo số em bị hạ chỗ trước và sau khi bật bảo vệ.",
+   "phu_thuoc": [
+    "G1",
+    "A3"
+   ],
+   "ap_dung": {
+    "NT": "R",
+    "SK": "O",
+    "DT": "-",
+    "KTX": "R",
+    "TS": "O",
+    "HP": "O",
+    "NS": "R",
+    "KT": "O",
+    "VL": "-",
+    "LG": "-",
+    "TC": "R",
+    "YT": "O"
+   },
+   "rieng_theo_nganh": {
+    "NT": "Giữ chỗ người đã xác nhận.",
+    "KTX": "Quyền giữ chỗ của người đang ở.",
+    "NS": "Không ai bị chuyển sang nơi kém hơn hiện tại.",
+    "TC": "Danh mục đã giao cho chuyên viên."
+   }
+  },
+  {
+   "id": "G4",
+   "nhom": "G",
+   "pham_vi": "theo_nganh",
+   "ten": "Gom lô nhỏ theo cửa sổ thời gian (nâng cấp 4)",
+   "tep": "api.py (bộ lập lịch mới bọc quanh pipeline)",
+   "dong": "api.py L744–1316",
+   "ham": "_run_pipeline_da_khoa",
+   "hien_trang": "Chạy hoàn toàn thủ công: nút 'Chạy pipeline' với xác nhận hai bước.",
+   "thay_doi": "Bộ lập lịch cửa sổ Δ (chạy mỗi Δ phút hoặc khi đủ N yêu cầu) cộng hàng đợi yêu cầu; đi kèm G1–G3.",
+   "muc": "Viết mới",
+   "quy_mo": "M–L",
+   "trong_so": 3,
+   "rui_ro": "Tái nhập ưu thế thứ tự đến nếu quy tắc kém: phải gom lô rồi xếp theo ưu tiên, không theo thời điểm đến.",
+   "kiem_nhan": "Test: đổi thứ tự đến trong cùng một lô không đổi kết quả.",
+   "phu_thuoc": [
+    "G1",
+    "G3"
+   ],
+   "ap_dung": {
+    "NT": "O",
+    "SK": "R",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "R",
+    "NS": "-",
+    "KT": "R",
+    "VL": "R",
+    "LG": "R",
+    "TC": "R",
+    "YT": "-"
+   },
+   "rieng_theo_nganh": {
+    "SK": "Đổi phiên trong ngày.",
+    "HP": "Tuần thêm–bớt môn.",
+    "KT": "Đơn hàng mới theo lô.",
+    "VL": "Việc mới liên tục.",
+    "LG": "Lô ngắn cho ngày hôm sau.",
+    "TC": "Khách hàng mới theo lô."
+   }
+  },
+  {
+   "id": "G5",
+   "nhom": "G",
+   "pham_vi": "theo_nganh",
+   "ten": "Đổi nguyện vọng và dòng liên tục (nâng cấp 5–6)",
+   "tep": "mô-đun mới (họ thuật toán trực tuyến)",
+   "dong": "—",
+   "ham": "—",
+   "hien_trang": "Không có: lõi là DA theo lô tĩnh.",
+   "thay_doi": "Họ thuật toán khác; nằm ngoài phạm vi sửa mã.",
+   "muc": "Viết mới",
+   "quy_mo": "XL",
+   "trong_so": 8,
+   "rui_ro": "Không còn ổn định như lô tĩnh; chống khai gian không mặc nhiên.",
+   "kiem_nhan": "Cần nghiên cứu riêng.",
+   "phu_thuoc": [],
+   "ap_dung": {
+    "NT": "-",
+    "SK": "-",
+    "DT": "-",
+    "KTX": "-",
+    "TS": "-",
+    "HP": "-",
+    "NS": "-",
+    "KT": "-",
+    "VL": "O",
+    "LG": "R",
+    "TC": "-",
+    "YT": "-"
+   },
+   "rieng_theo_nganh": {
+    "LG": "Điều phối tức thời (taxi, giao hàng): đã đánh giá là không nên bán bằng chương trình này.",
+    "VL": "Nếu việc phải giao ngay."
+   }
+  }
+ ],
+ "so_do": {
+  "verify_vs_run": {
+   "nguon": "kiem_verify_nhanh.py và đo trong kernel, 20 CLB, tỉ lệ chỗ 1,0, dữ liệu tự sinh",
+   "so_hoc_sinh": [
+    2000,
+    5000,
+    10000,
+    20000
+   ],
+   "run_rbda_s": [
+    0.16,
+    0.46,
+    1.08,
+    3.06
+   ],
+   "verify_goc_s": [
+    0.26,
+    3.21,
+    22.38,
+    null
+   ],
+   "verify_nhanh_s": [
+    0.007,
+    0.072,
+    0.091,
+    0.292
+   ]
+  },
+  "em_den_muon": {
+   "nguon": "2.000 học sinh, 20 CLB; 20–40 lần thử mỗi dòng",
+   "ti_le_cho": [
+    1.0,
+    1.0,
+    1.0,
+    0.8,
+    0.8,
+    0.8
+   ],
+   "so_em_den_muon": [
+    1,
+    5,
+    20,
+    1,
+    5,
+    20
+   ],
+   "em_cu_bi_doi_tb": [
+    1.72,
+    9.03,
+    40.7,
+    1.7,
+    8.17,
+    32.4
+   ],
+   "mat_han_cho_tb": [
+    0.62,
+    2.07,
+    9.55,
+    0.8,
+    4.0,
+    16.25
+   ],
+   "tot_len_tb": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ]
+  },
+  "so_vong": {
+   "nguon": "ket_qua_thu_tai.csv (204 lần chạy của dự án)",
+   "do_dai_danh_sach": [
+    3,
+    5,
+    10
+   ],
+   "trung_vi": [
+    9,
+    14,
+    18
+   ],
+   "lon_nhat": [
+    37,
+    84,
+    227
+   ],
+   "tran_max_rounds": 1000
+  },
+  "tiep_tuc_DA": {
+   "nguon": "exp_resume.py",
+   "cau_hinh": [
+    "2000/20/1.0/1 em",
+    "2000/20/0.8/5 em",
+    "5000/20/1.0/1 em",
+    "5000/20/0.9/20 em"
+   ],
+   "giong_het_chay_lai": [
+    "15/15",
+    "10/10",
+    "8/8",
+    "5/5"
+   ],
+   "t_chay_lai_ms": [
+    43.9,
+    110.6,
+    933.0,
+    778.1
+   ],
+   "t_tiep_tuc_ms": [
+    11.18,
+    52.61,
+    243.43,
+    425.6
+   ]
+  }
+ }
+}
