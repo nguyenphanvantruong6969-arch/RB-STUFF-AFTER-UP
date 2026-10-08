@@ -8,9 +8,7 @@ addopts = "-p no:cacheprovider"
 
 [tool.ruff]
 target-version = "py311"
-extend-exclude = [".venv", ".venv_build", "build", "dist",
-    # Kich ban tham khao cua goi ke hoach (doc tu ban build, khong phai ma san pham).
-    "docs/ke_hoach/tham_khao"]
+extend-exclude = [".venv", ".venv_build", "build", "dist"]
 
 [tool.ruff.lint]
 # Chi cac luat bat LOI THAT, khong bat van phong:

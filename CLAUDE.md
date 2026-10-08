@@ -9,22 +9,23 @@
 - Ngăn xếp: Python 3.11 + SQLite (`app.db`), giao diện HTML/JS chạy trong pywebview (WebView2), có chế độ dự phòng mở bằng trình duyệt (`browser_host.py`). Đóng gói bằng PyInstaller qua GitHub Actions (workflow *Build Windows executable (rbda-kiosk)*; build tay: `build_windows.bat`).
 - **Mục tiêu hiện tại của chủ dự án:** tổng quát hoá chương trình để bán cho các ngành khác ngoài CLB trường học (12 ngành đã đánh giá), và thêm khả năng xử lý thay đổi theo thời gian (em đến muộn, rút lui). Mô hình kinh doanh để sau.
 
-## Bản đồ mã (số dòng lấy từ bản build, có thể lệch so với kho — định vị theo TÊN HÀM)
+## Bản đồ mã (định vị theo TÊN HÀM; số dòng đã đối chiếu với kho ngày 08/10/2026 — bảng đầy đủ ở `docs/ke_hoach/DOI_CHIEU_KHO_MA.md`)
 | Tệp | Vai trò | Hàm then chốt |
 |---|---|---|
-| `rbda_priority_pipeline.py` (~2.187 dòng) | Thuật toán, schema, I/O SQLite | `compute_club_priority` L123–191 · `club_choice_function` L236–292 · `run_rbda` L315–452 · `verify_stability` L456–524 · `run_rbda_nhieu_buoi` L877–985 · `generate_stb_lottery`, `chen_stb_cho_hoc_sinh_moi` L1086–1182 · `DEFAULT_SCHEMA` L1251–1290 · `di_tru_schema` L1568–1666 · `default_reserve_eligible_fn` L1709–1720 |
-| `api.py` (~1.316 dòng) | `PipelineAPI`: pipeline 5 bước | `_run_pipeline_da_khoa` L744–1316 (rollback khi có cặp phá vỡ: L1052–1071) · `get_data_health_report` L234–514 |
-| `api_nhap.py`, `api_xuat.py`, `api_quan_ly.py`, `api_bao_cao.py`, `api_cham_diem.py`, `api_chung.py` | Nhập/xuất CSV-Excel, quản lý, báo cáo, chấm điểm mù, tiện ích | xem `docs/ke_hoach/SO_DANG_KY_33_MUC.md` |
+| `rbda_priority_pipeline.py` (~2.187 dòng) | Thuật toán, schema, I/O SQLite | `compute_club_priority` L123–191 · `club_choice_function` L236–292 · `run_rbda` L315–452 · `verify_stability` L456–524 · `run_rbda_nhieu_buoi` L877–985 · `generate_stb_lottery`, `chen_stb_cho_hoc_sinh_moi` L1086–1182 · `_BANG_RANG_BUOC` L1250, `DEFAULT_SCHEMA` L1290 · `di_tru_schema` L1568–1666 · `default_reserve_eligible_fn` L1709–1720 |
+| `api.py` (~1.364 dòng) | `PipelineAPI`: pipeline 5 bước | `_run_pipeline_da_khoa` L784–1364 (rollback khi có cặp phá vỡ: L1107–1119) · `get_data_health_report` L236 |
+| `api_nhap.py`, `api_xuat.py`, `api_quan_ly.py`, `api_bao_cao.py`, `api_cham_diem.py`, `api_chung.py` | Nhập/xuất CSV-Excel, quản lý, báo cáo, chấm điểm mù, tiện ích | số dòng trong sổ đã trôi (api_nhap +~230, api_xuat +~250): xem `docs/ke_hoach/DOI_CHIEU_KHO_MA.md` |
+| `so_nhap.py`, `so_excel.py` | Sổ nhập CLB: MỘT tệp Excel thay ba tệp nạp; nguồn duy nhất của định dạng (skill trong `.claude/skills/` cũng dùng) | `import_so_nhap`, `xem_truoc_so_nhap` (api_nhap.py) |
 | `i18n_errors.py` → `tao_i18n_js.py` → `i18n_loi.js` | Thông báo lỗi song ngữ, **một nguồn** | `err`, `phan_hoi_ok`, `phan_hoi_loi` |
 | `browser_host.py`, `recovery.py`, `chan_doan.py`, `main.py` | Máy chủ dự phòng 127.0.0.1, phục hồi, log, điểm vào | |
 | `index.html`, `js/00…08_*.js`, `i18n.js`, `style.css` | Giao diện; gọi backend qua `window.pywebview.api.*`, trả `{ok, data, errors}` | |
-| `tests/` | ~37 tệp, ~483 ca (theo tài liệu dự án) | `test_pipeline_core.py`, `test_nhieu_buoi.py::TestTrungKhit`, `test_toi_uu_on_dinh.py`, `test_boc_tham.py`, … |
+| `tests/` | 89 tệp `test_*.py`, 1.330 ca (đo 08/10/2026) | `test_pipeline_core.py`, `test_nhieu_buoi.py::TestTrungKhit`, `test_toi_uu_on_dinh.py`, `test_boc_tham.py`, … |
 | `du_lieu_test/`, `mau_csv/`, `docs/`, `BAN_GIAO.md` | Bộ dữ liệu mô phỏng, script đo, mẫu nhập, tài liệu cơ chế, nhật ký 25 lỗi đã sửa | |
 
 ## Lệnh
-- Chạy test: `python -m pytest -q` trong venv của dự án (tài liệu ghi `./.venv/bin/python -m pytest -q`; trên Windows: `.venv\Scripts\python -m pytest -q`). Toàn bộ ~95 giây.
+- Chạy test: `python -m pytest -q` trong venv của dự án (tài liệu ghi `./.venv/bin/python -m pytest -q`; trên Windows: `.venv\Scripts\python -m pytest -q`). Toàn bộ ~22 phút trên máy 4 nhân kèm test giao diện Chromium (BAN_GIAO.md ghi ~3,5 phút; chưa giải thích được, xem `docs/ke_hoach/DOI_CHIEU_KHO_MA.md`). Lint: `ruff check .`; CI đòi phủ ≥ 85 %.
 - Sinh lại thông báo lỗi JS sau khi sửa `i18n_errors.py`: `python tao_i18n_js.py`.
-- Kiểm verify nhanh (tham khảo): `python docs/ke_hoach/tham_khao/kiem_verify_nhanh.py <thư mục chứa rbda_priority_pipeline.py>`.
+- Kiểm verify nhanh (tham khảo): `pip install numpy` (chỉ cho kịch bản tham khảo, KHÔNG thêm vào requirements) rồi `python docs/ke_hoach/tham_khao/kiem_verify_nhanh.py <thư mục chứa rbda_priority_pipeline.py>`. Test `tests/test_tham_khao_verify_nhanh.py` canh cùng các kịch bản này mà không cần numpy.
 
 ## Bất biến — KHÔNG được phá
 1. Cấu hình mặc định phải cho kết quả TRÙNG KHÍT với trước khi sửa (cùng dữ liệu, cùng seed): so từng dòng match_results trên 3 bộ dữ liệu × 20 seed.
@@ -42,7 +43,7 @@
 3. Tham số mới phải có **mặc định = hành vi cũ**; cấu hình mặc định phải cho kết quả **trùng khít** (so từng dòng `match_results`, 3 bộ dữ liệu × 20 seed).
 4. Không xoá các chế độ đối chứng (`stb_tuan`, `stb_co_bu`, A1/A3 trong TN7): script đo trong `du_lieu_test/` cần chúng để tái lập số liệu.
 5. Hàm lựa chọn mới phải qua test **thay thế được** và **luật tổng cầu**; không qua thì ghi rõ "không bảo đảm ổn định" và dùng chế độ đo lường (mục A12).
-6. Sau mỗi mục: cập nhật `CHANGELOG` (mã mục, tệp, test mới) và đánh dấu tiến độ trong `docs/ke_hoach/TIEN_DO.md`.
+6. Sau mỗi mục: cập nhật `CHANGELOG.md` (mã mục, tệp, test mới) và đánh dấu tiến độ trong `docs/ke_hoach/TIEN_DO.md`.
 7. Dừng và hỏi khi: một bất biến xung đột với mục; số dòng/hiện trạng trong sổ lệch hẳn so với kho; cần thêm thư viện; cần đổi hợp đồng cột CSV hay schema ngoài phạm vi mục.
 
 ## Liêm chính học thuật (đây là đề tài của học sinh)

@@ -11,7 +11,7 @@ và không đủ tư cách (N). Khi thêm em s vào H:
   * nếu |H| + 1 <= capacity: club_choice_function nhận tất cả -> s được nhận;
   * ngược lại: lượt dự trữ giữ E[:reserve_capacity]; lượt phổ thông xếp phần còn lại theo thứ hạng,
     nên chỉ cần biết vị trí của s trong dãy đó = (#E đứng trước s, trừ reserve_capacity) + (#N đứng trước s),
-    tra bằng bisect (O(log n)).
+    tra bằng bisect_right (O(log n)).
 
 Chỉ đúng cho CẤU TRÚC HAI LƯỢT hiện tại của club_choice_function (dự trữ rồi phổ thông). Hàm lựa chọn
 khác (A3 trong sổ đăng ký) phải dùng bản gốc hoặc có bản nhanh riêng.
@@ -20,7 +20,7 @@ khác (A3 trong sổ đăng ký) phải dùng bản gốc hoặc có bản nhanh
 trên 7 cấu hình: 3 kết quả thật (0 cặp ở 2.000, 5.000, 10.000 học sinh) và 4 kết quả bị hoán đổi, trong đó mọi CLB
 đều đầy và có suất dự trữ (23.110 cặp phá vỡ nhân tạo, giống hệt). Thời gian ở 10.000 học sinh: 22,4 s (gốc) so với 0,09 s.
 """
-from bisect import bisect_left
+from bisect import bisect_right
 
 
 def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, err=None):
@@ -29,18 +29,26 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
     Trả về list[{"code": "blocking_pair", "params": {...}}] nếu truyền `err` (hàm err của i18n_errors);
     nếu không truyền, trả về list[dict] cùng khoá params.
     """
+    from rbda_priority_pipeline import loi_suc_chua
+
     assignment = result.assignment
     held = {cid: [] for cid in clubs}
     for sid, cid in assignment.items():
-        if cid:
+        if cid is not None:
             held[cid].append(sid)
 
     chuan_bi = {}
     for cid, info in clubs.items():
         rank = result.base_rank.get(cid, {})
-        e = sorted(rank[s] for s in held[cid] if is_reserve_eligible_fn(s, cid))
-        n = sorted(rank[s] for s in held[cid] if not is_reserve_eligible_fn(s, cid))
-        chuan_bi[cid] = (e, n, len(held[cid]), info["capacity"], info["reserve_capacity"])
+        # Cùng thứ hạng như club_choice_function: em không có trong rank xếp cuối.
+        hang_cuoi = len(rank)
+        e, n = [], []
+        for s in held[cid]:
+            (e if is_reserve_eligible_fn(s, cid) else n).append(rank.get(s, hang_cuoi))
+        e.sort()
+        n.sort()
+        loi = loi_suc_chua(info["capacity"], info["reserve_capacity"])
+        chuan_bi[cid] = (e, n, len(held[cid]), info["capacity"], info["reserve_capacity"], loi)
 
     problems = []
     for sid, prefs in preferences.items():
@@ -52,17 +60,24 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
             rank = result.base_rank.get(cid, {})
             if sid not in rank:
                 continue
-            e, n, n_giu, capacity, reserve_capacity = chuan_bi[cid]
+            e, n, n_giu, capacity, reserve_capacity, loi = chuan_bi[cid]
+            if loi:
+                # Như club_choice_function: báo lỗi ngay khi xét CLB có sức chứa sai.
+                raise ValueError(
+                    f"Suc chua khong hop le ({loi}): capacity={capacity}, "
+                    f"reserve_capacity={reserve_capacity}")
             if n_giu + 1 <= capacity:
                 duoc_nhan = True
             else:
                 r = rank[sid]
                 du_tu_cach = is_reserve_eligible_fn(sid, cid)
-                p = bisect_left(e, r)
+                # bisect_right: club_choice_function sắp ổn định trên (đang giữ + [sid]),
+                # nên khi trùng thứ hạng (em không có trong rank nhận len(rank)) sid đứng SAU.
+                p = bisect_right(e, r)
                 if du_tu_cach and p < reserve_capacity:
                     duoc_nhan = True
                 else:
-                    vi_tri = max(0, p - reserve_capacity) + bisect_left(n, r)
+                    vi_tri = max(0, p - reserve_capacity) + bisect_right(n, r)
                     cho_pho_thong = capacity - min(reserve_capacity, len(e) + (1 if du_tu_cach else 0))
                     duoc_nhan = vi_tri < cho_pho_thong
             if duoc_nhan:

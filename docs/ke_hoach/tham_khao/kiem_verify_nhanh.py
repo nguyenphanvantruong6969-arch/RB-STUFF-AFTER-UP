@@ -2,63 +2,19 @@
 """Tái lập phép kiểm: de_xuat_verify_nhanh.verify_stability_nhanh == rbda_priority_pipeline.verify_stability.
 Chạy:  python kiem_verify_nhanh.py <thư mục chứa rbda_priority_pipeline.py | PhanBoCauLacBo.exe>
 Dữ liệu tự sinh (không phải dữ liệu thật)."""
-import sys, struct, zlib, marshal, types, random, time, dataclasses, json
-import numpy as np
-sys.path.insert(0, __import__('os').path.dirname(__import__('os').path.abspath(__file__)))
-from de_xuat_verify_nhanh import verify_stability_nhanh
-
+import dataclasses
+import json
 import os
+import random
+import sys
+import time
 
-def nap_rb(duong_dan):
-    """duong_dan = thư mục chứa rbda_priority_pipeline.py (kho mã) HOẶC tệp PhanBoCauLacBo.exe (bản build)."""
-    if os.path.isdir(duong_dan):
-        sys.path.insert(0, os.path.abspath(duong_dan))
-        import rbda_priority_pipeline as rb_mod
-        return rb_mod
-    import struct, zlib, marshal, types
-    data = open(duong_dan, 'rb').read()
-    pos = data.rfind(b'MEI\x0c\x0b\x0a\x0b\x0e')
-    magic, pkglen, tocpos, toclen, pyver, pylib = struct.unpack('!8sIIII64s', data[pos:pos + 88])
-    pkg_start = pos + 88 - pkglen
-    def carch(name):
-        toc = data[pkg_start + tocpos: pkg_start + tocpos + toclen]; p = 0
-        while p < len(toc):
-            esz, epos, dlen, ulen, cflag, typ = struct.unpack('!IIIIBc', toc[p:p + 18])
-            n = toc[p + 18:p + esz].split(b'\x00')[0].decode()
-            if n == name:
-                raw = data[pkg_start + epos: pkg_start + epos + dlen]
-                return zlib.decompress(raw) if cflag else raw
-            p += esz
-    pyz = carch('PYZ.pyz'); tocoff = struct.unpack('!i', pyz[8:12])[0]
-    mods = {n: v for n, v in marshal.loads(pyz[tocoff:])}
-    def load_mod(name):
-        ispkg, off, ln = mods[name]
-        co = marshal.loads(zlib.decompress(pyz[off:off + ln]))
-        m = types.ModuleType(name); m.__file__ = name + '.py'; sys.modules[name] = m
-        exec(co, m.__dict__); return m
-    load_mod('i18n_errors')
-    return load_mod('rbda_priority_pipeline')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _chung import gen, nap_rb  # noqa: E402
+from de_xuat_verify_nhanh import verify_stability_nhanh  # noqa: E402
 
 rb = nap_rb(sys.argv[1])
-from i18n_errors import err
-
-def gen(S, K, ratio, npref=10, ntest=4, skew=1.0, seed=1, ngroup_frac=0.15):
-    rng = random.Random(seed)
-    cids = [f"c{j:03d}" for j in range(K)]
-    pop = np.array([1.0 / ((j + 1) ** skew) for j in range(K)]); pop /= pop.sum()
-    caps = np.maximum(1, np.round(int(S * ratio) * np.ones(K) / K)).astype(int)
-    clubs = {c: {'capacity': int(caps[j]), 'reserve_capacity': int(caps[j] * 0.1), 'reserve_group': 'cs' if j % 3 == 0 else None} for j, c in enumerate(cids)}
-    students = {}; prefs = {}; tested = {c: {} for c in cids}; apps = {c: [] for c in cids}
-    nrng = np.random.default_rng(seed)
-    for i in range(S):
-        sid = f"s{i:06d}"
-        students[sid] = {'reserve_group': 'cs' if rng.random() < ngroup_frac else None}
-        pl = list(nrng.choice(K, size=min(npref, K), replace=False, p=pop))
-        prefs[sid] = [cids[j] for j in pl]
-        for j in pl[:ntest]:
-            tested[cids[j]][sid] = round(float(nrng.normal(6.5, 1.5)) * 2) / 2
-        for j in pl: apps[cids[j]].append(sid)
-    return students, clubs, tested, apps, prefs
+from i18n_errors import err  # noqa: E402
 
 def setup(S, K, ratio, seed, ngroup):
     students, clubs, tested, apps, prefs = gen(S, K, ratio, seed=seed, ngroup_frac=ngroup)
