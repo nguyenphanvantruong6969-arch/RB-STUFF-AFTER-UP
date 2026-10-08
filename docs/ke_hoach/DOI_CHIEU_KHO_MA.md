@@ -24,6 +24,7 @@
 - So với các con số có sẵn: gói kế hoạch ghi ~483 ca và ~95 giây; `BAN_GIAO.md` (dòng 28) ghi 1.160 ca và ~3,5 phút; `grep -c "def test_"` cho 1.078 định nghĩa trong 91 tệp. Pytest thu thập 1.287 ca vì nhiều test được tham số hoá.
 - Thời gian thực tế dài gấp khoảng 14 lần con số của gói. Chưa tách thời gian theo tệp; phần lớn có thể là các test giao diện Playwright (Chromium headless).
 - Đầu ra đầy đủ: `scratchpad/stage0/pytest.txt`.
+- **Lưu ý:** 22 phút 32 giây chưa giải thích được (chưa chạy `--durations`); có thể do máy 4 nhân và các test giao diện Chromium. Đo lại bằng `pytest --durations=15` làm mốc cho Giai đoạn 1 trước khi kết luận là chậm đi.
 
 ### Bước 4: kiểm tương đương verify nhanh
 
@@ -57,6 +58,7 @@ Dữ liệu sinh bằng `sinh_csv()` của `du_lieu_test/thu_tai/chay_thu_tai.py
 - `sanity_check_result` trả 0 vấn đề ở cả ba cấu hình. Kết quả của `verify_stability` và của bản nhanh giống nhau ở mọi lần lặp.
 - Tỉ lệ `verify_stability` / `run_rbda`: 11,4 lần (K=10), 8,7 lần (K=20), 2,8 lần (K=100).
 - Đầu ra: `scratchpad/stage0/do_5000.txt`; mã: `scratchpad/stage0/do_5000.py`.
+- **Lưu ý:** script gọi `run_rbda` trực tiếp trên `stb_number` đã lưu. Đây là phép **đo thời gian**, không đối chiếu kết quả phân bổ với pipeline (pipeline dùng số bốc thăm theo buổi `stb_ngay`).
 
 ### Bước 6: thí nghiệm tiếp tục DA từ trạng thái cũ (G1)
 
@@ -89,7 +91,7 @@ Dòng theo sổ là số trong `SO_DANG_KY_33_MUC.md`. Dòng thực tế là v�
 | Z3 | PipelineAPI._run_pipeline_da_khoa | api.py L744–1316 (573 dòng) | api.py **L784–1364 (581 dòng, là hàm cuối của tệp)**; sao lưu L864; kiểm dữ liệu L885; chọn buổi L899–919; khoá STB L989–1075; `run_rbda_nhieu_buoi` L1094; sanity/verify/rollback L1103–1119; ghi kết quả L1126–1238; run_history L1283; xuất CSV L1304–1313 | đúng | Các bước và thứ tự khoá/rollback đúng như mô tả. Dòng và độ dài trong sổ đã trôi (573 → 581). Docstring `_ket_noi_ghi` (L681) có 'để nguyên' đúng như sổ. |
 | Z4 | verify_stability | rbda L456–524 (gọi club_choice_function L511) | def L456; gọi `club_choice_function` L511 ✓; thân kết thúc ~L524 | khác | Số đo không tái lập đúng trên máy này: 10.000 HS verify 6,53 s (sổ: 22–24 s; chưa đo `run_rbda` ở 10.000). Ở 5.000 HS, tỉ lệ verify / run_rbda là 11,4× (K=10), 8,7× (K=20), 2,8× (K=100), không phải "≈20×". Bản nhanh khớp hoàn toàn ở 7/7 cấu hình (bước 4). |
 | Z5 | run_rbda (max_rounds) | rbda L315, L372, L429–434 | def L315; tham số `max_rounds` L323; vòng lặp L372; `raise` L428–434 | đúng | Docstring (L334–342) nói số vòng 'đúng bằng độ dài danh sách nguyện vọng dài nhất' và **bị bác bỏ bởi dữ liệu của chính dự án**: với 3 / 5 / 10 nguyện vọng, số vòng lớn nhất là 37 / 84 / 227 (204 lần, `du_lieu_test/thu_tai/ket_qua_thu_tai.csv`; trung vị 9 / 14 / 18). Sổ đúng; lỗi nằm ở docstring trong mã. |
-| Z6 | TestTrungKhit; chay_thu_tai.py | tests/ (không có trong gói); du_lieu_test/; du_lieu_test/thu_tai/ | `tests/test_nhieu_buoi.py` L156 `class TestTrungKhit` (có); 91 tệp test; 1.078 `def test_`; 1.287 ca chạy | sai | Sổ ghi '37 tệp, 483 ca' (theo CLAUDE.md của gói): lỗi thời. Khẳng định 'các bộ sinh dữ liệu chỉ sinh câu lạc bộ' là **sai**: nhiều tệp trong `du_lieu_test/` sinh cả học sinh, nguyện vọng và điểm (ví dụ `thu_tai/chay_thu_tai.py` `sinh_csv`, `do_do_dai_nguyen_vong.py`, `do_khai_that.py`). |
+| Z6 | TestTrungKhit; chay_thu_tai.py | tests/ (không có trong gói); du_lieu_test/; du_lieu_test/thu_tai/ | `tests/test_nhieu_buoi.py` L156 `class TestTrungKhit` (có); 91 tệp test; 1.078 `def test_`; 1.287 ca chạy | khác | Sổ ghi '37 tệp, 483 ca' (theo CLAUDE.md của gói): lỗi thời. Khẳng định 'các bộ sinh dữ liệu chỉ sinh dữ liệu câu lạc bộ' vẫn **đúng** theo nghĩa của sổ: chỉ có dữ liệu miền CLB trường học (học sinh, CLB, nguyện vọng, điểm), chưa có bộ sinh cho ngành nào khác. |
 | Z7 | run_rbda, verify_stability, default_reserve_eligible_fn | rbda L357, L404, L511; api.py L1041 | L357, L404, L511 đúng; api.py gọi `default_reserve_eligible_fn` **L1089** (sổ L1041); def L1709 | đúng | Chưa có tham số thay thế (đã kiểm chữ ký). Lệch dòng api.py (+48). Không nên nhắm `run_full_pipeline` (L1961, chỉ dùng để thử nghiệm). |
 | A1 | compute_club_priority; hop_ung_vien | rbda L123–191; L1723–1753 | def L123, thân kết thúc L191 ✓; hop_ung_vien L1723–1753 ✓ | đúng | Hai tầng, tầng 1 luôn đứng trước, mỗi cặp một điểm. Chữ ký chỉ có 4 tham số, không nhận thứ hạng nguyện vọng (ràng buộc chống nội sinh còn nguyên). |
 | A2 | compute_club_priority; sinh_stb_theo_buoi; generate_stb_lottery; chen_stb_cho_hoc_sinh_moi | rbda L123–191; L757–814; L1086–1109; L1112–1182 | def L123, L757, L1086, L1112 ✓ | đúng | Không có chính sách hoà điểm khác ('tieu_chi_phu', 'nhan_het' đều không có). `CHE_DO_BOC_THAM_MAC_DINH = "stb_ngay"`. Ghi chú cho 'nhan_het': cũng chạm `loi_suc_chua` (L271) và `sanity_check_result` (L2128). |
@@ -118,7 +120,7 @@ Dòng theo sổ là số trong `SO_DANG_KY_33_MUC.md`. Dòng thực tế là v�
 | G4 | _run_pipeline_da_khoa | api.py L744–1316 | L784–1364 | đúng | Chạy thủ công; xác nhận hai bước (js/02_van_hanh.js L416, L438–443). Không có bộ lập lịch. |
 | G5 | — | — | — | đúng | Không có mã (đúng như sổ: ngoài phạm vi sửa mã). |
 
-**Tổng hợp:** 33 mục → **29 đúng**, **2 khác** (Z1, Z4), **2 sai** (Z6, C1). Mọi mục đều có dòng trôi; dòng trôi nặng nhất ở api_nhap.py, api_xuat.py và api.py (xem Q1).
+**Tổng hợp:** 33 mục → **29 đúng**, **3 khác** (Z1, Z4, Z6), **1 sai** (C1). Mọi mục đều có dòng trôi; dòng trôi nặng nhất ở api_nhap.py, api_xuat.py và api.py (xem Q1).
 
 ---
 
@@ -127,7 +129,7 @@ Dòng theo sổ là số trong `SO_DANG_KY_33_MUC.md`. Dòng thực tế là v�
 **Q1. Số dòng và hiện trạng trong sổ còn đúng với kho không?**
 - rbda_priority_pipeline.py: 2.187 dòng; cả 24 dòng định nghĩa hàm trong gói khớp đúng, và các điểm gọi L357, L404, L511 cũng khớp.
 - Các tệp khác đã trôi: api.py 1.364 dòng (`_run_pipeline_da_khoa` L784–1364, +40 đến +48 dòng); api_nhap.py 1.424 dòng (+~230); api_xuat.py (+210 đến +260); api_quan_ly.py (+5).
-- Hiện trạng: 29 đúng, 2 khác, 2 sai (bảng trên). Lệch nhẹ (khác): Z1 (số đếm không tái lập được) và Z4 (số đo tốc độ trên máy này). Sai: Z6 (phạm vi bộ sinh dữ liệu, số test lỗi thời) và C1 (thiếu Sổ nhập `so_nhap.py`).
+- Hiện trạng: 29 đúng, 3 khác, 1 sai (bảng trên). Lệch nhẹ (khác): Z1 (số đếm không tái lập được), Z4 (số đo tốc độ trên máy này), Z6 (số test lỗi thời). Sai: C1 (thiếu Sổ nhập `so_nhap.py`).
 
 **Q2. Con số 7,65 s ở 5.000 HS chia cho từng bước bao nhiêu?**
 - Không tái lập được 7,65 s. Trên máy này, 5.000 HS × 10 CLB (chia đều, 10 nguyện vọng) cho `run_rbda` 0,184 s, `sanity_check_result` 0,004 s, `verify_stability` 2,090 s; cả đường `run_pipeline` 3,138 s.
@@ -172,8 +174,7 @@ Dòng theo sổ là số trong `SO_DANG_KY_33_MUC.md`. Dòng thực tế là v�
 - **Docstring của `run_rbda` (L334–342) sai:** nói số vòng 'đúng bằng độ dài danh sách nguyện vọng dài nhất'; dữ liệu thử tải của dự án cho tới 227 vòng với 10 nguyện vọng. Việc sửa docstring nên thuộc Z5.
 - **Số đo của Z4 không khớp trên máy này:** 22–24 s và ≈20× không tái lập; sổ phải ghi máy và cấu hình.
 - **Số đếm của Z1 không tái lập** (xem bảng). Sổ phải ghi phương pháp đếm để tái lập được.
-- **Z6 sai về bộ sinh dữ liệu:** nhiều tệp trong `du_lieu_test/` sinh học sinh, nguyện vọng và điểm, không chỉ CLB.
-- **E3 mang dòng không liên quan:** rbda L1756–1793 là dấu vân tay (E2).
+- **E3 dẫn rbda L1756–1793:** đây là dấu vân tay dữ liệu (`dau_van_tay_du_lieu`), thuộc E2 nhiều hơn; E3 chỉ dùng gián tiếp qua `export_du_lieu_dau_vao`.
 - **E1 thiếu một hiện trạng đã thay đổi:** browser_host đã có danh sách trắng theo đuôi tệp (L80–90), nên `app.db` không còn được phục vụ qua HTTP.
 - **`run_full_pipeline` không nên là mục tiêu của Z7** (đường thử nghiệm).
 - **Phụ thuộc:** xem Q6 (Z7→Z3 chỉ ở api.py, Z4 dispatch chưa có chủ, G1→Z4 là phụ thuộc mềm, C1→so_nhap.py, skill phụ thuộc so_nhap, A2 chạm loi_suc_chua).

@@ -13,4 +13,4 @@ Số đo chính (dữ liệu mô phỏng):
 - Verify nhanh: khớp hoàn toàn ở 7/7 cấu hình (`TAT_CA_GIONG_NHAU True`); 10.000 HS: 6,53 s so với 0,042 s.
 - 5.000 HS, 10 CLB: `run_rbda` 0,18 s; `verify_stability` 2,09 s (≈92 % thời gian kiểm tra); 0 cặp phá vỡ.
 - Tiếp tục DA từ trạng thái cũ: khớp chạy lại 38/38 lần.
-- Sổ 33 mục: 29 đúng, 2 khác (Z1, Z4), 2 sai (Z6, C1).
+- Sổ 33 mục: 29 đúng, 3 khác (Z1, Z4, Z6), 1 sai (C1).

@@ -4,7 +4,7 @@ Claude Code cập nhật tệp này sau mỗi mục. Một dòng mỗi mục.
 
 | Mã | Trạng thái (chưa / đang / xong / chặn) | Ngày | Tệp đã sửa | Test mới | Ghi chú |
 |---|---|---|---|---|---|
-| GĐ0 | xong | 2026-10-08 | CHANGELOG.md, docs/ke_hoach/DOI_CHIEU_KHO_MA.md, docs/ke_hoach/TIEN_DO.md (gói trước, commit 7c4f423: CLAUDE.md, docs/ke_hoach/*, pyproject.toml) | — | Chỉ đọc và đo: 1.287 test đạt, phủ 91,06 %, ruff sạch; verify nhanh khớp 7/7; 5.000 HS verify chiếm ~92 % thời gian (K=10); tiếp tục DA khớp 38/38; sổ 33 mục: 29 đúng, 2 khác, 2 sai |
+| GĐ0 | xong | 2026-10-08 | CHANGELOG.md, docs/ke_hoach/DOI_CHIEU_KHO_MA.md, docs/ke_hoach/TIEN_DO.md (gói trước, commit 7c4f423: CLAUDE.md, docs/ke_hoach/*, pyproject.toml) | — | Chỉ đọc và đo: 1.287 test đạt, phủ 91,06 %, ruff sạch; verify nhanh khớp 7/7; 5.000 HS verify chiếm ~92 % thời gian (K=10); tiếp tục DA khớp 38/38; sổ 33 mục: 29 đúng, 3 khác, 1 sai |
 | Z6 | chưa | | | | Bộ test và dữ liệu mô phỏng cho từng hàm mới (Giai đoạn 1, thứ tự đầu tiên) |
 | Z3 | chưa | | | | Tách _run_pipeline_da_khoa (581 dòng, không phải 573) |
 | Z7 | chưa | | | | Cổng cắm; lõi không cần Z3, chỉ điểm gọi api.py cần (xem DOI_CHIEU Q6); không nhắm run_full_pipeline |
