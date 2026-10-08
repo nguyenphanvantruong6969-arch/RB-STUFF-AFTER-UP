@@ -11,4 +11,4 @@ Claude Code cập nhật tệp này sau mỗi mục. Một dòng mỗi mục.
 | Z4 | chưa | | | | Verify nhanh; cần chủ sở hữu cho điều hướng bản chậm (xem DOI_CHIEU Q6); số đo lại trên máy này |
 | Z5 | chưa | | | | Sửa docstring số vòng (bị bác bỏ bởi ket_qua_thu_tai.csv); trần max_rounds theo cận chứng minh được |
 | Z2 | chưa | | | | Một nguồn cho giới hạn 10 nguyện vọng / 5 CLB thi (hiện hai bản sao Python và JS) |
-| Z1 | chưa | | | | Gói từ vựng giao diện; số đếm trong sổ phải ghi phương pháp; không có UI_STRINGS |
+| Z1 | chưa | | | | Gói từ vựng giao diện; số đếm trong sổ phải ghi phương pháp |
