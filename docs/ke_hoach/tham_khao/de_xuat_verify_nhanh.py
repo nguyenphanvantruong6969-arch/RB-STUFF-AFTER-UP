@@ -29,7 +29,13 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
     Trả về list[{"code": "blocking_pair", "params": {...}}] nếu truyền `err` (hàm err của i18n_errors);
     nếu không truyền, trả về list[dict] cùng khoá params.
     """
-    from rbda_priority_pipeline import loi_suc_chua
+    import sys
+    rb = sys.modules.get("rbda_priority_pipeline")
+    if rb is None:
+        import rbda_priority_pipeline as rb
+    # Kiểm sức chứa bằng CHÍNH club_choice_function của mô-đun đã nạp (kho mã hay bản build),
+    # nên cùng luật, cùng thông báo lỗi, và bản build cũ không có luật này thì cũng không báo.
+    da_kiem = set()
 
     assignment = result.assignment
     held = {cid: [] for cid in clubs}
@@ -47,8 +53,7 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
             (e if is_reserve_eligible_fn(s, cid) else n).append(rank.get(s, hang_cuoi))
         e.sort()
         n.sort()
-        loi = loi_suc_chua(info["capacity"], info["reserve_capacity"])
-        chuan_bi[cid] = (e, n, len(held[cid]), info["capacity"], info["reserve_capacity"], loi)
+        chuan_bi[cid] = (e, n, len(held[cid]), info["capacity"], info["reserve_capacity"])
 
     problems = []
     for sid, prefs in preferences.items():
@@ -60,12 +65,11 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
             rank = result.base_rank.get(cid, {})
             if sid not in rank:
                 continue
-            e, n, n_giu, capacity, reserve_capacity, loi = chuan_bi[cid]
-            if loi:
-                # Như club_choice_function: báo lỗi ngay khi xét CLB có sức chứa sai.
-                raise ValueError(
-                    f"Suc chua khong hop le ({loi}): capacity={capacity}, "
-                    f"reserve_capacity={reserve_capacity}")
+            e, n, n_giu, capacity, reserve_capacity = chuan_bi[cid]
+            if cid not in da_kiem:
+                # verify_stability gọi club_choice_function ở đây, và nó báo lỗi sức chứa trước tiên.
+                rb.club_choice_function([], capacity, reserve_capacity, lambda _s: False, {})
+                da_kiem.add(cid)
             if n_giu + 1 <= capacity:
                 duoc_nhan = True
             else:

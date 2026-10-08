@@ -19,13 +19,13 @@
 | `i18n_errors.py` → `tao_i18n_js.py` → `i18n_loi.js` | Thông báo lỗi song ngữ, **một nguồn** | `err`, `phan_hoi_ok`, `phan_hoi_loi` |
 | `browser_host.py`, `recovery.py`, `chan_doan.py`, `main.py` | Máy chủ dự phòng 127.0.0.1, phục hồi, log, điểm vào | |
 | `index.html`, `js/00…08_*.js`, `i18n.js`, `style.css` | Giao diện; gọi backend qua `window.pywebview.api.*`, trả `{ok, data, errors}` | |
-| `tests/` | 89 tệp `test_*.py`, 1.330 ca (đo 08/10/2026) | `test_pipeline_core.py`, `test_nhieu_buoi.py::TestTrungKhit`, `test_toi_uu_on_dinh.py`, `test_boc_tham.py`, … |
+| `tests/` | 89 tệp `test_*.py`, 1.372 ca (`pytest --collect-only`, 08/10/2026) | `test_pipeline_core.py`, `test_nhieu_buoi.py::TestTrungKhit`, `test_toi_uu_on_dinh.py`, `test_boc_tham.py`, … |
 | `du_lieu_test/`, `mau_csv/`, `docs/`, `BAN_GIAO.md` | Bộ dữ liệu mô phỏng, script đo, mẫu nhập, tài liệu cơ chế, nhật ký 25 lỗi đã sửa | |
 
 ## Lệnh
 - Chạy test: `python -m pytest -q` trong venv của dự án (tài liệu ghi `./.venv/bin/python -m pytest -q`; trên Windows: `.venv\Scripts\python -m pytest -q`). Toàn bộ ~22 phút trên máy 4 nhân kèm test giao diện Chromium (BAN_GIAO.md ghi ~3,5 phút; chưa giải thích được, xem `docs/ke_hoach/DOI_CHIEU_KHO_MA.md`). Lint: `ruff check .`; CI đòi phủ ≥ 85 %.
 - Sinh lại thông báo lỗi JS sau khi sửa `i18n_errors.py`: `python tao_i18n_js.py`.
-- Kiểm verify nhanh (tham khảo): `pip install numpy` (chỉ cho kịch bản tham khảo, KHÔNG thêm vào requirements) rồi `python docs/ke_hoach/tham_khao/kiem_verify_nhanh.py <thư mục chứa rbda_priority_pipeline.py>`. Test `tests/test_tham_khao_verify_nhanh.py` canh cùng các kịch bản này mà không cần numpy.
+- Kiểm verify nhanh (tham khảo): `pip install numpy` (chỉ cho kịch bản tham khảo, KHÔNG thêm vào requirements) rồi `python docs/ke_hoach/tham_khao/kiem_verify_nhanh.py <thư mục chứa rbda_priority_pipeline.py>`. Test `tests/test_tham_khao_verify_nhanh.py` (không cần numpy) canh `verify_stability_nhanh`, `exp_resume.resume_da`, `_chung.nap_rb` (đường thư mục và tệp không phải PyInstaller); `_chung.gen` chỉ được kiểm khi có numpy; đường nạp từ `.exe` thật chưa có test (không có bản build trong kho).
 
 ## Bất biến — KHÔNG được phá
 1. Cấu hình mặc định phải cho kết quả TRÙNG KHÍT với trước khi sửa (cùng dữ liệu, cùng seed): so từng dòng match_results trên 3 bộ dữ liệu × 20 seed.

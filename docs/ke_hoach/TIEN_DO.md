@@ -12,4 +12,4 @@ Claude Code cập nhật tệp này sau mỗi mục. Một dòng mỗi mục.
 | Z5 | chưa | | | | Sửa docstring số vòng (bị bác bỏ bởi ket_qua_thu_tai.csv); trần max_rounds theo cận chứng minh được |
 | Z2 | chưa | | | | Một nguồn cho giới hạn 10 nguyện vọng / 5 CLB thi (hiện hai bản sao Python và JS) |
 | Z1 | chưa | | | | Gói từ vựng giao diện; số đếm trong sổ phải ghi phương pháp |
-| RS | xong | 2026-10-08 | docs/ke_hoach/tham_khao/*, tests/test_tham_khao_verify_nhanh.py, CLAUDE.md, pyproject.toml | tests/test_tham_khao_verify_nhanh.py (43 ca) | Sửa 10 điểm rà soát mã; bản nhanh Z4 khớp ca biên (bisect_right) |
+| GĐ0 | xong | 2026-10-08 | docs/ke_hoach/tham_khao/*, tests/test_tham_khao_verify_nhanh.py, CLAUDE.md, pyproject.toml | tests/test_tham_khao_verify_nhanh.py (85 ca) | Việc tiếp của giai đoạn 0, ngoài sổ (Truong yêu cầu qua /code-review), chuẩn bị cho Z4, G1, Z6: sửa 2 lượt rà soát mã |

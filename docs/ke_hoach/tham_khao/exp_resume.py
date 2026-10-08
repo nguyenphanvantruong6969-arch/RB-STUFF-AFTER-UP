@@ -2,37 +2,52 @@
 """Thử tiếp tục DA từ trạng thái cũ (mục G1) và so với chạy lại toàn bộ.
 Chạy: python exp_resume.py <thư mục chứa rbda_priority_pipeline.py | PhanBoCauLacBo.exe>
 Dữ liệu tự sinh."""
+import importlib.util
 import json
 import os
 import random
 import sys
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _chung import gen, nap_rb  # noqa: E402
+
+def _nap_canh(ten):
+    """Nạp mô-đun cùng thư mục theo đường dẫn, không sửa sys.path."""
+    duong = os.path.join(os.path.dirname(os.path.abspath(__file__)), ten + ".py")
+    spec = importlib.util.spec_from_file_location("tham_khao_" + ten, duong)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_chung = _nap_canh("_chung")
+gen, nap_rb = _chung.gen, _chung.nap_rb
 
 # Gán ở khối __main__ (hoặc từ test) trước khi gọi resume_da / resume_test.
 rb = None
 
 
 def resume_da(res0, clubs, tested, apps, prefs, stb, fn, new_ids):
+    # Tính lại thứ hạng cho CLB em mới đăng ký và CLB chưa có trong lần chạy cũ; bỏ ID CLB không tồn tại.
     touched = set()
     for n in new_ids: touched.update(prefs[n])
-    base_rank = {c: res0.base_rank[c] for c in clubs}
+    touched = (touched | (set(clubs) - set(res0.base_rank))) & set(clubs)
+    base_rank = {c: res0.base_rank.get(c, {}) for c in clubs}
     for c in touched:
         order = rb.compute_club_priority(c, apps.get(c, []), tested.get(c, {}), stb)
         base_rank[c] = {s: i for i, s in enumerate(order)}
     held = {c: [] for c in clubs}
     for s, c in res0.assignment.items():
         if c is not None: held[c].append(s)
-    nxt = {s: (res0.rank_in_student_pref[s] - 1 if res0.assignment.get(s) else len(prefs[s])) for s in res0.assignment}
+    nxt = {s: (res0.rank_in_student_pref[s] - 1 if res0.assignment.get(s) is not None else len(prefs.get(s, [])))
+           for s in res0.assignment}
     for n in new_ids: nxt[n] = 0
     un = list(new_ids); props = 0
     while un:
         proposals = {}; still = []
         for s in un:
-            if nxt[s] >= len(prefs[s]): continue
-            c = prefs[s][nxt[s]]
+            ds = prefs.get(s, [])
+            if nxt[s] >= len(ds): continue
+            c = ds[nxt[s]]
             if c not in clubs:
                 # Như run_rbda: nguyện vọng trỏ tới CLB không có -> coi như bị từ chối ngay.
                 nxt[s] += 1; still.append(s); continue
@@ -75,7 +90,7 @@ def resume_test(S, K, ratio, m, trials, seed=500):
         fn2 = rb.default_reserve_eligible_fn(st2, clubs)
         t = time.perf_counter(); full = rb.run_rbda(st2, clubs, te2, ap2, pf2, stbn, fn2); tf.append(time.perf_counter() - t)
         t = time.perf_counter(); asg, pp = resume_da(res0, clubs, te2, ap2, pf2, stbn, fn2, new_ids); tr_.append(time.perf_counter() - t); props.append(pp)
-        a_full = {s: c for s, c in full.assignment.items() if c}; a_res = {s: c for s, c in asg.items() if c}
+        a_full = {s: c for s, c in full.assignment.items() if c is not None}; a_res = dict(asg)
         same += (a_full == a_res)
     return dict(S=S, K=K, ratio=ratio, m=m, trials=trials, identical=f"{same}/{trials}",
                 t_full_ms=round(1000 * float(np.mean(tf)), 1), t_resume_ms=round(1000 * float(np.mean(tr_)), 2),
