@@ -243,6 +243,34 @@ def test_tiep_tuc_da_chiu_em_khong_co_nguyen_vong():
     assert {s: c for s, c in full.assignment.items() if c is not None} == asg
 
 
+def test_tiep_tuc_da_tu_choi_em_trong_nguyen_vong_nhung_khong_trong_apps():
+    # Phản ví dụ do rà soát tìm ra: s1, s3 không có trong apps[c0] nên cùng thứ hạng len(rank);
+    # chạy lại chọn s1, tiếp tục chọn s3. Đường thật không có ca này (hop_ung_vien), nên
+    # resume_da phải từ chối thay vì trả kết quả khác run_rbda.
+    clubs = {"c0": {"capacity": 3, "reserve_capacity": 1, "reserve_group": "g"},
+             "c1": {"capacity": 1, "reserve_capacity": 1, "reserve_group": None}}
+    st = {s: {"reserve_group": None} for s in ["s0", "s1", "s2", "s3"]}
+    prefs = {"s0": ["c0"], "s1": ["c1", "c0"], "s2": ["c0", "c1"], "s3": ["c1", "c0"]}
+    apps = {"c0": ["s0", "s2"], "c1": ["s1", "s3"]}
+    tested = {"c0": {"s0": 0.0}, "c1": {}}
+    res0 = rb.run_rbda(st, clubs, tested, apps, prefs, {"s0": 0, "s2": 1, "s1": 2, "s3": 3},
+                       rb.default_reserve_eligible_fn(st, clubs))
+    st2 = dict(st, n0={"reserve_group": None})
+    pf2 = dict(prefs, n0=["c1"])
+    ap2 = {"c0": ["s0", "s2"], "c1": ["s1", "s3", "n0"]}
+    stbn = {"s0": 0, "s2": 1, "n0": 2, "s1": 3, "s3": 4}
+    fn2 = rb.default_reserve_eligible_fn(st2, clubs)
+    with pytest.raises(ValueError, match="apps"):
+        exp_resume.resume_da(res0, clubs, tested, ap2, pf2, stbn, fn2, ["n0"])
+    # Khi apps chứa đủ nguyện vọng (như hop_ung_vien), hai đường trùng nhau.
+    ap3 = rb.hop_ung_vien(ap2, pf2)
+    res0b = rb.run_rbda(st, clubs, tested, rb.hop_ung_vien(apps, prefs), prefs,
+                        {"s0": 0, "s2": 1, "s1": 2, "s3": 3}, rb.default_reserve_eligible_fn(st, clubs))
+    full = rb.run_rbda(st2, clubs, tested, ap3, pf2, stbn, fn2)
+    asg, _ = exp_resume.resume_da(res0b, clubs, tested, ap3, pf2, stbn, fn2, ["n0"])
+    assert {s: c for s, c in full.assignment.items() if c is not None} == asg
+
+
 # ---------------------------------------------------------------------------
 # _chung: bộ nạp và bộ sinh
 # ---------------------------------------------------------------------------

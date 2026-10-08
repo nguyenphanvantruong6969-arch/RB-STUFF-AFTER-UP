@@ -27,6 +27,18 @@ rb = None
 
 
 def resume_da(res0, clubs, tested, apps, prefs, stb, fn, new_ids):
+    """Tiếp tục DA từ kết quả cũ `res0` sau khi thêm `new_ids`; phải cho đúng kết quả của run_rbda.
+
+    Tiền đề: mọi (em, CLB) trong nguyện vọng đều có trong apps của CLB đó — đường thật bảo đảm
+    điều này bằng `hop_ung_vien`. Nếu không, các em không có thứ hạng cùng nhận len(rank) và
+    club_choice_function phân xử theo thứ tự trong pool, vốn phụ thuộc lịch sử từng vòng nên
+    tiếp tục và chạy lại có thể chọn khác em. Vì vậy hàm từ chối dữ liệu như vậy thay vì lặng lẽ lệch.
+    """
+    for s, ds in prefs.items():
+        for c in ds:
+            if c in clubs and s not in apps.get(c, ()):
+                raise ValueError("resume_da: %s xếp nguyện vọng %s nhưng không có trong apps[%s] "
+                                 "(cần apps chứa mọi nguyện vọng, như hop_ung_vien)." % (s, c, c))
     # Tính lại thứ hạng cho CLB em mới đăng ký và CLB chưa có trong lần chạy cũ; bỏ ID CLB không tồn tại.
     touched = set()
     for n in new_ids: touched.update(prefs[n])
