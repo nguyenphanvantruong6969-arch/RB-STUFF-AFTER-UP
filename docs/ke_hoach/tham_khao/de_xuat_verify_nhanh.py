@@ -49,10 +49,12 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn):
             return chuan_bi[cid]
         info = clubs[cid]
         capacity, reserve_capacity = info["capacity"], info["reserve_capacity"]
-        # Bản gốc gọi club_choice_function ngay tại đây và nó kiểm sức chứa trước tiên: gọi chính hàm
-        # của mô-đun đã nạp (kho mã hay bản build) với ứng viên thật, để cùng luật, cùng thông báo lỗi.
-        rb.club_choice_function([sid], capacity, reserve_capacity, lambda _s: False, {})
         rank = result.base_rank.get(cid, {})
+        # Lần đầu xét CLB này, gọi ĐÚNG lời gọi của bản gốc (đang giữ + [sid], hàm đủ tư cách thật,
+        # thứ hạng thật) bằng club_choice_function của mô-đun đã nạp: mọi kiểm tra đầu vào của nó —
+        # hôm nay là sức chứa, sau này có thể thêm — chạy y hệt, cùng thông báo lỗi. Một lần mỗi CLB.
+        rb.club_choice_function(held[cid] + [sid], capacity, reserve_capacity,
+                                lambda s_: is_reserve_eligible_fn(s_, cid), rank)
         # Cùng thứ hạng như club_choice_function: em không có trong rank xếp cuối.
         hang_cuoi = len(rank)
         e, n = [], []

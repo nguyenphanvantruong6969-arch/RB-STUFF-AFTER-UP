@@ -31,13 +31,23 @@ def _lay_rb():
         return rb
     mod = sys.modules.get("rbda_priority_pipeline")
     if mod is None:
-        raise RuntimeError("exp_resume: chưa nạp rbda_priority_pipeline (gán exp_resume.rb hoặc dùng nap_rb).")
+        raise ValueError("resume_da: chưa nạp rbda_priority_pipeline (gán exp_resume.rb hoặc dùng nap_rb).")
     return mod
 
 
 def _so_boc_tham_hop_le(v):
     # Số thực bất kỳ (int, numpy.int64, float) nhưng không bool, không NaN; chuỗi đọc từ CSV thì không.
     return isinstance(v, numbers.Real) and not isinstance(v, bool) and v == v
+
+
+def _nhom(v):
+    # Như default_reserve_eligible_fn: nhóm rỗng ('' hay None) đều là "không có nhóm".
+    return v or None
+
+
+def _cung_diem(a, b):
+    # So hai bảng điểm; NaN coi như bằng NaN (dict != thì NaN luôn khác).
+    return a.keys() == b.keys() and all(a[k] == b[k] or (a[k] != a[k] and b[k] != b[k]) for k in a)
 
 
 def kiem_tien_de(res0, cu, moi, new_ids):
@@ -47,7 +57,7 @@ def kiem_tien_de(res0, cu, moi, new_ids):
     students, clubs, tested, apps, prefs, stb. Tiếp tục DA cho đúng kết quả chạy lại CHỈ khi thay đổi
     là "thêm ràng buộc" (mục G1): thêm em mới, hoặc GIẢM sức chứa. Mọi thay đổi khác (bớt ràng buộc,
     sửa dữ liệu em cũ, mở/đóng CLB mà em cũ có xếp) cần chạy lại toàn bộ (G2).
-    Độ phức tạp O(kích thước dữ liệu), dùng tập hợp.
+    Tra cứu bằng tập hợp (tuyến tính theo dữ liệu), cộng MỘT lần sắp em cũ theo số bốc thăm (n log n).
     """
     for k in _KHOA:
         if k not in cu or k not in moi:
@@ -69,7 +79,7 @@ def kiem_tien_de(res0, cu, moi, new_ids):
     for c, info0 in clubs0.items():
         info1 = clubs1[c]
         if (info1["reserve_capacity"] != info0["reserve_capacity"]
-                or info1.get("reserve_group") != info0.get("reserve_group")):
+                or _nhom(info1.get("reserve_group")) != _nhom(info0.get("reserve_group"))):
             raise ValueError("resume_da: CLB %s đổi dự trữ (cần chạy lại)." % c)
         if info1["capacity"] > info0["capacity"]:
             raise ValueError("resume_da: CLB %s tăng sức chứa (bớt ràng buộc, mục G2, cần chạy lại)." % c)
@@ -86,16 +96,17 @@ def kiem_tien_de(res0, cu, moi, new_ids):
         if clb_moi.intersection(p1):
             raise ValueError("resume_da: em cũ %s có xếp CLB mới mở %s (cần chạy lại)."
                              % (s, sorted(clb_moi.intersection(p1))))
-        if cu["students"][s].get("reserve_group") != moi["students"][s].get("reserve_group"):
+        if _nhom(cu["students"][s].get("reserve_group")) != _nhom(moi["students"][s].get("reserve_group")):
             raise ValueError("resume_da: nhóm dự trữ của em cũ %s đã đổi (cần chạy lại)." % s)
     for c in set(clubs0) | set(cu["tested"]):
-        t0 = cu["tested"].get(c, {})
+        # Bỏ em mới ở CẢ hai phía: điểm nhập trước cho em đến muộn không phải "em cũ đổi điểm".
+        t0 = {k: v for k, v in cu["tested"].get(c, {}).items() if k not in moi_set}
         t1 = {k: v for k, v in moi["tested"].get(c, {}).items() if k not in moi_set}
-        if t0 != t1:
+        if not _cung_diem(t0, t1):
             raise ValueError("resume_da: điểm của em cũ ở CLB %s đã đổi (cần chạy lại)." % c)
     apps_set = {c: set(v) for c, v in moi["apps"].items()}
     for c in clubs1:
-        cu_apps = set(cu["apps"].get(c, ()))
+        cu_apps = set(cu["apps"].get(c, ())) - moi_set
         if apps_set.get(c, set()) - moi_set != cu_apps:
             raise ValueError("resume_da: ứng viên cũ của CLB %s đã đổi (cần chạy lại)." % c)
     for s, ds in moi["prefs"].items():
@@ -112,7 +123,10 @@ def kiem_tien_de(res0, cu, moi, new_ids):
             raise ValueError("resume_da: thiếu số bốc thăm hoặc không phải số (dữ liệu %s) của %s."
                              % (ten, sorted(thieu)[:5]))
     # Cùng khoá phá hoà như compute_club_priority: (số bốc thăm, mã em) — số bốc thăm có thể trùng.
-    if (sorted(cu_hs, key=lambda s: (cu_stb[s], s)) != sorted(cu_hs, key=lambda s: (moi_stb[s], s))):
+    # Sắp một lần theo khoá cũ, rồi khoá mới phải tăng ngặt theo đúng thứ tự đó.
+    thu_tu = sorted(cu_hs, key=lambda s: (cu_stb[s], s))
+    khoa_moi = [(moi_stb[s], s) for s in thu_tu]
+    if any(khoa_moi[i] >= khoa_moi[i + 1] for i in range(len(khoa_moi) - 1)):
         raise ValueError("resume_da: thứ tự bốc thăm của em cũ đã đổi (phải chèn bằng chen_stb_cho_hoc_sinh_moi).")
 
 
@@ -192,6 +206,7 @@ def resume_da(res0, cu, moi, new_ids, fn=None, da_kiem=False):
 
 def resume_test(S, K, ratio, m, trials, seed=500):
     import numpy as np  # chỉ kịch bản đo cần; không phải phụ thuộc sản phẩm
+    rb = _lay_rb()
     students, clubs, tested, apps, prefs = gen(S, K, ratio, seed=3)
     ids = list(students); stb = rb.generate_stb_lottery(ids, 42)
     for s in ids: students[s]['stb'] = stb[s]

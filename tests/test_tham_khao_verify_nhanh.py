@@ -281,7 +281,7 @@ _VI_PHAM = {
         moi["prefs"].update(s001=moi["prefs"]["s001"]), cu["prefs"].update(s001=["c_x"] + cu["prefs"]["s001"]),
         moi["prefs"].update(s001=["c_x"] + moi["prefs"]["s001"]))), "CLB mới"),
     "doi_thu_tu_boc_tham": (_sua(lambda cu, moi, ids, r: moi["stb"].update(
-        s000=moi["stb"]["s001"], s001=moi["stb"]["s000"])), "bốc thăm"),
+        s000=moi["stb"]["s001"], s001=moi["stb"]["s000"])), "thứ tự bốc thăm"),
 }
 
 
@@ -372,7 +372,7 @@ def test_kiem_tien_de_dung_khoa_pha_hoa_nhu_compute_club_priority():
         v = cu["stb"][a]
         cu["stb"][a] = cu["stb"][b] = v
         moi["stb"][a], moi["stb"][b] = v + 2, v + 1       # b trước a, vẫn trước em kế tiếp (v + 20)
-    with pytest.raises(ValueError, match="bốc thăm"):
+    with pytest.raises(ValueError, match="thứ tự bốc thăm"):
         exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
@@ -401,6 +401,49 @@ def test_kiem_tien_de_nhan_so_boc_tham_kieu_numpy():
     np = pytest.importorskip("numpy")
     cu, moi, moi_ids, res0 = _them_em_moi(2)
     moi["stb"] = {s: np.int64(v) for s, v in moi["stb"].items()}
+    exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+
+
+def test_kiem_tien_de_bao_valueerror_khi_chua_nap_rbda(monkeypatch):
+    # Hợp đồng: mọi vi phạm tiền đề là ValueError, kể cả chưa có mô-đun rbda để kiểm sức chứa.
+    monkeypatch.setattr(exp_resume, "rb", None)
+    monkeypatch.delitem(sys.modules, "rbda_priority_pipeline")
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    with pytest.raises(ValueError, match="chưa nạp"):
+        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+
+
+def test_kiem_tien_de_chap_nhan_diem_nhap_truoc_cho_em_den_muon():
+    # Em đến muộn đã có điểm / có trong apps ở dữ liệu cũ (nhập trước khi thêm vào danh sách học sinh):
+    # không phải "em cũ đổi dữ liệu".
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    n = moi_ids[1]
+    c = moi["prefs"][n][1]
+    cu["tested"][c] = dict(cu["tested"][c], **{n: 3.0})
+    cu["apps"][c] = list(cu["apps"][c]) + [n]
+    asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids)
+    assert asg == _chay_lai(moi)
+
+
+def test_kiem_tien_de_coi_nhom_rong_va_none_la_mot():
+    # default_reserve_eligible_fn coi nhóm '' và None như nhau: dữ liệu CSV ('') và SQLite (None) tương đương.
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    for c, info in moi["clubs"].items():
+        if not info.get("reserve_group"):
+            info["reserve_group"] = "" if info.get("reserve_group") is None else None
+    for s in cu["students"]:
+        if not moi["students"][s].get("reserve_group"):
+            moi["students"][s]["reserve_group"] = ""
+    asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids)
+    assert asg == _chay_lai(moi)
+
+
+def test_kiem_tien_de_chap_nhan_diem_nan_khong_doi():
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    c = next(c for c, t in cu["tested"].items() if t)
+    s = next(iter(cu["tested"][c]))
+    cu["tested"][c] = dict(cu["tested"][c], **{s: float("nan")})
+    moi["tested"][c] = dict(moi["tested"][c], **{s: float("nan")})
     exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
@@ -483,7 +526,7 @@ def test_nap_rb_nap_i18n_errors_khi_mo_dun_chinh_da_co(tmp_path):
     assert os.path.realpath(kq.stdout.strip()) == os.path.realpath(str(tmp_path / "i18n_errors.py"))
 
 
-def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None):
+def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None, kieu_cu=False):
     """Dựng một tệp PyInstaller tối thiểu (CArchive + PYZ) chứa i18n_errors và rbda_priority_pipeline."""
     import marshal
     import struct
@@ -496,9 +539,11 @@ def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None):
         nen = zlib.compress(marshal.dumps(compile(ma, ten + ".py", "exec")))
         muc.append((ten, (0, 12 + len(than), len(nen))))
         than += nen
-    pyz = b"PYZ\0" + b"\0" * 4 + struct.pack("!i", 12 + len(than)) + than + marshal.dumps(muc)
+    # kieu_cu: PyInstaller < 6 — mục lục PYZ là dict và mục CArchive tên "PYZ-00.pyz".
+    pyz = (b"PYZ\0" + b"\0" * 4 + struct.pack("!i", 12 + len(than)) + than
+           + marshal.dumps(dict(muc) if kieu_cu else muc))
     nen_pyz = zlib.compress(pyz)
-    ten_b = b"PYZ.pyz\0" + b"\0" * 6
+    ten_b = (b"PYZ-00.pyz\0" + b"\0" * 3) if kieu_cu else (b"PYZ.pyz\0" + b"\0" * 6)
     toc = struct.pack("!IIIIBc", 18 + len(ten_b), 0, len(nen_pyz), len(pyz), 1, b"z") + ten_b
     goi = nen_pyz + toc
     cookie_len = 88
@@ -523,13 +568,46 @@ def test_nap_rb_doc_ban_build_va_nap_lai_cung_tep(tmp_path):
     lien_ket = tmp_path / "lien_ket.exe"
     try:
         lien_ket.symlink_to(exe)
-    except OSError:          # Windows không quyền tạo liên kết: dùng đường dẫn viết khác của cùng tệp
-        lien_ket = tmp_path / "." / "PhanBoCauLacBo.exe"
+        lien_ket = str(lien_ket)
+    except OSError:
+        # Windows không quyền tạo liên kết: cùng tệp nhưng viết khác (chuỗi, để pathlib không gộp "."),
+        # và đổi hoa/thường — Windows coi là cùng tệp.
+        lien_ket = os.path.join(str(tmp_path), ".", "PhanBoCauLacBo.exe").upper()
     kq = _chay_tien_trinh_moi(
         "r = m.nap_rb(sys.argv[2]); print(r.GIA_TRI, sys.modules['i18n_errors'].err('x')['code']);"
-        "print(m.nap_rb(sys.argv[3]) is r)", str(exe), str(lien_ket))
+        "print(m.nap_rb(sys.argv[3]) is r)", str(exe), lien_ket)
     assert kq.returncode == 0, kq.stderr
     assert kq.stdout.split() == ["42", "x", "True"]
+
+
+def test_nap_rb_doc_ban_build_pyinstaller_cu(tmp_path):
+    exe = tmp_path / "PhanBoCauLacBo.exe"
+    _tao_exe_gia(str(exe), kieu_cu=True)
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(exe))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "42"
+
+
+def test_nap_rb_bao_loi_ro_khi_duong_dan_khong_ton_tai(tmp_path):
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path / "khong_ton_tai"))
+    assert kq.returncode != 0 and "không tồn tại" in kq.stderr and "Traceback" not in kq.stderr
+
+
+def test_nap_rb_lay_ca_hai_tep_tu_thu_muc_nguoi_dung_dua(tmp_path):
+    # rbda_priority_pipeline.py trong A là liên kết sang B; A có i18n_errors riêng -> phải nạp i18n_errors của A.
+    a, b = tmp_path / "A", tmp_path / "B"
+    a.mkdir()
+    b.mkdir()
+    (b / "rbda_priority_pipeline.py").write_text("GIA_TRI = 1\n", encoding="utf-8")
+    (b / "i18n_errors.py").write_text("NGUON = 'B'\n", encoding="utf-8")
+    (a / "i18n_errors.py").write_text("NGUON = 'A'\n", encoding="utf-8")
+    try:
+        (a / "rbda_priority_pipeline.py").symlink_to(b / "rbda_priority_pipeline.py")
+    except OSError:
+        pytest.skip("không tạo được liên kết trên máy này")
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.modules['i18n_errors'].NGUON)", str(a))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "A"
 
 
 def test_nap_rb_ban_build_hong_khong_de_mo_dun_do_dang(tmp_path):

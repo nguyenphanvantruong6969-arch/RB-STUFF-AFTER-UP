@@ -30,15 +30,31 @@ def _cung_tep(a, b):
     return os.path.normcase(os.path.realpath(a)) == os.path.normcase(os.path.realpath(b))
 
 
-def _chan_ban_khac(thu_muc):
-    """SystemExit nếu tiến trình đã nạp rbda_priority_pipeline / i18n_errors từ nơi khác `thu_muc`."""
-    for ten in ("rbda_priority_pipeline", "i18n_errors"):
-        mod = sys.modules.get(ten)
-        if mod is None:
-            continue
-        if not _cung_tep(getattr(mod, "__file__", "") or "", os.path.join(thu_muc, ten + ".py")):
-            raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo thư mục %s hãy chạy một tiến trình riêng."
-                             % (ten, getattr(mod, "__file__", "?"), thu_muc))
+_TEN = ("i18n_errors", "rbda_priority_pipeline")   # i18n_errors trước: mô-đun chính import nó theo tên
+
+
+def _nap_co_kiem(ao, nap, mo_ta):
+    """Một luật cho mọi nguồn: `ao` = {tên mô-đun: đường dẫn mong đợi}.
+
+    Đã nạp đúng cả hai từ đó -> trả bản đã nạp. Đã nạp từ nơi khác -> SystemExit (mỗi tiến trình một bản).
+    Chưa có -> gọi `nap(ten)` theo thứ tự _TEN; hỏng giữa chừng thì gỡ mọi mô-đun vừa thêm.
+    """
+    da_nap = {ten: getattr(sys.modules.get(ten), "__file__", None) for ten in _TEN}
+    if all(da_nap[ten] and _cung_tep(da_nap[ten], ao[ten]) for ten in _TEN):
+        return sys.modules["rbda_priority_pipeline"]
+    for ten in _TEN:
+        if ten in sys.modules and not (da_nap[ten] and _cung_tep(da_nap[ten], ao[ten])):
+            raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo %s hãy chạy một tiến trình riêng."
+                             % (ten, da_nap[ten], mo_ta))
+    chua_co = [ten for ten in _TEN if ten not in sys.modules]
+    try:
+        for ten in chua_co:
+            nap(ten)
+    except BaseException:
+        for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
+            sys.modules.pop(ten, None)
+        raise
+    return sys.modules["rbda_priority_pipeline"]
 
 
 def nap_rb(duong_dan):
@@ -48,35 +64,45 @@ def nap_rb(duong_dan):
     theo tên). Nếu tiến trình đã có một bản từ nơi khác thì báo lỗi thay vì lặng lẽ trả bản cũ.
     """
     if os.path.isdir(duong_dan):
-        tep = os.path.realpath(os.path.join(duong_dan, "rbda_priority_pipeline.py"))
-        if not os.path.isfile(tep):
+        # Thư mục NGƯỜI DÙNG đưa (không phải thư mục đích của liên kết): cả hai tệp lấy từ đây.
+        thu_muc = os.path.abspath(duong_dan)
+        if not os.path.isfile(os.path.join(thu_muc, "rbda_priority_pipeline.py")):
             raise SystemExit("%s không có rbda_priority_pipeline.py." % duong_dan)
-        thu_muc = os.path.dirname(tep)
-        _chan_ban_khac(thu_muc)
-        # Mô-đun import i18n_errors theo tên (cả bên trong hàm): bảo đảm CẢ HAI đã nạp từ thư mục này
-        # (kể cả khi rbda_priority_pipeline đã có sẵn), rồi bỏ đường dẫn khỏi sys.path để không che
-        # các mô-đun khác của tiến trình.
-        chua_co = [ten for ten in ("i18n_errors", "rbda_priority_pipeline") if ten not in sys.modules]
-        sys.path.insert(0, thu_muc)
-        try:
-            import i18n_errors  # noqa: F401
-            import rbda_priority_pipeline as rb_mod
-        except BaseException:
-            for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
-                sys.modules.pop(ten, None)
-            raise
-        finally:
-            sys.path.remove(thu_muc)
-        return rb_mod
-    ao = {ten: os.path.join(os.path.abspath(duong_dan), ten + '.py')
-          for ten in ("i18n_errors", "rbda_priority_pipeline")}
-    da_nap = {ten: getattr(sys.modules.get(ten), "__file__", None) for ten in ao}
-    if all(da_nap[ten] and _cung_tep(da_nap[ten], ao[ten]) for ten in ao):
-        return sys.modules["rbda_priority_pipeline"]     # đã nạp đúng bản build này
-    for ten in ao:
-        if ten in sys.modules:
-            raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo bản build hãy chạy một tiến trình riêng."
-                             % (ten, da_nap[ten]))
+
+        def nap(ten):
+            # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi bỏ ra
+            # để không che các mô-đun khác của tiến trình.
+            sys.path.insert(0, thu_muc)
+            try:
+                importlib.import_module(ten)
+            finally:
+                sys.path.remove(thu_muc)
+
+        return _nap_co_kiem({ten: os.path.join(thu_muc, ten + ".py") for ten in _TEN}, nap,
+                            "thư mục %s" % thu_muc)
+    if not os.path.isfile(duong_dan):
+        raise SystemExit("%s không phải thư mục kho mã cũng không phải tệp PyInstaller (không tồn tại)."
+                         % duong_dan)
+    # Đường dẫn ảo bên trong tệp .exe: không bao giờ trùng một tệp .py thật của kho mã.
+    ao = {ten: os.path.join(os.path.abspath(duong_dan), ten + ".py") for ten in _TEN}
+    trang_thai = {}
+
+    def nap(ten):
+        if "pyz" not in trang_thai:
+            trang_thai["pyz"], trang_thai["mods"] = _doc_pyz(duong_dan)
+        pyz, mods = trang_thai["pyz"], trang_thai["mods"]
+        _ispkg, off, ln = mods[ten]
+        co = marshal.loads(zlib.decompress(pyz[off:off + ln]))
+        m = types.ModuleType(ten)
+        m.__file__ = ao[ten]
+        sys.modules[ten] = m
+        exec(co, m.__dict__)
+
+    return _nap_co_kiem(ao, nap, "bản build %s" % duong_dan)
+
+
+def _doc_pyz(duong_dan):
+    """Đọc PYZ trong tệp PyInstaller: trả (bytes PYZ, {tên mô-đun: (ispkg, vị trí, độ dài)})."""
     with open(duong_dan, 'rb') as f:
         data = f.read()
     pos = data.rfind(_COOKIE_PYINSTALLER)
@@ -94,42 +120,25 @@ def nap_rb(duong_dan):
         raise SystemExit("Bản build dùng Python %d.%d nhưng đang chạy Python %d.%d: hãy chạy bằng đúng "
                          "phiên bản đó." % (build // 100, build % 100, dang_chay // 100, dang_chay % 100))
     pkg_start = pos + 88 - pkglen
-
-    def carch(name):
-        toc = data[pkg_start + tocpos: pkg_start + tocpos + toclen]
-        p = 0
-        while p < len(toc):
-            esz, epos, dlen, _ulen, cflag, _typ = struct.unpack('!IIIIBc', toc[p:p + 18])
-            n = toc[p + 18:p + esz].split(b'\x00')[0].decode()
-            if n == name:
-                raw = data[pkg_start + epos: pkg_start + epos + dlen]
-                return zlib.decompress(raw) if cflag else raw
-            p += esz
-        raise SystemExit("Không thấy %s trong tệp PyInstaller %s." % (name, duong_dan))
-
-    pyz = carch('PYZ.pyz')
+    toc = data[pkg_start + tocpos: pkg_start + tocpos + toclen]
+    p = 0
+    pyz = None
+    while p < len(toc):
+        esz, epos, dlen, _ulen, cflag, _typ = struct.unpack('!IIIIBc', toc[p:p + 18])
+        n = toc[p + 18:p + esz].split(b'\x00')[0].decode()
+        # PyInstaller 6 đặt tên "PYZ.pyz"; bản trước 6 đặt "PYZ-00.pyz".
+        if n == "PYZ.pyz" or (n.startswith("PYZ-") and n.endswith(".pyz")):
+            raw = data[pkg_start + epos: pkg_start + epos + dlen]
+            pyz = zlib.decompress(raw) if cflag else raw
+            break
+        p += esz
+    if pyz is None:
+        raise SystemExit("Không thấy PYZ trong tệp PyInstaller %s." % duong_dan)
     tocoff = struct.unpack('!i', pyz[8:12])[0]
     toc_pyz = marshal.loads(pyz[tocoff:])
     # PyInstaller mới ghi danh sách (tên, mục); bản cũ ghi dict {tên: mục}.
     mods = dict(toc_pyz.items() if isinstance(toc_pyz, dict) else toc_pyz)
-
-    def load_mod(name):
-        _ispkg, off, ln = mods[name]
-        co = marshal.loads(zlib.decompress(pyz[off:off + ln]))
-        m = types.ModuleType(name)
-        # Đường dẫn ảo bên trong tệp .exe: không bao giờ trùng một tệp .py thật của kho mã.
-        m.__file__ = ao[name]
-        sys.modules[name] = m
-        exec(co, m.__dict__)
-        return m
-
-    try:
-        load_mod('i18n_errors')
-        return load_mod('rbda_priority_pipeline')
-    except BaseException:
-        for ten in ao:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
-            sys.modules.pop(ten, None)
-        raise
+    return pyz, mods
 
 
 def gen(S, K, ratio, npref=10, ntest=4, skew=1.0, seed=1, ngroup_frac=0.15):
