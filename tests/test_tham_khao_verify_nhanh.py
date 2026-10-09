@@ -25,18 +25,13 @@ _GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _THAM_KHAO = os.path.join(_GOC, "docs", "ke_hoach", "tham_khao")
 
 
-def _nap(ten):
-    spec = importlib.util.spec_from_file_location(
-        "test_tham_khao_" + ten, os.path.join(_THAM_KHAO, ten + ".py"))
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-verify_stability_nhanh = _nap("de_xuat_verify_nhanh").verify_stability_nhanh
-exp_resume = _nap("exp_resume")
+# Nạp _chung theo đường dẫn; các kịch bản khác nạp qua bộ nạp duy nhất _chung.nap_canh.
+_spec = importlib.util.spec_from_file_location("test_tham_khao__chung", os.path.join(_THAM_KHAO, "_chung.py"))
+_chung = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_chung)
+verify_stability_nhanh = _chung.nap_canh("de_xuat_verify_nhanh", "test_tham_khao_").verify_stability_nhanh
+exp_resume = _chung.nap_canh("exp_resume", "test_tham_khao_")
 exp_resume.rb = rb
-_chung = _nap("_chung")
 
 
 # ---------------------------------------------------------------------------
@@ -340,36 +335,74 @@ def _them_hs(cu, moi, moi_ids, so):
                        rb.default_reserve_eligible_fn(cu["students"], cu["clubs"]))
 
 
-def test_kiem_tien_de_tang_tuyen_tinh_theo_du_lieu():
-    # So tỉ lệ thời gian khi dữ liệu gấp 8 lần (không dùng ngưỡng giây tuyệt đối để khỏi chập chờn):
-    # tuyến tính ~8 lần, bản cũ quét danh sách (bình phương) ~64 lần.
-    import time
+class _DanhSachCam(list):
+    """Danh sách cấm tra `in`: kiểm tiền đề phải dùng tập hợp, không quét danh sách (bình phương)."""
 
-    def do(so):
-        cu, moi, moi_ids, _ = _them_em_moi(0)
-        res0 = _them_hs(cu, moi, moi_ids, so)
-        tg = []
-        for _ in range(3):
-            t = time.perf_counter()
-            exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
-            tg.append(time.perf_counter() - t)
-        return sorted(tg)[1], (res0, cu, moi, moi_ids)
+    def __contains__(self, x):
+        raise AssertionError("kiem_tien_de quét danh sách apps bằng `in`")
 
-    nho, _ = do(500)
-    lon, (res0, cu, moi, moi_ids) = do(4000)
-    assert lon / nho < 30
+
+def test_kiem_tien_de_khong_quet_danh_sach_apps():
+    cu, moi, moi_ids, res0 = _them_em_moi(0)
+    res0 = _them_hs(cu, moi, moi_ids, 2000)
+    moi["apps"] = {c: _DanhSachCam(v) for c, v in moi["apps"].items()}
+    cu["apps"] = {c: _DanhSachCam(v) for c, v in cu["apps"].items()}
+    exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
     asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids, da_kiem=True)
     assert asg == _chay_lai(moi)
 
 
 def test_kiem_tien_de_dung_khoa_pha_hoa_nhu_compute_club_priority():
-    # Số bốc thăm trùng nhau: compute_club_priority phá hoà bằng mã em. Đổi số làm đảo thứ tự hai em
-    # (a=b=5 -> a=7, b=6) phải bị từ chối dù sắp theo riêng số bốc thăm có thể "trông như" không đổi.
+    # 20 cặp em cũ có số bốc thăm TRÙNG nhau (a=b=v): compute_club_priority phá hoà bằng mã em (a trước b).
+    # Dữ liệu mới tách cặp sao cho b đứng trước a, mọi em khác giữ nguyên thứ tự -> phải từ chối.
+    # Kiểm chỉ theo số bốc thăm sẽ thấy cặp trùng theo thứ tự duyệt tập hợp (ngẫu nhiên mỗi tiến trình),
+    # nên bỏ lọt mỗi cặp với xác suất 1/2: 20 cặp -> lọt cả 20 với xác suất 2^-20.
     cu, moi, moi_ids, res0 = _them_em_moi(2)
-    a, b = "s000", "s001"
-    cu["stb"] = dict(cu["stb"], **{a: 5, b: 5})
-    moi["stb"] = dict(moi["stb"], **{a: 7, b: 6})
+    cu_hs = sorted(cu["students"])
+    cu["stb"] = {s: 10 * i for i, s in enumerate(cu_hs)}
+    moi["stb"] = dict(cu["stb"], **{n: 10_000 + i for i, n in enumerate(moi_ids)})
+    for k in range(20):
+        a, b = cu_hs[2 * k], cu_hs[2 * k + 1]            # a < b theo mã
+        v = cu["stb"][a]
+        cu["stb"][a] = cu["stb"][b] = v
+        moi["stb"][a], moi["stb"][b] = v + 2, v + 1       # b trước a, vẫn trước em kế tiếp (v + 10)
     with pytest.raises(ValueError, match="bốc thăm"):
+        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+
+
+def test_kiem_tien_de_chap_nhan_tach_cap_trung_giu_dung_thu_tu():
+    # Ngược lại với test trên: cặp trùng a=b=v được tách thành a=v, b=v+1 — thứ tự (số, mã) KHÔNG đổi,
+    # nên phải chấp nhận và cho đúng kết quả chạy lại. Kiểm chỉ theo số bốc thăm sẽ so thứ tự cặp trùng
+    # theo thứ tự duyệt tập hợp và từ chối nhầm mỗi cặp với xác suất 1/2 (20 cặp: gần như chắc chắn).
+    cu, moi, moi_ids, _ = _them_em_moi(2)
+    cu_hs = sorted(cu["students"])
+    cu["stb"] = {s: 10 * i for i, s in enumerate(cu_hs)}
+    for k in range(20):
+        a, b = cu_hs[2 * k], cu_hs[2 * k + 1]
+        cu["stb"][b] = cu["stb"][a]
+    moi["stb"] = {s: 10 * i for i, s in enumerate(cu_hs)}
+    for k in range(20):
+        a, b = cu_hs[2 * k], cu_hs[2 * k + 1]
+        moi["stb"][a], moi["stb"][b] = cu["stb"][a], cu["stb"][a] + 1
+    moi["stb"].update({n: 10_000 + i for i, n in enumerate(moi_ids)})
+    res0 = rb.run_rbda(cu["students"], cu["clubs"], cu["tested"], cu["apps"], cu["prefs"], cu["stb"],
+                       rb.default_reserve_eligible_fn(cu["students"], cu["clubs"]))
+    asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids)
+    assert asg == _chay_lai(moi)
+
+
+def test_kiem_tien_de_nhan_so_boc_tham_kieu_numpy():
+    np = pytest.importorskip("numpy")
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    moi["stb"] = {s: np.int64(v) for s, v in moi["stb"].items()}
+    exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+
+
+def test_kiem_tien_de_bao_ro_suc_chua_moi_sai():
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    c = next(c for c, v in moi["clubs"].items() if v["reserve_capacity"] > 0)
+    moi["clubs"][c]["capacity"] = moi["clubs"][c]["reserve_capacity"] - 1
+    with pytest.raises(ValueError, match="sức chứa mới của CLB %s" % c):
         exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
@@ -415,6 +448,23 @@ def test_nap_rb_nap_dung_thu_muc_trong_tien_trinh_moi(tmp_path):
     assert os.path.realpath(tep_rb) == os.path.realpath(str(tmp_path / "rbda_priority_pipeline.py"))
     assert os.path.realpath(tep_loi) == os.path.realpath(str(tmp_path / "i18n_errors.py"))
     assert con_trong_path == "False"
+
+
+def test_nap_rb_nap_i18n_errors_khi_mo_dun_chinh_da_co(tmp_path):
+    # Tiến trình đã có rbda_priority_pipeline (từ thư mục đó) nhưng chưa có i18n_errors (mô-đun chỉ
+    # import nó bên trong hàm): nap_rb phải nạp nốt i18n_errors từ cùng thư mục.
+    import subprocess
+    for ten in ("rbda_priority_pipeline.py", "i18n_errors.py"):
+        (tmp_path / ten).write_text(open(os.path.join(_GOC, ten), encoding="utf-8").read(), encoding="utf-8")
+    ma = ("import importlib.util, sys;"
+          "sys.path.insert(0, sys.argv[2]); import rbda_priority_pipeline; sys.path.remove(sys.argv[2]);"
+          "assert 'i18n_errors' not in sys.modules;"
+          "sp = importlib.util.spec_from_file_location('c', sys.argv[1]);"
+          "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m); m.nap_rb(sys.argv[2]);"
+          "print(sys.modules['i18n_errors'].__file__)")
+    kq = subprocess.run([sys.executable, "-I", "-c", ma, os.path.join(_THAM_KHAO, "_chung.py"), str(tmp_path)],
+                        capture_output=True, text=True, check=True, cwd=str(tmp_path.parent))
+    assert os.path.realpath(kq.stdout.strip()) == os.path.realpath(str(tmp_path / "i18n_errors.py"))
 
 
 def test_nap_rb_tu_choi_ban_build_khi_da_nap_ban_kho_ma(tmp_path):

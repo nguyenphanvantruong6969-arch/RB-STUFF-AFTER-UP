@@ -57,6 +57,11 @@ def kiem_tien_de(res0, cu, moi, new_ids):
             raise ValueError("resume_da: CLB %s đổi dự trữ (cần chạy lại)." % c)
         if info1["capacity"] > info0["capacity"]:
             raise ValueError("resume_da: CLB %s tăng sức chứa (bớt ràng buộc, mục G2, cần chạy lại)." % c)
+    loi_suc_chua = getattr(rb, "loi_suc_chua", None)   # bản build cũ có thể chưa có luật này
+    for c, info1 in clubs1.items():
+        loi = loi_suc_chua(info1["capacity"], info1["reserve_capacity"]) if loi_suc_chua else None
+        if loi:
+            raise ValueError("resume_da: sức chứa mới của CLB %s không hợp lệ (%s)." % (c, loi))
     clb_moi = set(clubs1) - set(clubs0)
     for s in cu_hs:
         p0, p1 = cu["prefs"].get(s, []), moi["prefs"].get(s, [])
@@ -86,7 +91,8 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                                  "(cần apps chứa mọi nguyện vọng, như hop_ung_vien)." % (s, c, c))
     cu_stb, moi_stb = cu["stb"], moi["stb"]
     for ten, bang, ds in (("cũ", cu_stb, cu_hs), ("mới", moi_stb, cu_hs | moi_set)):
-        thieu = [s for s in ds if not isinstance(bang.get(s), int)]
+        # Như compute_club_priority: số nào so sánh được cũng nhận (int, numpy.int64...); chỉ thiếu / None là lỗi.
+        thieu = [s for s in ds if bang.get(s) is None]
         if thieu:
             raise ValueError("resume_da: thiếu số bốc thăm (dữ liệu %s) của %s." % (ten, sorted(thieu)[:5]))
     # Cùng khoá phá hoà như compute_club_priority: (số bốc thăm, mã em) — số bốc thăm có thể trùng.

@@ -49,11 +49,9 @@ def nap_rb(duong_dan):
             raise SystemExit("%s không có rbda_priority_pipeline.py." % duong_dan)
         thu_muc = os.path.dirname(tep)
         _chan_ban_khac(thu_muc)
-        da_co = sys.modules.get("rbda_priority_pipeline")
-        if da_co is not None:
-            return da_co
-        # Mô-đun import i18n_errors theo tên (cả bên trong hàm): nạp cả hai từ thư mục này rồi bỏ đường
-        # dẫn khỏi sys.path để không che các mô-đun khác của tiến trình.
+        # Mô-đun import i18n_errors theo tên (cả bên trong hàm): bảo đảm CẢ HAI đã nạp từ thư mục này
+        # (kể cả khi rbda_priority_pipeline đã có sẵn), rồi bỏ đường dẫn khỏi sys.path để không che
+        # các mô-đun khác của tiến trình.
         sys.path.insert(0, thu_muc)
         try:
             import i18n_errors  # noqa: F401
@@ -61,10 +59,15 @@ def nap_rb(duong_dan):
         finally:
             sys.path.remove(thu_muc)
         return rb_mod
-    for ten in ("rbda_priority_pipeline", "i18n_errors"):
+    ao = {ten: os.path.join(os.path.abspath(duong_dan), ten + '.py')
+          for ten in ("i18n_errors", "rbda_priority_pipeline")}
+    da_nap = {ten: getattr(sys.modules.get(ten), "__file__", None) for ten in ao}
+    if all(da_nap[ten] == ao[ten] for ten in ao):
+        return sys.modules["rbda_priority_pipeline"]     # đã nạp đúng bản build này
+    for ten in ao:
         if ten in sys.modules:
             raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo bản build hãy chạy một tiến trình riêng."
-                             % (ten, getattr(sys.modules[ten], "__file__", "?")))
+                             % (ten, da_nap[ten]))
     with open(duong_dan, 'rb') as f:
         data = f.read()
     pos = data.rfind(_COOKIE_PYINSTALLER)
@@ -106,13 +109,18 @@ def nap_rb(duong_dan):
         co = marshal.loads(zlib.decompress(pyz[off:off + ln]))
         m = types.ModuleType(name)
         # Đường dẫn ảo bên trong tệp .exe: không bao giờ trùng một tệp .py thật của kho mã.
-        m.__file__ = os.path.join(os.path.abspath(duong_dan), name + '.py')
+        m.__file__ = ao[name]
         sys.modules[name] = m
         exec(co, m.__dict__)
         return m
 
-    load_mod('i18n_errors')
-    return load_mod('rbda_priority_pipeline')
+    try:
+        load_mod('i18n_errors')
+        return load_mod('rbda_priority_pipeline')
+    except BaseException:
+        for ten in ao:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
+            sys.modules.pop(ten, None)
+        raise
 
 
 def gen(S, K, ratio, npref=10, ntest=4, skew=1.0, seed=1, ngroup_frac=0.15):
