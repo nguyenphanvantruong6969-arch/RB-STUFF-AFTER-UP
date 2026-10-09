@@ -85,7 +85,12 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                 raise ValueError("resume_da: %s xếp nguyện vọng %s nhưng không có trong apps[%s] "
                                  "(cần apps chứa mọi nguyện vọng, như hop_ung_vien)." % (s, c, c))
     cu_stb, moi_stb = cu["stb"], moi["stb"]
-    if sorted(cu_hs, key=cu_stb.__getitem__) != sorted(cu_hs, key=moi_stb.__getitem__):
+    for ten, bang, ds in (("cũ", cu_stb, cu_hs), ("mới", moi_stb, cu_hs | moi_set)):
+        thieu = [s for s in ds if not isinstance(bang.get(s), int)]
+        if thieu:
+            raise ValueError("resume_da: thiếu số bốc thăm (dữ liệu %s) của %s." % (ten, sorted(thieu)[:5]))
+    # Cùng khoá phá hoà như compute_club_priority: (số bốc thăm, mã em) — số bốc thăm có thể trùng.
+    if (sorted(cu_hs, key=lambda s: (cu_stb[s], s)) != sorted(cu_hs, key=lambda s: (moi_stb[s], s))):
         raise ValueError("resume_da: thứ tự bốc thăm của em cũ đã đổi (phải chèn bằng chen_stb_cho_hoc_sinh_moi).")
 
 

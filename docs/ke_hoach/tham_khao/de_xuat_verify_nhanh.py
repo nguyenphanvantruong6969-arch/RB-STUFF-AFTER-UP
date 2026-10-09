@@ -74,11 +74,12 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn):
             if sid not in rank:
                 continue
             e, n, n_giu, capacity, reserve_capacity = lay_chuan_bi(cid, sid)
+            # Bản gốc luôn gọi hàm đủ tư cách cho cả ứng viên (kể cả khi CLB còn chỗ): gọi y như vậy.
+            du_tu_cach = is_reserve_eligible_fn(sid, cid)
             if n_giu + 1 <= capacity:
                 duoc_nhan = True
             else:
                 r = rank[sid]
-                du_tu_cach = is_reserve_eligible_fn(sid, cid)
                 # bisect_right: club_choice_function sắp ổn định trên (đang giữ + [sid]),
                 # nên khi trùng thứ hạng (em không có trong rank nhận len(rank)) sid đứng SAU.
                 p = bisect_right(e, r)

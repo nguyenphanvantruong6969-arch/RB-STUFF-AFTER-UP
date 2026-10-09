@@ -180,6 +180,21 @@ def test_ban_nhanh_khong_doc_clb_khong_ai_xet_toi():
     assert rb.verify_stability(res, clubs, prefs, fn2) == verify_stability_nhanh(res, clubs, prefs, fn2)
 
 
+def test_ham_du_tu_cach_loi_o_ung_vien_thi_ca_hai_ban_cung_bao_loi():
+    _, clubs, _, _, prefs, _, fn, res = _sinh(6)
+    res = _bien_doi(res, clubs, random.Random(6), 25)
+    nan = next(s for s, ds in prefs.items() for c in ds[:1] if res.assignment.get(s) != c and s in res.base_rank[c])
+
+    def fn2(s, c):
+        if s == nan:
+            raise KeyError(s)
+        return fn(s, c)
+    with pytest.raises(KeyError):
+        rb.verify_stability(res, clubs, prefs, fn2)
+    with pytest.raises(KeyError):
+        verify_stability_nhanh(res, clubs, prefs, fn2)
+
+
 # ---------------------------------------------------------------------------
 # exp_resume.resume_da == chạy lại toàn bộ run_rbda (khi tiền đề thoả), từ chối khi không thoả
 # ---------------------------------------------------------------------------
@@ -310,27 +325,63 @@ def test_tiep_tuc_da_tu_choi_res0_lap_tu_apps_thieu():
     assert asg == _chay_lai(moi)
 
 
-def test_kiem_tien_de_tuyen_tinh():
-    # Kiểm tiền đề dùng tập hợp: 3.000 em, mỗi CLB hàng nghìn ứng viên vẫn chạy nhanh.
-    cu, moi, moi_ids, res0 = _them_em_moi(0)
-    hs = ["x%04d" % i for i in range(3000)]
+def _them_hs(cu, moi, moi_ids, so):
+    """Thêm `so` em cũ (cùng trong cu và moi), chạy lại res0 cho dữ liệu cũ."""
+    hs = ["x%05d" % i for i in range(so)]
     for d in (cu, moi):
-        for s in hs:
-            d["students"][s] = {"reserve_group": None}
-            d["prefs"][s] = list(d["clubs"])[:4]
-            for c in d["prefs"][s]:
-                d["apps"][c].append(s)
-    stb_cu = rb.generate_stb_lottery(list(cu["students"]), 1)
-    cu["stb"] = stb_cu
-    moi["stb"] = rb.chen_stb_cho_hoc_sinh_moi(sorted(cu["students"], key=stb_cu.__getitem__), moi_ids, 1)
-    res0 = rb.run_rbda(cu["students"], cu["clubs"], cu["tested"], cu["apps"], cu["prefs"], stb_cu,
+        for x in hs:
+            d["students"][x] = {"reserve_group": None}
+            d["prefs"][x] = list(d["clubs"])[:4]
+            for c in d["prefs"][x]:
+                d["apps"][c].append(x)
+    cu["stb"] = rb.generate_stb_lottery(list(cu["students"]), 1)
+    moi["stb"] = rb.chen_stb_cho_hoc_sinh_moi(sorted(cu["students"], key=cu["stb"].__getitem__), moi_ids, 1)
+    return rb.run_rbda(cu["students"], cu["clubs"], cu["tested"], cu["apps"], cu["prefs"], cu["stb"],
                        rb.default_reserve_eligible_fn(cu["students"], cu["clubs"]))
+
+
+def test_kiem_tien_de_tang_tuyen_tinh_theo_du_lieu():
+    # So tỉ lệ thời gian khi dữ liệu gấp 8 lần (không dùng ngưỡng giây tuyệt đối để khỏi chập chờn):
+    # tuyến tính ~8 lần, bản cũ quét danh sách (bình phương) ~64 lần.
     import time
-    t = time.perf_counter()
-    exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
-    assert time.perf_counter() - t < 0.5
+
+    def do(so):
+        cu, moi, moi_ids, _ = _them_em_moi(0)
+        res0 = _them_hs(cu, moi, moi_ids, so)
+        tg = []
+        for _ in range(3):
+            t = time.perf_counter()
+            exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+            tg.append(time.perf_counter() - t)
+        return sorted(tg)[1], (res0, cu, moi, moi_ids)
+
+    nho, _ = do(500)
+    lon, (res0, cu, moi, moi_ids) = do(4000)
+    assert lon / nho < 30
     asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids, da_kiem=True)
     assert asg == _chay_lai(moi)
+
+
+def test_kiem_tien_de_dung_khoa_pha_hoa_nhu_compute_club_priority():
+    # Số bốc thăm trùng nhau: compute_club_priority phá hoà bằng mã em. Đổi số làm đảo thứ tự hai em
+    # (a=b=5 -> a=7, b=6) phải bị từ chối dù sắp theo riêng số bốc thăm có thể "trông như" không đổi.
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    a, b = "s000", "s001"
+    cu["stb"] = dict(cu["stb"], **{a: 5, b: 5})
+    moi["stb"] = dict(moi["stb"], **{a: 7, b: 6})
+    with pytest.raises(ValueError, match="bốc thăm"):
+        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+
+
+@pytest.mark.parametrize("gia_tri", ["thieu", None])
+def test_kiem_tien_de_bao_ro_khi_thieu_so_boc_tham(gia_tri):
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    if gia_tri == "thieu":
+        moi["stb"].pop("s003")
+    else:
+        moi["stb"]["s003"] = None
+    with pytest.raises(ValueError, match="thiếu số bốc thăm"):
+        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
 # ---------------------------------------------------------------------------
@@ -356,17 +407,34 @@ def test_nap_rb_nap_dung_thu_muc_trong_tien_trinh_moi(tmp_path):
     ma = ("import importlib.util, sys;"
           "sp = importlib.util.spec_from_file_location('c', sys.argv[1]);"
           "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m);"
-          "print(m.nap_rb(sys.argv[2]).__file__)")
+          "r = m.nap_rb(sys.argv[2]); print(r.__file__);"
+          "print(sys.modules['i18n_errors'].__file__); print(sys.argv[2] in sys.path)")
     kq = subprocess.run([sys.executable, "-I", "-c", ma, os.path.join(_THAM_KHAO, "_chung.py"), str(tmp_path)],
                         capture_output=True, text=True, check=True, cwd=str(tmp_path.parent))
-    assert os.path.realpath(kq.stdout.strip()) == os.path.realpath(str(tmp_path / "rbda_priority_pipeline.py"))
+    tep_rb, tep_loi, con_trong_path = kq.stdout.split()
+    assert os.path.realpath(tep_rb) == os.path.realpath(str(tmp_path / "rbda_priority_pipeline.py"))
+    assert os.path.realpath(tep_loi) == os.path.realpath(str(tmp_path / "i18n_errors.py"))
+    assert con_trong_path == "False"
+
+
+def test_nap_rb_tu_choi_ban_build_khi_da_nap_ban_kho_ma(tmp_path):
+    tep = tmp_path / "PhanBoCauLacBo.exe"
+    tep.write_bytes(b"MZ")
+    with pytest.raises(SystemExit, match="bản build"):
+        _chung.nap_rb(str(tep))
 
 
 def test_nap_rb_bao_loi_ro_khi_tep_khong_phai_pyinstaller(tmp_path):
+    # Cần tiến trình chưa nạp bản nào (bộ test đã nạp bản kho mã).
+    import subprocess
     tep = tmp_path / "khong_phai.exe"
     tep.write_bytes(b"MZ" + b"\x00" * 200)
-    with pytest.raises(SystemExit, match="PyInstaller"):
-        _chung.nap_rb(str(tep))
+    ma = ("import importlib.util, sys;"
+          "sp = importlib.util.spec_from_file_location('c', sys.argv[1]);"
+          "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m); m.nap_rb(sys.argv[2])")
+    kq = subprocess.run([sys.executable, "-I", "-c", ma, os.path.join(_THAM_KHAO, "_chung.py"), str(tep)],
+                        capture_output=True, text=True)
+    assert kq.returncode != 0 and "PyInstaller" in kq.stderr
 
 
 def test_gen_sinh_du_lieu_dung_hinh_dang():
