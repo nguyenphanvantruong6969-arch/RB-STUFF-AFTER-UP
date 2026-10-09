@@ -25,14 +25,18 @@ def nap_canh(ten, tien_to="tham_khao_"):
     return mod
 
 
+def _cung_tep(a, b):
+    """So hai đường dẫn như hệ điều hành (liên kết, hoa/thường trên Windows)."""
+    return os.path.normcase(os.path.realpath(a)) == os.path.normcase(os.path.realpath(b))
+
+
 def _chan_ban_khac(thu_muc):
     """SystemExit nếu tiến trình đã nạp rbda_priority_pipeline / i18n_errors từ nơi khác `thu_muc`."""
     for ten in ("rbda_priority_pipeline", "i18n_errors"):
         mod = sys.modules.get(ten)
         if mod is None:
             continue
-        tep = os.path.realpath(getattr(mod, "__file__", "") or "")
-        if tep != os.path.realpath(os.path.join(thu_muc, ten + ".py")):
+        if not _cung_tep(getattr(mod, "__file__", "") or "", os.path.join(thu_muc, ten + ".py")):
             raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo thư mục %s hãy chạy một tiến trình riêng."
                              % (ten, getattr(mod, "__file__", "?"), thu_muc))
 
@@ -52,17 +56,22 @@ def nap_rb(duong_dan):
         # Mô-đun import i18n_errors theo tên (cả bên trong hàm): bảo đảm CẢ HAI đã nạp từ thư mục này
         # (kể cả khi rbda_priority_pipeline đã có sẵn), rồi bỏ đường dẫn khỏi sys.path để không che
         # các mô-đun khác của tiến trình.
+        chua_co = [ten for ten in ("i18n_errors", "rbda_priority_pipeline") if ten not in sys.modules]
         sys.path.insert(0, thu_muc)
         try:
             import i18n_errors  # noqa: F401
             import rbda_priority_pipeline as rb_mod
+        except BaseException:
+            for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
+                sys.modules.pop(ten, None)
+            raise
         finally:
             sys.path.remove(thu_muc)
         return rb_mod
     ao = {ten: os.path.join(os.path.abspath(duong_dan), ten + '.py')
           for ten in ("i18n_errors", "rbda_priority_pipeline")}
     da_nap = {ten: getattr(sys.modules.get(ten), "__file__", None) for ten in ao}
-    if all(da_nap[ten] == ao[ten] for ten in ao):
+    if all(da_nap[ten] and _cung_tep(da_nap[ten], ao[ten]) for ten in ao):
         return sys.modules["rbda_priority_pipeline"]     # đã nạp đúng bản build này
     for ten in ao:
         if ten in sys.modules:

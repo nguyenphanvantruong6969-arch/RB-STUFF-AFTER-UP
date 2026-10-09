@@ -25,13 +25,13 @@ _GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _THAM_KHAO = os.path.join(_GOC, "docs", "ke_hoach", "tham_khao")
 
 
-# Nạp _chung theo đường dẫn; các kịch bản khác nạp qua bộ nạp duy nhất _chung.nap_canh.
-_spec = importlib.util.spec_from_file_location("test_tham_khao__chung", os.path.join(_THAM_KHAO, "_chung.py"))
-_chung = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_chung)
-verify_stability_nhanh = _chung.nap_canh("de_xuat_verify_nhanh", "test_tham_khao_").verify_stability_nhanh
-exp_resume = _chung.nap_canh("exp_resume", "test_tham_khao_")
+# Nạp exp_resume theo đường dẫn; dùng lại đúng bản _chung mà nó đã nạp (một bản trong tiến trình).
+_spec = importlib.util.spec_from_file_location("test_tham_khao_exp_resume", os.path.join(_THAM_KHAO, "exp_resume.py"))
+exp_resume = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(exp_resume)
 exp_resume.rb = rb
+_chung = exp_resume._chung
+verify_stability_nhanh = _chung.nap_canh("de_xuat_verify_nhanh", "test_tham_khao_").verify_stability_nhanh
 
 
 # ---------------------------------------------------------------------------
@@ -336,10 +336,16 @@ def _them_hs(cu, moi, moi_ids, so):
 
 
 class _DanhSachCam(list):
-    """Danh sách cấm tra `in`: kiểm tiền đề phải dùng tập hợp, không quét danh sách (bình phương)."""
+    """Danh sách cấm tra cứu tuyến tính: kiểm tiền đề phải dùng tập hợp, không quét danh sách (bình phương)."""
 
     def __contains__(self, x):
-        raise AssertionError("kiem_tien_de quét danh sách apps bằng `in`")
+        raise AssertionError("kiem_tien_de quét danh sách bằng `in`")
+
+    def index(self, *a):
+        raise AssertionError("kiem_tien_de quét danh sách bằng .index")
+
+    def count(self, *a):
+        raise AssertionError("kiem_tien_de quét danh sách bằng .count")
 
 
 def test_kiem_tien_de_khong_quet_danh_sach_apps():
@@ -365,7 +371,7 @@ def test_kiem_tien_de_dung_khoa_pha_hoa_nhu_compute_club_priority():
         a, b = cu_hs[2 * k], cu_hs[2 * k + 1]            # a < b theo mã
         v = cu["stb"][a]
         cu["stb"][a] = cu["stb"][b] = v
-        moi["stb"][a], moi["stb"][b] = v + 2, v + 1       # b trước a, vẫn trước em kế tiếp (v + 10)
+        moi["stb"][a], moi["stb"][b] = v + 2, v + 1       # b trước a, vẫn trước em kế tiếp (v + 20)
     with pytest.raises(ValueError, match="bốc thăm"):
         exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
@@ -398,6 +404,16 @@ def test_kiem_tien_de_nhan_so_boc_tham_kieu_numpy():
     exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
+def test_kiem_tien_de_khong_bo_qua_kiem_suc_chua_khi_chua_gan_rb(monkeypatch):
+    # exp_resume.rb chưa gán: vẫn phải kiểm sức chứa bằng bản rbda đã nạp trong tiến trình.
+    monkeypatch.setattr(exp_resume, "rb", None)
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    c = next(c for c, v in moi["clubs"].items() if v["reserve_capacity"] > 0)
+    moi["clubs"][c]["capacity"] = moi["clubs"][c]["reserve_capacity"] - 1
+    with pytest.raises(ValueError, match="sức chứa mới"):
+        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+
+
 def test_kiem_tien_de_bao_ro_suc_chua_moi_sai():
     cu, moi, moi_ids, res0 = _them_em_moi(2)
     c = next(c for c, v in moi["clubs"].items() if v["reserve_capacity"] > 0)
@@ -406,14 +422,14 @@ def test_kiem_tien_de_bao_ro_suc_chua_moi_sai():
         exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
-@pytest.mark.parametrize("gia_tri", ["thieu", None])
+@pytest.mark.parametrize("gia_tri", ["thieu", None, "7", float("nan"), True])
 def test_kiem_tien_de_bao_ro_khi_thieu_so_boc_tham(gia_tri):
     cu, moi, moi_ids, res0 = _them_em_moi(2)
     if gia_tri == "thieu":
         moi["stb"].pop("s003")
     else:
-        moi["stb"]["s003"] = None
-    with pytest.raises(ValueError, match="thiếu số bốc thăm"):
+        moi["stb"]["s003"] = gia_tri
+    with pytest.raises(ValueError, match="thiếu số bốc thăm hoặc không phải số"):
         exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
@@ -465,6 +481,82 @@ def test_nap_rb_nap_i18n_errors_khi_mo_dun_chinh_da_co(tmp_path):
     kq = subprocess.run([sys.executable, "-I", "-c", ma, os.path.join(_THAM_KHAO, "_chung.py"), str(tmp_path)],
                         capture_output=True, text=True, check=True, cwd=str(tmp_path.parent))
     assert os.path.realpath(kq.stdout.strip()) == os.path.realpath(str(tmp_path / "i18n_errors.py"))
+
+
+def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None):
+    """Dựng một tệp PyInstaller tối thiểu (CArchive + PYZ) chứa i18n_errors và rbda_priority_pipeline."""
+    import marshal
+    import struct
+    import zlib
+    if pyver is None:
+        pyver = sys.version_info.major * 100 + sys.version_info.minor
+    than, muc = b"", []
+    for ten, ma in (("i18n_errors", "def err(code, **p):\n    return {'code': code, 'params': p}\n"),
+                    ("rbda_priority_pipeline", ma_rb)):
+        nen = zlib.compress(marshal.dumps(compile(ma, ten + ".py", "exec")))
+        muc.append((ten, (0, 12 + len(than), len(nen))))
+        than += nen
+    pyz = b"PYZ\0" + b"\0" * 4 + struct.pack("!i", 12 + len(than)) + than + marshal.dumps(muc)
+    nen_pyz = zlib.compress(pyz)
+    ten_b = b"PYZ.pyz\0" + b"\0" * 6
+    toc = struct.pack("!IIIIBc", 18 + len(ten_b), 0, len(nen_pyz), len(pyz), 1, b"z") + ten_b
+    goi = nen_pyz + toc
+    cookie_len = 88
+    cookie = struct.pack("!8sIIII64s", b"MEI\x0c\x0b\x0a\x0b\x0e", len(goi) + cookie_len,
+                         len(nen_pyz), len(toc), pyver, b"python")
+    with open(duong, "wb") as f:
+        f.write(b"MZ-dau-tep" + goi + cookie)
+
+
+def _chay_tien_trinh_moi(ma, *thong_so):
+    import subprocess
+    dau = ("import importlib.util, sys;"
+           "sp = importlib.util.spec_from_file_location('c', sys.argv[1]);"
+           "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m);")
+    return subprocess.run([sys.executable, "-I", "-c", dau + ma, os.path.join(_THAM_KHAO, "_chung.py"), *thong_so],
+                          capture_output=True, text=True)
+
+
+def test_nap_rb_doc_ban_build_va_nap_lai_cung_tep(tmp_path):
+    exe = tmp_path / "PhanBoCauLacBo.exe"
+    _tao_exe_gia(str(exe))
+    lien_ket = tmp_path / "lien_ket.exe"
+    try:
+        lien_ket.symlink_to(exe)
+    except OSError:          # Windows không quyền tạo liên kết: dùng đường dẫn viết khác của cùng tệp
+        lien_ket = tmp_path / "." / "PhanBoCauLacBo.exe"
+    kq = _chay_tien_trinh_moi(
+        "r = m.nap_rb(sys.argv[2]); print(r.GIA_TRI, sys.modules['i18n_errors'].err('x')['code']);"
+        "print(m.nap_rb(sys.argv[3]) is r)", str(exe), str(lien_ket))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["42", "x", "True"]
+
+
+def test_nap_rb_ban_build_hong_khong_de_mo_dun_do_dang(tmp_path):
+    exe = tmp_path / "PhanBoCauLacBo.exe"
+    _tao_exe_gia(str(exe), ma_rb="raise RuntimeError('hong')\n")
+    kq = _chay_tien_trinh_moi(
+        "\ntry:\n    m.nap_rb(sys.argv[2])\nexcept RuntimeError:\n"
+        "    print('i18n_errors' in sys.modules, 'rbda_priority_pipeline' in sys.modules)", str(exe))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["False", "False"]
+
+
+def test_nap_rb_ban_build_lech_phien_ban_python(tmp_path):
+    exe = tmp_path / "PhanBoCauLacBo.exe"
+    _tao_exe_gia(str(exe), pyver=207)
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(exe))
+    assert kq.returncode != 0 and "Python 2.7" in kq.stderr
+
+
+def test_nap_rb_thu_muc_hong_khong_de_mo_dun_do_dang(tmp_path):
+    (tmp_path / "i18n_errors.py").write_text("def err(code, **p):\n    return code\n", encoding="utf-8")
+    (tmp_path / "rbda_priority_pipeline.py").write_text("raise RuntimeError('hong')\n", encoding="utf-8")
+    kq = _chay_tien_trinh_moi(
+        "\ntry:\n    m.nap_rb(sys.argv[2])\nexcept RuntimeError:\n"
+        "    print('i18n_errors' in sys.modules, 'rbda_priority_pipeline' in sys.modules)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["False", "False"]
 
 
 def test_nap_rb_tu_choi_ban_build_khi_da_nap_ban_kho_ma(tmp_path):

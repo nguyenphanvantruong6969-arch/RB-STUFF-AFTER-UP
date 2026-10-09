@@ -4,6 +4,7 @@ Chạy: python exp_resume.py <thư mục chứa rbda_priority_pipeline.py | Phan
 Dữ liệu tự sinh."""
 import importlib.util
 import json
+import numbers
 import os
 import random
 import sys
@@ -22,6 +23,21 @@ rb = None
 
 
 _KHOA = ("students", "clubs", "tested", "apps", "prefs", "stb")
+
+
+def _lay_rb():
+    """Mô-đun rbda đang dùng: biến `rb` (gán ở __main__ / test), hoặc bản đã nạp trong tiến trình."""
+    if rb is not None:
+        return rb
+    mod = sys.modules.get("rbda_priority_pipeline")
+    if mod is None:
+        raise RuntimeError("exp_resume: chưa nạp rbda_priority_pipeline (gán exp_resume.rb hoặc dùng nap_rb).")
+    return mod
+
+
+def _so_boc_tham_hop_le(v):
+    # Số thực bất kỳ (int, numpy.int64, float) nhưng không bool, không NaN; chuỗi đọc từ CSV thì không.
+    return isinstance(v, numbers.Real) and not isinstance(v, bool) and v == v
 
 
 def kiem_tien_de(res0, cu, moi, new_ids):
@@ -57,7 +73,7 @@ def kiem_tien_de(res0, cu, moi, new_ids):
             raise ValueError("resume_da: CLB %s đổi dự trữ (cần chạy lại)." % c)
         if info1["capacity"] > info0["capacity"]:
             raise ValueError("resume_da: CLB %s tăng sức chứa (bớt ràng buộc, mục G2, cần chạy lại)." % c)
-    loi_suc_chua = getattr(rb, "loi_suc_chua", None)   # bản build cũ có thể chưa có luật này
+    loi_suc_chua = getattr(_lay_rb(), "loi_suc_chua", None)   # bản build cũ có thể chưa có luật này
     for c, info1 in clubs1.items():
         loi = loi_suc_chua(info1["capacity"], info1["reserve_capacity"]) if loi_suc_chua else None
         if loi:
@@ -91,10 +107,10 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                                  "(cần apps chứa mọi nguyện vọng, như hop_ung_vien)." % (s, c, c))
     cu_stb, moi_stb = cu["stb"], moi["stb"]
     for ten, bang, ds in (("cũ", cu_stb, cu_hs), ("mới", moi_stb, cu_hs | moi_set)):
-        # Như compute_club_priority: số nào so sánh được cũng nhận (int, numpy.int64...); chỉ thiếu / None là lỗi.
-        thieu = [s for s in ds if bang.get(s) is None]
+        thieu = [s for s in ds if not _so_boc_tham_hop_le(bang.get(s))]
         if thieu:
-            raise ValueError("resume_da: thiếu số bốc thăm (dữ liệu %s) của %s." % (ten, sorted(thieu)[:5]))
+            raise ValueError("resume_da: thiếu số bốc thăm hoặc không phải số (dữ liệu %s) của %s."
+                             % (ten, sorted(thieu)[:5]))
     # Cùng khoá phá hoà như compute_club_priority: (số bốc thăm, mã em) — số bốc thăm có thể trùng.
     if (sorted(cu_hs, key=lambda s: (cu_stb[s], s)) != sorted(cu_hs, key=lambda s: (moi_stb[s], s))):
         raise ValueError("resume_da: thứ tự bốc thăm của em cũ đã đổi (phải chèn bằng chen_stb_cho_hoc_sinh_moi).")
@@ -110,6 +126,7 @@ def resume_da(res0, cu, moi, new_ids, fn=None, da_kiem=False):
     """
     if not da_kiem:
         kiem_tien_de(res0, cu, moi, new_ids)
+    rb = _lay_rb()
     clubs, tested, apps, prefs, stb = (moi[k] for k in ("clubs", "tested", "apps", "prefs", "stb"))
     if fn is None:
         fn = rb.default_reserve_eligible_fn(moi["students"], clubs)
