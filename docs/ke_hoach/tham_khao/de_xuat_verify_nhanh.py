@@ -23,19 +23,18 @@ trên 7 cấu hình: 3 kết quả thật (0 cặp ở 2.000, 5.000, 10.000 họ
 from bisect import bisect_right
 
 
-def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, err=None):
-    """Cùng chữ ký và cùng hình dạng kết quả với verify_stability.
+def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn):
+    """Cùng chữ ký, cùng kết quả và cùng lỗi với rbda_priority_pipeline.verify_stability.
 
-    Trả về list[{"code": "blocking_pair", "params": {...}}] nếu truyền `err` (hàm err của i18n_errors);
-    nếu không truyền, trả về list[dict] cùng khoá params.
+    Trả list[{"code": "blocking_pair", "params": {...}}] dựng bằng `err` của i18n_errors như bản gốc.
+    Chỉ đọc dữ liệu của CLB nào thật sự được xét (lười như bản gốc): CLB không ai muốn chuyển tới thì
+    không đọc capacity, không gọi hàm đủ tư cách.
     """
     import sys
+    from i18n_errors import err
     rb = sys.modules.get("rbda_priority_pipeline")
     if rb is None:
         import rbda_priority_pipeline as rb
-    # Kiểm sức chứa bằng CHÍNH club_choice_function của mô-đun đã nạp (kho mã hay bản build),
-    # nên cùng luật, cùng thông báo lỗi, và bản build cũ không có luật này thì cũng không báo.
-    da_kiem = set()
 
     assignment = result.assignment
     held = {cid: [] for cid in clubs}
@@ -44,7 +43,15 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
             held[cid].append(sid)
 
     chuan_bi = {}
-    for cid, info in clubs.items():
+
+    def lay_chuan_bi(cid, sid):
+        if cid in chuan_bi:
+            return chuan_bi[cid]
+        info = clubs[cid]
+        capacity, reserve_capacity = info["capacity"], info["reserve_capacity"]
+        # Bản gốc gọi club_choice_function ngay tại đây và nó kiểm sức chứa trước tiên: gọi chính hàm
+        # của mô-đun đã nạp (kho mã hay bản build) với ứng viên thật, để cùng luật, cùng thông báo lỗi.
+        rb.club_choice_function([sid], capacity, reserve_capacity, lambda _s: False, {})
         rank = result.base_rank.get(cid, {})
         # Cùng thứ hạng như club_choice_function: em không có trong rank xếp cuối.
         hang_cuoi = len(rank)
@@ -53,7 +60,8 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
             (e if is_reserve_eligible_fn(s, cid) else n).append(rank.get(s, hang_cuoi))
         e.sort()
         n.sort()
-        chuan_bi[cid] = (e, n, len(held[cid]), info["capacity"], info["reserve_capacity"])
+        chuan_bi[cid] = (e, n, len(held[cid]), capacity, reserve_capacity)
+        return chuan_bi[cid]
 
     problems = []
     for sid, prefs in preferences.items():
@@ -65,11 +73,7 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
             rank = result.base_rank.get(cid, {})
             if sid not in rank:
                 continue
-            e, n, n_giu, capacity, reserve_capacity = chuan_bi[cid]
-            if cid not in da_kiem:
-                # verify_stability gọi club_choice_function ở đây, và nó báo lỗi sức chứa trước tiên.
-                rb.club_choice_function([], capacity, reserve_capacity, lambda _s: False, {})
-                da_kiem.add(cid)
+            e, n, n_giu, capacity, reserve_capacity = lay_chuan_bi(cid, sid)
             if n_giu + 1 <= capacity:
                 duoc_nhan = True
             else:
@@ -85,7 +89,6 @@ def verify_stability_nhanh(result, clubs, preferences, is_reserve_eligible_fn, e
                     cho_pho_thong = capacity - min(reserve_capacity, len(e) + (1 if du_tu_cach else 0))
                     duoc_nhan = vi_tri < cho_pho_thong
             if duoc_nhan:
-                params = dict(student_id=sid, club_id=cid, current_club=current_club,
-                              n_holders=n_giu, capacity=capacity)
-                problems.append(err("blocking_pair", **params) if err else {"code": "blocking_pair", "params": params})
+                problems.append(err("blocking_pair", student_id=sid, club_id=cid, current_club=current_club,
+                                    n_holders=n_giu, capacity=capacity))
     return problems

@@ -10,72 +10,157 @@ import sys
 import time
 
 
-def _nap_canh(ten):
-    """Nạp mô-đun cùng thư mục theo đường dẫn, không sửa sys.path."""
-    duong = os.path.join(os.path.dirname(os.path.abspath(__file__)), ten + ".py")
-    spec = importlib.util.spec_from_file_location("tham_khao_" + ten, duong)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
-
-
-_chung = _nap_canh("_chung")
+# Nạp _chung theo đường dẫn (không sửa sys.path); các mô-đun cùng thư mục khác nạp qua _chung.nap_canh.
+_spec = importlib.util.spec_from_file_location(
+    "tham_khao__chung", os.path.join(os.path.dirname(os.path.abspath(__file__)), "_chung.py"))
+_chung = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_chung)
 gen, nap_rb = _chung.gen, _chung.nap_rb
 
 # Gán ở khối __main__ (hoặc từ test) trước khi gọi resume_da / resume_test.
 rb = None
 
 
-def resume_da(res0, clubs, tested, apps, prefs, stb, fn, new_ids):
-    """Tiếp tục DA từ kết quả cũ `res0` sau khi thêm `new_ids`; phải cho đúng kết quả của run_rbda.
+_KHOA = ("students", "clubs", "tested", "apps", "prefs", "stb")
 
-    Tiền đề: mọi (em, CLB) trong nguyện vọng đều có trong apps của CLB đó — đường thật bảo đảm
-    điều này bằng `hop_ung_vien`. Nếu không, các em không có thứ hạng cùng nhận len(rank) và
-    club_choice_function phân xử theo thứ tự trong pool, vốn phụ thuộc lịch sử từng vòng nên
-    tiếp tục và chạy lại có thể chọn khác em. Vì vậy hàm từ chối dữ liệu như vậy thay vì lặng lẽ lệch.
+
+def kiem_tien_de(res0, cu, moi, new_ids):
+    """Kiểm tiền đề của resume_da; vi phạm thì ValueError nêu rõ chỗ sai.
+
+    `cu` là dữ liệu đã cho ra `res0`, `moi` là dữ liệu bây giờ; cả hai là dict có các khoá
+    students, clubs, tested, apps, prefs, stb. Tiếp tục DA cho đúng kết quả chạy lại CHỈ khi thay đổi
+    là "thêm ràng buộc" (mục G1): thêm em mới, hoặc GIẢM sức chứa. Mọi thay đổi khác (bớt ràng buộc,
+    sửa dữ liệu em cũ, mở/đóng CLB mà em cũ có xếp) cần chạy lại toàn bộ (G2).
+    Độ phức tạp O(kích thước dữ liệu), dùng tập hợp.
     """
-    for s, ds in prefs.items():
+    for k in _KHOA:
+        if k not in cu or k not in moi:
+            raise ValueError("resume_da: cu/moi thiếu khoá %r." % k)
+    moi_set = set(new_ids)
+    if len(moi_set) != len(new_ids):
+        raise ValueError("resume_da: new_ids có mã trùng.")
+    cu_hs = set(cu["students"])
+    if moi_set & cu_hs:
+        raise ValueError("resume_da: %s đã có trong lần chạy cũ (nộp lại cần chạy lại toàn bộ)."
+                         % sorted(moi_set & cu_hs)[:5])
+    if set(moi["students"]) != cu_hs | moi_set:
+        raise ValueError("resume_da: danh sách học sinh mới phải đúng bằng em cũ cộng new_ids.")
+    if set(res0.assignment) != cu_hs:
+        raise ValueError("resume_da: res0 không phải kết quả của dữ liệu cũ (khác tập học sinh).")
+    clubs0, clubs1 = cu["clubs"], moi["clubs"]
+    if set(clubs0) - set(clubs1):
+        raise ValueError("resume_da: CLB %s bị đóng (bớt ràng buộc, cần chạy lại)." % sorted(set(clubs0) - set(clubs1)))
+    for c, info0 in clubs0.items():
+        info1 = clubs1[c]
+        if (info1["reserve_capacity"] != info0["reserve_capacity"]
+                or info1.get("reserve_group") != info0.get("reserve_group")):
+            raise ValueError("resume_da: CLB %s đổi dự trữ (cần chạy lại)." % c)
+        if info1["capacity"] > info0["capacity"]:
+            raise ValueError("resume_da: CLB %s tăng sức chứa (bớt ràng buộc, mục G2, cần chạy lại)." % c)
+    clb_moi = set(clubs1) - set(clubs0)
+    for s in cu_hs:
+        p0, p1 = cu["prefs"].get(s, []), moi["prefs"].get(s, [])
+        if p0 != p1:
+            raise ValueError("resume_da: nguyện vọng của em cũ %s đã đổi (cần chạy lại)." % s)
+        if clb_moi.intersection(p1):
+            raise ValueError("resume_da: em cũ %s có xếp CLB mới mở %s (cần chạy lại)."
+                             % (s, sorted(clb_moi.intersection(p1))))
+        if cu["students"][s].get("reserve_group") != moi["students"][s].get("reserve_group"):
+            raise ValueError("resume_da: nhóm dự trữ của em cũ %s đã đổi (cần chạy lại)." % s)
+    for c in set(clubs0) | set(cu["tested"]):
+        t0 = cu["tested"].get(c, {})
+        t1 = {k: v for k, v in moi["tested"].get(c, {}).items() if k not in moi_set}
+        if t0 != t1:
+            raise ValueError("resume_da: điểm của em cũ ở CLB %s đã đổi (cần chạy lại)." % c)
+    apps_set = {c: set(v) for c, v in moi["apps"].items()}
+    for c in clubs1:
+        cu_apps = set(cu["apps"].get(c, ()))
+        if apps_set.get(c, set()) - moi_set != cu_apps:
+            raise ValueError("resume_da: ứng viên cũ của CLB %s đã đổi (cần chạy lại)." % c)
+    for s, ds in moi["prefs"].items():
         for c in ds:
-            if c in clubs and s not in apps.get(c, ()):
+            if c in clubs1 and s not in apps_set.get(c, ()):
+                # Em không có thứ hạng cùng nhận len(rank); club_choice_function phân xử theo thứ tự
+                # pool, vốn phụ thuộc lịch sử từng vòng -> tiếp tục và chạy lại có thể chọn khác em.
                 raise ValueError("resume_da: %s xếp nguyện vọng %s nhưng không có trong apps[%s] "
                                  "(cần apps chứa mọi nguyện vọng, như hop_ung_vien)." % (s, c, c))
-    # Tính lại thứ hạng cho CLB em mới đăng ký và CLB chưa có trong lần chạy cũ; bỏ ID CLB không tồn tại.
+    cu_stb, moi_stb = cu["stb"], moi["stb"]
+    if sorted(cu_hs, key=cu_stb.__getitem__) != sorted(cu_hs, key=moi_stb.__getitem__):
+        raise ValueError("resume_da: thứ tự bốc thăm của em cũ đã đổi (phải chèn bằng chen_stb_cho_hoc_sinh_moi).")
+
+
+def resume_da(res0, cu, moi, new_ids, fn=None, da_kiem=False):
+    """Tiếp tục DA từ kết quả cũ `res0` (của dữ liệu `cu`) sang dữ liệu `moi` = cu + new_ids.
+
+    Cho đúng kết quả của run_rbda trên `moi` khi tiền đề của `kiem_tien_de` thoả (hàm tự kiểm, trừ
+    khi da_kiem=True vì người gọi đã kiểm). Hỗ trợ: em đến muộn, CLB mới chỉ em mới xếp, GIẢM sức chứa.
+    `fn` mặc định là default_reserve_eligible_fn của dữ liệu mới; truyền fn khác thì người gọi tự bảo đảm
+    nó cho cùng kết quả với em cũ như lần chạy trước. Trả ({em: CLB} cho em có chỗ, số lần đề nghị).
+    """
+    if not da_kiem:
+        kiem_tien_de(res0, cu, moi, new_ids)
+    clubs, tested, apps, prefs, stb = (moi[k] for k in ("clubs", "tested", "apps", "prefs", "stb"))
+    if fn is None:
+        fn = rb.default_reserve_eligible_fn(moi["students"], clubs)
+    clubs0 = cu["clubs"]
+    # Tính lại thứ hạng ở CLB có em mới xếp và CLB mới mở. CLB khác: chỉ em cũ, cùng điểm, cùng thứ tự
+    # bốc thăm tương đối -> thứ hạng cũ vẫn đúng.
     touched = set()
-    for n in new_ids: touched.update(prefs[n])
-    touched = (touched | (set(clubs) - set(res0.base_rank))) & set(clubs)
+    for n in new_ids:
+        touched.update(prefs.get(n, []))
+    touched = (touched & set(clubs)) | (set(clubs) - set(clubs0))
     base_rank = {c: res0.base_rank.get(c, {}) for c in clubs}
     for c in touched:
         order = rb.compute_club_priority(c, apps.get(c, []), tested.get(c, {}), stb)
         base_rank[c] = {s: i for i, s in enumerate(order)}
     held = {c: [] for c in clubs}
     for s, c in res0.assignment.items():
-        if c is not None: held[c].append(s)
-    nxt = {s: (res0.rank_in_student_pref[s] - 1 if res0.assignment.get(s) is not None else len(prefs.get(s, [])))
-           for s in res0.assignment}
-    for n in new_ids: nxt[n] = 0
-    un = list(new_ids); props = 0
+        if c is not None:
+            held[c].append(s)
+    nxt = {s: (res0.rank_in_student_pref[s] - 1 if c is not None else len(prefs.get(s, [])))
+           for s, c in res0.assignment.items()}
+    for n in new_ids:
+        nxt[n] = 0
+    un = list(new_ids)
+    props = 0
+
+    def chon(c, pool):
+        acc, _ = rb.club_choice_function(pool, clubs[c]['capacity'], clubs[c]['reserve_capacity'],
+                                         (lambda s_, c=c: fn(s_, c)), base_rank[c])
+        accs = set(acc)
+        held[c] = acc
+        for s in pool:
+            if s not in accs:
+                nxt[s] += 1
+                un.append(s)
+
+    # Giảm sức chứa = thêm ràng buộc: chọn lại trên tập đang giữ, em bị loại đề nghị tiếp.
+    for c, info0 in clubs0.items():
+        if clubs[c]['capacity'] < info0['capacity']:
+            chon(c, held[c])
     while un:
-        proposals = {}; still = []
-        for s in un:
+        dot, un = un, []
+        proposals = {}
+        for s in dot:
             ds = prefs.get(s, [])
-            if nxt[s] >= len(ds): continue
+            if nxt[s] >= len(ds):
+                continue
             c = ds[nxt[s]]
             if c not in clubs:
                 # Như run_rbda: nguyện vọng trỏ tới CLB không có -> coi như bị từ chối ngay.
-                nxt[s] += 1; still.append(s); continue
-            proposals.setdefault(c, []).append(s); props += 1
+                nxt[s] += 1
+                un.append(s)
+                continue
+            proposals.setdefault(c, []).append(s)
+            props += 1
         for c, newa in proposals.items():
-            pool = held[c] + newa
-            acc, tr = rb.club_choice_function(pool, clubs[c]['capacity'], clubs[c]['reserve_capacity'], (lambda s_, c=c: fn(s_, c)), base_rank[c])
-            accs = set(acc); held[c] = acc
-            for s in pool:
-                if s not in accs:
-                    nxt[s] += 1; still.append(s)
-        un = still
+            chon(c, held[c] + newa)
     asg = {}
-    for c, l in held.items():
-        for s in l: asg[s] = c
+    for c, ds in held.items():
+        for s in ds:
+            asg[s] = c
     return asg, props
+
 
 def resume_test(S, K, ratio, m, trials, seed=500):
     import numpy as np  # chỉ kịch bản đo cần; không phải phụ thuộc sản phẩm
@@ -86,7 +171,7 @@ def resume_test(S, K, ratio, m, trials, seed=500):
     res0 = rb.run_rbda(students, clubs, tested, apps, prefs, stb, fn)
     order_old = sorted(ids, key=lambda s: stb[s]); cids = list(clubs)
     pop = np.array([1.0 / ((j + 1) ** 1.0) for j in range(K)]); pop /= pop.sum()
-    same = 0; tf = []; tr_ = []; props = []
+    same = 0; tf = []; tr_ = []; tk = []; props = []
     for tr in range(trials):
         rg = np.random.default_rng(seed + tr); rr = random.Random(seed + tr)
         new_ids = [f"n{tr}_{i}" for i in range(m)]
@@ -100,12 +185,16 @@ def resume_test(S, K, ratio, m, trials, seed=500):
             for j in pl[:4]: te2[cids[j]][n] = round(float(rg.normal(6.5, 1.5)) * 2) / 2
             for j in pl: ap2[cids[j]].append(n)
         fn2 = rb.default_reserve_eligible_fn(st2, clubs)
+        cu = dict(students=students, clubs=clubs, tested=tested, apps=apps, prefs=prefs, stb=stb)
+        moi = dict(students=st2, clubs=clubs, tested=te2, apps=ap2, prefs=pf2, stb=stbn)
         t = time.perf_counter(); full = rb.run_rbda(st2, clubs, te2, ap2, pf2, stbn, fn2); tf.append(time.perf_counter() - t)
-        t = time.perf_counter(); asg, pp = resume_da(res0, clubs, te2, ap2, pf2, stbn, fn2, new_ids); tr_.append(time.perf_counter() - t); props.append(pp)
+        t = time.perf_counter(); kiem_tien_de(res0, cu, moi, new_ids); tk.append(time.perf_counter() - t)
+        t = time.perf_counter(); asg, pp = resume_da(res0, cu, moi, new_ids, fn=fn2, da_kiem=True); tr_.append(time.perf_counter() - t); props.append(pp)
         a_full = {s: c for s, c in full.assignment.items() if c is not None}; a_res = dict(asg)
         same += (a_full == a_res)
     return dict(S=S, K=K, ratio=ratio, m=m, trials=trials, identical=f"{same}/{trials}",
                 t_full_ms=round(1000 * float(np.mean(tf)), 1), t_resume_ms=round(1000 * float(np.mean(tr_)), 2),
+                t_kiem_tien_de_ms=round(1000 * float(np.mean(tk)), 2),
                 mean_proposals=round(float(np.mean(props)), 1))
 
 if __name__ == "__main__":

@@ -20,7 +20,6 @@ import sys
 import pytest
 
 import rbda_priority_pipeline as rb
-from i18n_errors import err
 
 _GOC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _THAM_KHAO = os.path.join(_GOC, "docs", "ke_hoach", "tham_khao")
@@ -83,7 +82,7 @@ def _khoa(p):
 def _so_sanh(res, clubs, prefs, fn):
     """Hai bản phải cho cùng danh sách cặp phá vỡ; trả số cặp để test khỏi so hai danh sách rỗng."""
     a = rb.verify_stability(res, clubs, prefs, fn)
-    b = verify_stability_nhanh(res, clubs, prefs, fn, err=err)
+    b = verify_stability_nhanh(res, clubs, prefs, fn)
     assert sorted(map(_khoa, a)) == sorted(map(_khoa, b))
     return len(a)
 
@@ -164,120 +163,203 @@ def test_suc_chua_sai_thi_ca_hai_ban_bao_cung_loi(reserve_capacity):
     with pytest.raises(ValueError) as goc:
         rb.verify_stability(res, clubs, prefs, fn)
     with pytest.raises(ValueError) as nhanh:
-        verify_stability_nhanh(res, clubs, prefs, fn, err=err)
+        verify_stability_nhanh(res, clubs, prefs, fn)
     assert str(goc.value) == str(nhanh.value)
 
 
+def test_ban_nhanh_khong_doc_clb_khong_ai_xet_toi():
+    # Bản gốc chỉ đọc capacity / gọi hàm đủ tư cách của CLB có ứng viên muốn chuyển tới.
+    _, clubs, _, _, prefs, _, fn, res = _sinh(5)
+    clubs = dict(clubs, c_le={"capacity": 1})        # thiếu reserve_capacity, không ai xếp
+    res.base_rank["c_le"] = {}
+
+    def fn2(s, c):
+        if c == "c_le":
+            raise AssertionError("không được gọi cho CLB không ai xét tới")
+        return fn(s, c)
+    assert rb.verify_stability(res, clubs, prefs, fn2) == verify_stability_nhanh(res, clubs, prefs, fn2)
+
+
 # ---------------------------------------------------------------------------
-# exp_resume.resume_da == chạy lại toàn bộ run_rbda
+# exp_resume.resume_da == chạy lại toàn bộ run_rbda (khi tiền đề thoả), từ chối khi không thoả
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize("seed", range(15))
-def test_tiep_tuc_da_trung_chay_lai_toan_bo(seed):
+def _du_lieu(students, clubs, tested, apps, prefs, stb):
+    return dict(students=students, clubs=clubs, tested=tested, apps=apps, prefs=prefs, stb=stb)
+
+
+def _them_em_moi(seed, so_moi=6, clb_moi=False, giam_suc_chua=0, em_khong_nv=False):
+    """Dữ liệu cũ (+ res0) và dữ liệu mới hợp lệ cho G1: em mới, CLB mới chỉ em mới xếp, giảm sức chứa."""
     students, clubs, tested, apps, prefs, stb, fn, res0 = _sinh(seed)
+    cu = _du_lieu(students, clubs, tested, apps, prefs, stb)
     rng = random.Random(1000 + seed)
-    moi = ["n%d" % i for i in range(6)]
-    stb2 = rb.chen_stb_cho_hoc_sinh_moi(sorted(students, key=lambda s: stb[s]), moi, seed)
-    # CLB mới mở sau lần chạy cũ: chưa có trong res0.base_rank.
-    clubs2 = dict(clubs)
-    clubs2["c_moi"] = {"capacity": 3, "reserve_capacity": 1, "reserve_group": "cs"}
+    moi_ids = ["n%d" % i for i in range(so_moi)]
+    stb2 = rb.chen_stb_cho_hoc_sinh_moi(sorted(students, key=lambda s: stb[s]), moi_ids, seed)
+    clubs2 = {c: dict(v) for c, v in clubs.items()}
+    for c in list(clubs2)[:giam_suc_chua]:
+        clubs2[c]["capacity"] = max(clubs2[c]["reserve_capacity"], clubs2[c]["capacity"] - 2, 1)
+    if clb_moi:
+        clubs2["c_moi"] = {"capacity": 3, "reserve_capacity": 1, "reserve_group": "cs"}
     st2 = {s: dict(v) for s, v in students.items()}
     pf2 = dict(prefs)
     te2 = {c: dict(v) for c, v in tested.items()}
-    te2["c_moi"] = {}
     ap2 = {c: list(v) for c, v in apps.items()}
-    ap2["c_moi"] = []
-    for i, n in enumerate(moi):
-        # Em mới đủ diện dự trữ và có điểm thi (tầng 1) để đẩy em cũ; có nguyện vọng trỏ
-        # tới CLB không tồn tại ("khong_co") phải bị bỏ qua như run_rbda.
+    for c in clubs2:
+        te2.setdefault(c, {})
+        ap2.setdefault(c, [])
+    for i, n in enumerate(moi_ids):
+        # Em mới có diện dự trữ, có điểm thi (tầng 1) để đẩy em cũ; có nguyện vọng trỏ tới CLB
+        # không tồn tại ("khong_co") phải bị bỏ qua như run_rbda.
         st2[n] = {"reserve_group": "cs" if i % 2 == 0 else None}
+        if em_khong_nv and i == 0:
+            continue                              # em mới không có dòng nguyện vọng
         ds = rng.sample(list(clubs2), 3)
         pf2[n] = ["khong_co"] + ds
         for c in ds:
             ap2[c].append(n)
             te2[c][n] = 10.0
-    fn2 = rb.default_reserve_eligible_fn(st2, clubs2)
-    full = rb.run_rbda(st2, clubs2, te2, ap2, pf2, stb2, fn2)
-    asg, _ = exp_resume.resume_da(res0, clubs2, te2, ap2, pf2, stb2, fn2, moi)
-    assert {s: c for s, c in full.assignment.items() if c is not None} == asg
-    # Tiền đề: em mới thật sự được xếp và có em cũ bị đổi chỗ ở ít nhất vài seed (xem test dưới).
-    assert any(asg.get(n) is not None for n in moi)
+    moi = _du_lieu(st2, clubs2, te2, ap2, pf2, stb2)
+    return cu, moi, moi_ids, res0
 
 
-def test_em_moi_that_su_day_em_cu():
-    doi = 0
-    for seed in range(15):
-        students, clubs, tested, apps, prefs, stb, fn, res0 = _sinh(seed)
-        moi = ["n%d" % i for i in range(6)]
-        stb2 = rb.chen_stb_cho_hoc_sinh_moi(sorted(students, key=lambda s: stb[s]), moi, seed)
-        st2 = {s: dict(v) for s, v in students.items()}
-        pf2, ap2 = dict(prefs), {c: list(v) for c, v in apps.items()}
-        te2 = {c: dict(v) for c, v in tested.items()}
-        for n in moi:
-            st2[n] = {"reserve_group": "cs"}
-            pf2[n] = list(clubs)
-            for c in clubs:
-                ap2[c].append(n)
-                te2[c][n] = 10.0
-        fn2 = rb.default_reserve_eligible_fn(st2, clubs)
-        asg, _ = exp_resume.resume_da(res0, clubs, te2, ap2, pf2, stb2, fn2, moi)
+def _chay_lai(moi):
+    fn = rb.default_reserve_eligible_fn(moi["students"], moi["clubs"])
+    kq = rb.run_rbda(moi["students"], moi["clubs"], moi["tested"], moi["apps"], moi["prefs"], moi["stb"], fn)
+    return {s: c for s, c in kq.assignment.items() if c is not None}
+
+
+@pytest.mark.parametrize("bien_the", [
+    {}, {"clb_moi": True}, {"giam_suc_chua": 2}, {"em_khong_nv": True},
+    {"clb_moi": True, "giam_suc_chua": 3, "em_khong_nv": True}])
+@pytest.mark.parametrize("seed", range(12))
+def test_tiep_tuc_da_trung_chay_lai_toan_bo(seed, bien_the):
+    cu, moi, moi_ids, res0 = _them_em_moi(seed, **bien_the)
+    asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids)
+    assert asg == _chay_lai(moi)
+
+
+def test_tiep_tuc_da_thuc_su_doi_cho_em_cu():
+    # Tiền đề cho test trên: các ca có em cũ bị đẩy đi, có em mới được xếp (không so hai thứ rỗng).
+    doi = xep_moi = 0
+    for seed in range(12):
+        cu, moi, moi_ids, res0 = _them_em_moi(seed, giam_suc_chua=2)
+        asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids)
         doi += sum(1 for s, c in res0.assignment.items() if asg.get(s) != c)
-    assert doi > 0
+        xep_moi += sum(1 for n in moi_ids if n in asg)
+    assert doi > 0 and xep_moi > 0
 
 
-def test_tiep_tuc_da_chiu_em_khong_co_nguyen_vong():
-    # Em có trong students nhưng không có dòng nguyện vọng: run_rbda dùng prefs.get(sid, []).
-    students, clubs, tested, apps, prefs, stb, fn, _ = _sinh(4)
-    students["s_trong"] = {"reserve_group": None}
-    stb = rb.generate_stb_lottery(list(students), 4)
-    fn = rb.default_reserve_eligible_fn(students, clubs)
-    res0 = rb.run_rbda(students, clubs, tested, apps, prefs, stb, fn)
-    assert res0.assignment["s_trong"] is None
-    moi = ["n0"]
-    stb2 = rb.chen_stb_cho_hoc_sinh_moi(sorted(students, key=lambda s: stb[s]), moi, 4)
-    st2 = dict(students, n0={"reserve_group": None})
-    pf2 = dict(prefs, n0=list(clubs))
-    ap2 = {c: list(v) + ["n0"] for c, v in apps.items()}
-    fn2 = rb.default_reserve_eligible_fn(st2, clubs)
-    full = rb.run_rbda(st2, clubs, tested, ap2, pf2, stb2, fn2)
-    asg, _ = exp_resume.resume_da(res0, clubs, tested, ap2, pf2, stb2, fn2, moi)
-    assert {s: c for s, c in full.assignment.items() if c is not None} == asg
+def _sua(ham):
+    def lam(cu, moi, moi_ids, res0):
+        ham(cu, moi, moi_ids, res0)
+        return cu, moi, moi_ids, res0
+    return lam
 
 
-def test_tiep_tuc_da_tu_choi_em_trong_nguyen_vong_nhung_khong_trong_apps():
-    # Phản ví dụ do rà soát tìm ra: s1, s3 không có trong apps[c0] nên cùng thứ hạng len(rank);
-    # chạy lại chọn s1, tiếp tục chọn s3. Đường thật không có ca này (hop_ung_vien), nên
-    # resume_da phải từ chối thay vì trả kết quả khác run_rbda.
+_VI_PHAM = {
+    "em_moi_trung_em_cu": (_sua(lambda cu, moi, ids, r: ids.append("s001")), "lần chạy cũ"),
+    "new_ids_trung": (_sua(lambda cu, moi, ids, r: ids.append(ids[0])), "trùng"),
+    "dong_clb": (_sua(lambda cu, moi, ids, r: moi["clubs"].pop("c0")), "đóng"),
+    "tang_suc_chua": (_sua(lambda cu, moi, ids, r: moi["clubs"]["c0"].update(capacity=99)), "tăng"),
+    "doi_du_tru": (_sua(lambda cu, moi, ids, r: moi["clubs"]["c1"].update(reserve_capacity=0)), "dự trữ"),
+    "doi_nguyen_vong_em_cu": (_sua(lambda cu, moi, ids, r: moi["prefs"].update(s001=["c0"])), "nguyện vọng"),
+    "doi_diem_em_cu": (_sua(lambda cu, moi, ids, r: moi["tested"]["c0"].update(
+        {next(iter(cu["tested"]["c0"])): 99.0})), "điểm"),
+    "doi_nhom_em_cu": (_sua(lambda cu, moi, ids, r: moi["students"]["s001"].update(reserve_group="khac")), "nhóm"),
+    "thieu_apps": (_sua(lambda cu, moi, ids, r: moi["apps"][moi["prefs"]["s001"][0]].remove("s001")), "apps|ứng viên"),
+    "em_cu_xep_clb_moi": (_sua(lambda cu, moi, ids, r: (
+        moi["clubs"].update(c_x={"capacity": 1, "reserve_capacity": 0, "reserve_group": None}),
+        moi["prefs"].update(s001=moi["prefs"]["s001"]), cu["prefs"].update(s001=["c_x"] + cu["prefs"]["s001"]),
+        moi["prefs"].update(s001=["c_x"] + moi["prefs"]["s001"]))), "CLB mới"),
+    "doi_thu_tu_boc_tham": (_sua(lambda cu, moi, ids, r: moi["stb"].update(
+        s000=moi["stb"]["s001"], s001=moi["stb"]["s000"])), "bốc thăm"),
+}
+
+
+@pytest.mark.parametrize("ten", sorted(_VI_PHAM))
+def test_tiep_tuc_da_tu_choi_khi_khong_phai_them_rang_buoc(ten):
+    sua, chu = _VI_PHAM[ten]
+    cu, moi, moi_ids, res0 = sua(*_them_em_moi(3))
+    with pytest.raises(ValueError, match=chu):
+        exp_resume.resume_da(res0, cu, moi, moi_ids)
+
+
+def test_tiep_tuc_da_tu_choi_res0_lap_tu_apps_thieu():
+    # Phản ví dụ của rà soát: res0 chạy từ apps thiếu (s1, s3 không có trong apps[c0]) rồi tiếp tục với
+    # apps đủ. Không kiểm thì kết quả lệch chạy lại (s1 hay s3 lấy chỗ cuối ở c0); phải từ chối.
     clubs = {"c0": {"capacity": 3, "reserve_capacity": 1, "reserve_group": "g"},
              "c1": {"capacity": 1, "reserve_capacity": 1, "reserve_group": None}}
     st = {s: {"reserve_group": None} for s in ["s0", "s1", "s2", "s3"]}
     prefs = {"s0": ["c0"], "s1": ["c1", "c0"], "s2": ["c0", "c1"], "s3": ["c1", "c0"]}
     apps = {"c0": ["s0", "s2"], "c1": ["s1", "s3"]}
     tested = {"c0": {"s0": 0.0}, "c1": {}}
-    res0 = rb.run_rbda(st, clubs, tested, apps, prefs, {"s0": 0, "s2": 1, "s1": 2, "s3": 3},
-                       rb.default_reserve_eligible_fn(st, clubs))
+    stb0 = {"s0": 0, "s2": 1, "s1": 2, "s3": 3}
+    res0 = rb.run_rbda(st, clubs, tested, apps, prefs, stb0, rb.default_reserve_eligible_fn(st, clubs))
     st2 = dict(st, n0={"reserve_group": None})
     pf2 = dict(prefs, n0=["c1"])
-    ap2 = {"c0": ["s0", "s2"], "c1": ["s1", "s3", "n0"]}
+    ap2 = rb.hop_ung_vien({"c0": ["s0", "s2"], "c1": ["s1", "s3", "n0"]}, pf2)
     stbn = {"s0": 0, "s2": 1, "n0": 2, "s1": 3, "s3": 4}
-    fn2 = rb.default_reserve_eligible_fn(st2, clubs)
-    with pytest.raises(ValueError, match="apps"):
-        exp_resume.resume_da(res0, clubs, tested, ap2, pf2, stbn, fn2, ["n0"])
-    # Khi apps chứa đủ nguyện vọng (như hop_ung_vien), hai đường trùng nhau.
-    ap3 = rb.hop_ung_vien(ap2, pf2)
-    res0b = rb.run_rbda(st, clubs, tested, rb.hop_ung_vien(apps, prefs), prefs,
-                        {"s0": 0, "s2": 1, "s1": 2, "s3": 3}, rb.default_reserve_eligible_fn(st, clubs))
-    full = rb.run_rbda(st2, clubs, tested, ap3, pf2, stbn, fn2)
-    asg, _ = exp_resume.resume_da(res0b, clubs, tested, ap3, pf2, stbn, fn2, ["n0"])
-    assert {s: c for s, c in full.assignment.items() if c is not None} == asg
+    cu = _du_lieu(st, clubs, tested, apps, prefs, stb0)
+    moi = _du_lieu(st2, clubs, tested, ap2, pf2, stbn)
+    with pytest.raises(ValueError):
+        exp_resume.resume_da(res0, cu, moi, ["n0"])
+    # Khi dữ liệu cũ cũng đủ (như hop_ung_vien), hai đường trùng nhau.
+    apps_du = rb.hop_ung_vien(apps, prefs)
+    res0b = rb.run_rbda(st, clubs, tested, apps_du, prefs, stb0, rb.default_reserve_eligible_fn(st, clubs))
+    cu_du = _du_lieu(st, clubs, tested, apps_du, prefs, stb0)
+    asg, _ = exp_resume.resume_da(res0b, cu_du, moi, ["n0"])
+    assert asg == _chay_lai(moi)
+
+
+def test_kiem_tien_de_tuyen_tinh():
+    # Kiểm tiền đề dùng tập hợp: 3.000 em, mỗi CLB hàng nghìn ứng viên vẫn chạy nhanh.
+    cu, moi, moi_ids, res0 = _them_em_moi(0)
+    hs = ["x%04d" % i for i in range(3000)]
+    for d in (cu, moi):
+        for s in hs:
+            d["students"][s] = {"reserve_group": None}
+            d["prefs"][s] = list(d["clubs"])[:4]
+            for c in d["prefs"][s]:
+                d["apps"][c].append(s)
+    stb_cu = rb.generate_stb_lottery(list(cu["students"]), 1)
+    cu["stb"] = stb_cu
+    moi["stb"] = rb.chen_stb_cho_hoc_sinh_moi(sorted(cu["students"], key=stb_cu.__getitem__), moi_ids, 1)
+    res0 = rb.run_rbda(cu["students"], cu["clubs"], cu["tested"], cu["apps"], cu["prefs"], stb_cu,
+                       rb.default_reserve_eligible_fn(cu["students"], cu["clubs"]))
+    import time
+    t = time.perf_counter()
+    exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+    assert time.perf_counter() - t < 0.5
+    asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids, da_kiem=True)
+    assert asg == _chay_lai(moi)
 
 
 # ---------------------------------------------------------------------------
 # _chung: bộ nạp và bộ sinh
 # ---------------------------------------------------------------------------
-def test_nap_rb_tu_thu_muc_kho_ma(monkeypatch):
-    monkeypatch.setattr(sys, "path", list(sys.path))   # nap_rb sửa sys.path: hoàn lại sau test
+def test_nap_rb_tra_ban_da_nap_khi_cung_thu_muc():
     mod = _chung.nap_rb(_GOC)
-    assert mod.run_rbda is rb.run_rbda
+    assert mod is rb
+    assert os.path.realpath(mod.__file__) == os.path.realpath(os.path.join(_GOC, "rbda_priority_pipeline.py"))
+
+
+def test_nap_rb_bao_loi_khi_tien_trinh_da_nap_ban_khac(tmp_path):
+    for ten in ("rbda_priority_pipeline.py", "i18n_errors.py"):
+        (tmp_path / ten).write_text(open(os.path.join(_GOC, ten), encoding="utf-8").read(), encoding="utf-8")
+    with pytest.raises(SystemExit, match="tiến trình riêng"):
+        _chung.nap_rb(str(tmp_path))
+
+
+def test_nap_rb_nap_dung_thu_muc_trong_tien_trinh_moi(tmp_path):
+    import subprocess
+    for ten in ("rbda_priority_pipeline.py", "i18n_errors.py"):
+        (tmp_path / ten).write_text(open(os.path.join(_GOC, ten), encoding="utf-8").read(), encoding="utf-8")
+    ma = ("import importlib.util, sys;"
+          "sp = importlib.util.spec_from_file_location('c', sys.argv[1]);"
+          "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m);"
+          "print(m.nap_rb(sys.argv[2]).__file__)")
+    kq = subprocess.run([sys.executable, "-I", "-c", ma, os.path.join(_THAM_KHAO, "_chung.py"), str(tmp_path)],
+                        capture_output=True, text=True, check=True, cwd=str(tmp_path.parent))
+    assert os.path.realpath(kq.stdout.strip()) == os.path.realpath(str(tmp_path / "rbda_priority_pipeline.py"))
 
 
 def test_nap_rb_bao_loi_ro_khi_tep_khong_phai_pyinstaller(tmp_path):

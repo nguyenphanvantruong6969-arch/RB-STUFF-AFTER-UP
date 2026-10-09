@@ -4,6 +4,7 @@
 Một bản duy nhất cho bộ nạp mô-đun và bộ sinh dữ liệu, để hai kịch bản không lệch nhau.
 Dữ liệu sinh ra là DỮ LIỆU MÔ PHỎNG, không phải dữ liệu thật.
 """
+import importlib.util
 import marshal
 import os
 import random
@@ -13,12 +14,34 @@ import types
 import zlib
 
 _COOKIE_PYINSTALLER = b'MEI\x0c\x0b\x0a\x0b\x0e'
+_THU_MUC = os.path.dirname(os.path.abspath(__file__))
+
+
+def nap_canh(ten, tien_to="tham_khao_"):
+    """Nạp mô-đun `ten`.py cùng thư mục này theo đường dẫn, không sửa sys.path."""
+    spec = importlib.util.spec_from_file_location(tien_to + ten, os.path.join(_THU_MUC, ten + ".py"))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def nap_rb(duong_dan):
-    """duong_dan = thư mục chứa rbda_priority_pipeline.py (kho mã) HOẶC tệp PhanBoCauLacBo.exe (bản build)."""
+    """duong_dan = thư mục chứa rbda_priority_pipeline.py (kho mã) HOẶC tệp PhanBoCauLacBo.exe (bản build).
+
+    Mỗi tiến trình chỉ nạp được MỘT bản rbda_priority_pipeline (mã của nó tự import i18n_errors
+    theo tên). Nếu tiến trình đã có một bản từ nơi khác thì báo lỗi thay vì lặng lẽ trả bản cũ.
+    """
     if os.path.isdir(duong_dan):
-        sys.path.insert(0, os.path.abspath(duong_dan))
+        tep = os.path.realpath(os.path.join(duong_dan, "rbda_priority_pipeline.py"))
+        if not os.path.isfile(tep):
+            raise SystemExit("%s không có rbda_priority_pipeline.py." % duong_dan)
+        da_co = sys.modules.get("rbda_priority_pipeline")
+        if da_co is not None:
+            if os.path.realpath(getattr(da_co, "__file__", "") or "") == tep:
+                return da_co
+            raise SystemExit("Tiến trình này đã nạp rbda_priority_pipeline từ %s; muốn đo %s hãy chạy "
+                             "một tiến trình riêng." % (getattr(da_co, "__file__", "?"), tep))
+        sys.path.insert(0, os.path.dirname(tep))  # cần cho các import theo tên bên trong mô-đun
         import rbda_priority_pipeline as rb_mod
         return rb_mod
     with open(duong_dan, 'rb') as f:
@@ -27,7 +50,16 @@ def nap_rb(duong_dan):
     if pos < 0:
         raise SystemExit("%s không phải thư mục kho mã cũng không phải tệp PyInstaller "
                          "(không thấy cookie MEI)." % duong_dan)
-    _magic, pkglen, tocpos, toclen, _pyver, _pylib = struct.unpack('!8sIIII64s', data[pos:pos + 88])
+    _magic, pkglen, tocpos, toclen, pyver, _pylib = struct.unpack('!8sIIII64s', data[pos:pos + 88])
+    # Cookie ghi phiên bản Python lúc build (vd 311); bytecode chỉ nạp được bằng đúng phiên bản đó.
+    dang_chay = sys.version_info.major * 100 + sys.version_info.minor
+    if pyver >= 100:
+        build = pyver
+    else:  # PyInstaller rất cũ ghi dạng 27, 36...
+        build = (pyver // 10) * 100 + pyver % 10
+    if build != dang_chay:
+        raise SystemExit("Bản build dùng Python %d.%d nhưng đang chạy Python %d.%d: hãy chạy bằng đúng "
+                         "phiên bản đó." % (build // 100, build % 100, dang_chay // 100, dang_chay % 100))
     pkg_start = pos + 88 - pkglen
 
     def carch(name):
@@ -44,7 +76,9 @@ def nap_rb(duong_dan):
 
     pyz = carch('PYZ.pyz')
     tocoff = struct.unpack('!i', pyz[8:12])[0]
-    mods = {n: v for n, v in marshal.loads(pyz[tocoff:])}
+    toc_pyz = marshal.loads(pyz[tocoff:])
+    # PyInstaller mới ghi danh sách (tên, mục); bản cũ ghi dict {tên: mục}.
+    mods = dict(toc_pyz.items() if isinstance(toc_pyz, dict) else toc_pyz)
 
     def load_mod(name):
         _ispkg, off, ln = mods[name]
