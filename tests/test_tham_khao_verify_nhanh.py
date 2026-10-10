@@ -662,6 +662,8 @@ def test_nap_rb_nhan_ban_bien_dich_khong_kem_nguon(tmp_path):
 def _bien_dich_vao_pycache(nguon):
     """Ghi <thư mục>/__pycache__/<tên>.<thẻ>.pyc ở ĐÚNG chỗ đó (bỏ qua PYTHONPYCACHEPREFIX), và kiểm là có."""
     import py_compile
+    if sys.implementation.cache_tag is None:
+        pytest.skip("trình thông dịch này không dùng __pycache__ (cache_tag None)")
     dich = nguon.parent / "__pycache__" / ("%s.%s.pyc" % (nguon.stem, sys.implementation.cache_tag))
     py_compile.compile(str(nguon), cfile=str(dich))
     assert dich.is_file()
@@ -689,11 +691,27 @@ def test_tep_se_nap_bo_qua_pyc_co_the_trong_pycache(tmp_path):
         _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
 
 
+def test_tep_se_nap_bao_loi_doc_thu_muc_that(tmp_path):
+    # Thư mục thật không có quyền đọc (chmod 000): báo lỗi đọc, không phải "không có mô-đun".
+    # root bỏ qua quyền tệp và Windows không dùng chmod kiểu này: bỏ qua ở đó.
+    if os.name == "nt" or (hasattr(os, "geteuid") and os.geteuid() == 0):
+        pytest.skip("cần người dùng thường trên hệ POSIX")
+    khoa = tmp_path / "khoa"
+    khoa.mkdir()
+    (khoa / "rbda_priority_pipeline.py").write_text("A = 1\n", encoding="utf-8")
+    khoa.chmod(0)
+    try:
+        with pytest.raises(SystemExit, match="Không đọc được thư mục"):
+            _chung._tep_se_nap(str(khoa), "rbda_priority_pipeline")
+    finally:
+        khoa.chmod(0o755)
+
+
 def test_tep_se_nap_bao_loi_doc_thu_muc(tmp_path, monkeypatch):
-    # Không đọc được thư mục (quyền): báo đúng lỗi đọc, không phải "không có mô-đun".
+    # Như test trên nhưng chạy được mọi nơi (kể cả root): giả lập lỗi quyền khi mở thư mục.
     def tu_choi(_):
         raise PermissionError("không có quyền")
-    monkeypatch.setattr(_chung.os, "listdir", tu_choi)
+    monkeypatch.setattr(_chung.os, "scandir", tu_choi)
     with pytest.raises(SystemExit, match="Không đọc được thư mục"):
         _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
 
@@ -711,10 +729,24 @@ def test_nap_rb_thu_muc_sai_bao_thieu_mo_dun_chinh(tmp_path):
     assert kq.returncode != 0 and "không có mô-đun rbda_priority_pipeline" in kq.stderr
 
 
-def test_tep_se_nap_khong_de_lai_bo_tim_trong_cache(tmp_path):
+def test_tep_se_nap_khong_dung_toi_cache_bo_tim(tmp_path):
+    # Không để lại bộ tìm cho thư mục tạm, và không xoá bộ tìm sẵn có của thư mục đã ở trên sys.path.
     (tmp_path / "rbda_priority_pipeline.py").write_text("A = 1\n", encoding="utf-8")
     _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
     assert str(tmp_path) not in sys.path_importer_cache
+    goc = sys.path_importer_cache.get(_GOC)
+    _chung._tep_se_nap(_GOC, "rbda_priority_pipeline")
+    assert sys.path_importer_cache.get(_GOC) is goc
+
+
+def test_nap_rb_khong_de_lai_bo_tim_trong_cache(tmp_path):
+    # Điểm vào công khai: sau nap_rb trên thư mục tạm, sys.path và cache bộ tìm như trước.
+    for ten, ma in (("rbda_priority_pipeline", "A = 1\n"), ("i18n_errors", "B = 1\n")):
+        (tmp_path / (ten + ".py")).write_text(ma, encoding="utf-8")
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.argv[2] in sys.path_importer_cache, "
+                              "sys.argv[2] in sys.path)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["False", "False"]
 
 
 def test_nap_rb_bao_ro_thu_muc_chi_co_pyc_trong_pycache(tmp_path):

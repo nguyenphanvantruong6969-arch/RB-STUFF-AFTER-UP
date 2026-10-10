@@ -39,22 +39,25 @@ def _cung_nguon(tep, mong_doi):
 def _tep_se_nap(thu_muc, ten):
     """Tệp mà CHÍNH bộ import của Python sẽ nạp cho `ten` từ `thu_muc` (không đoán theo tên tệp).
 
-    SystemExit nếu thư mục không có mô-đun đó, nếu đó là gói namespace, hoặc nếu Python sẽ nạp một bản
-    biên dịch (.so/.pyd) cũ thay cho tệp nguồn <tên>.py đang có (người dùng muốn đo mã nguồn).
+    SystemExit nếu thư mục không đọc được, không có mô-đun đó, đó là gói namespace, hoặc Python sẽ nạp một bản
+    biên dịch (.so/.pyd) cũ hay một gói cùng tên thay cho tệp nguồn <tên>.py đang có (người dùng muốn đo mã
+    nguồn). Thư mục KHÔNG có <tên>.py thì nhận đúng thứ Python nạp (bản biên dịch không kèm nguồn, hay gói
+    <tên>/__init__.py): đó chính là mã sẽ chạy khi import từ thư mục này.
     """
     try:
-        os.listdir(thu_muc)        # FileFinder nuốt lỗi quyền đọc rồi trả None: kiểm trước để báo đúng lỗi
+        os.scandir(thu_muc).close()   # FileFinder nuốt lỗi quyền đọc rồi trả None: kiểm trước để báo đúng lỗi
     except OSError as e:
         raise SystemExit("Không đọc được thư mục %s: %s" % (thu_muc, e))
-    # Bộ tìm tệp mới mỗi lần (bỏ bản cũ trong sys.path_importer_cache cả trước lẫn sau): danh sách tệp không
-    # bị cũ khi thư mục vừa đổi trong cùng một nhịp mtime, và không để lại bộ tìm cho thư mục tạm.
-    sys.path_importer_cache.pop(thu_muc, None)
+    # Bộ tìm tệp RIÊNG, cùng thứ tự loại tệp như bộ mặc định (mở rộng, nguồn, bytecode): danh sách tệp luôn
+    # mới và không đụng tới sys.path_importer_cache của tiến trình.
+    may = importlib.machinery
+    bo_tim = may.FileFinder(thu_muc, (may.ExtensionFileLoader, may.EXTENSION_SUFFIXES),
+                            (may.SourceFileLoader, may.SOURCE_SUFFIXES),
+                            (may.SourcelessFileLoader, may.BYTECODE_SUFFIXES))
     try:
-        spec = importlib.machinery.PathFinder.find_spec(ten, [thu_muc])
-    except ImportError as e:
-        raise SystemExit("Không tìm được %s trong %s: %s" % (ten, thu_muc, e))
-    finally:
-        sys.path_importer_cache.pop(thu_muc, None)
+        spec = bo_tim.find_spec(ten)
+    except (OSError, ImportError) as e:
+        raise SystemExit("Không đọc được thư mục %s khi tìm %s: %s" % (thu_muc, ten, e))
     if spec is None:
         raise SystemExit("%s không có mô-đun %s (.py hoặc bản biên dịch nạp được)." % (thu_muc, ten))
     if not spec.has_location:      # gói namespace: không có tệp (origin None)
@@ -124,13 +127,20 @@ def nap_rb(duong_dan):
         ao = {ten: _tep_se_nap(thu_muc, ten) for ten in reversed(_TEN)}
 
         def nap(ten):
-            # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi bỏ ra
-            # để không che các mô-đun khác của tiến trình.
+            # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi trả sys.path
+            # và mục của thư mục trong sys.path_importer_cache về như cũ (không để lại bộ tìm cho thư mục tạm,
+            # không thay bộ tìm sẵn có khi thư mục vốn đã ở trên sys.path).
+            co_san = thu_muc in sys.path_importer_cache
+            cu = sys.path_importer_cache.get(thu_muc)
             sys.path.insert(0, thu_muc)
             try:
                 importlib.import_module(ten)
             finally:
                 sys.path.remove(thu_muc)
+                if co_san:
+                    sys.path_importer_cache[thu_muc] = cu
+                else:
+                    sys.path_importer_cache.pop(thu_muc, None)
 
         return _nap_co_kiem(ao, nap, "thư mục %s" % thu_muc)
     if not os.path.isfile(duong_dan):
