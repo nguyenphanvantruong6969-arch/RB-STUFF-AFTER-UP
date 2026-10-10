@@ -36,29 +36,36 @@ def _cung_nguon(tep, mong_doi):
     return bool(tep) and _cung_tep(tep, mong_doi)
 
 
-def _tep_se_nap(thu_muc, ten):
-    """Tệp mà CHÍNH bộ import của Python sẽ nạp cho `ten` từ `thu_muc` (không đoán theo tên tệp).
+def _doc_duoc(thu_muc):
+    try:
+        os.scandir(thu_muc).close()
+    except OSError as e:
+        raise SystemExit("Không đọc được thư mục %s: %s" % (thu_muc, e))
+
+
+def _bo_tim_cua(thu_muc):
+    """Bộ tìm mà CHÍNH Python dùng cho `thu_muc`: gọi lần lượt sys.path_hooks như PathFinder, nhưng tạo mới
+    và không ghi vào sys.path_importer_cache (danh sách tệp luôn mới, không đụng trạng thái toàn cục)."""
+    for hook in sys.path_hooks:
+        try:
+            return hook(thu_muc)
+        except ImportError:
+            continue
+    raise SystemExit("Không có bộ tìm mô-đun nào nhận thư mục %s." % thu_muc)
+
+
+def _tim_spec(thu_muc, ten):
+    """Spec mà bộ import của Python sẽ dùng cho `ten` từ `thu_muc` (không đoán theo tên tệp).
 
     SystemExit nếu thư mục không đọc được, không có mô-đun đó, đó là gói namespace, hoặc Python sẽ nạp một bản
     biên dịch (.so/.pyd) cũ hay một gói cùng tên thay cho tệp nguồn <tên>.py đang có (người dùng muốn đo mã
     nguồn). Thư mục KHÔNG có <tên>.py thì nhận đúng thứ Python nạp (bản biên dịch không kèm nguồn, hay gói
     <tên>/__init__.py): đó chính là mã sẽ chạy khi import từ thư mục này.
     """
-    try:
-        os.scandir(thu_muc).close()   # FileFinder nuốt lỗi quyền đọc rồi trả None: kiểm trước để báo đúng lỗi
-    except OSError as e:
-        raise SystemExit("Không đọc được thư mục %s: %s" % (thu_muc, e))
-    # Bộ tìm tệp RIÊNG, cùng thứ tự loại tệp như bộ mặc định (mở rộng, nguồn, bytecode): danh sách tệp luôn
-    # mới và không đụng tới sys.path_importer_cache của tiến trình.
-    may = importlib.machinery
-    bo_tim = may.FileFinder(thu_muc, (may.ExtensionFileLoader, may.EXTENSION_SUFFIXES),
-                            (may.SourceFileLoader, may.SOURCE_SUFFIXES),
-                            (may.SourcelessFileLoader, may.BYTECODE_SUFFIXES))
-    try:
-        spec = bo_tim.find_spec(ten)
-    except (OSError, ImportError) as e:
-        raise SystemExit("Không đọc được thư mục %s khi tìm %s: %s" % (thu_muc, ten, e))
+    _doc_duoc(thu_muc)   # bộ tìm tệp nuốt lỗi quyền đọc rồi trả None: kiểm trước để báo đúng lỗi
+    spec = _bo_tim_cua(thu_muc).find_spec(ten)
     if spec is None:
+        _doc_duoc(thu_muc)   # thư mục vừa mất quyền / bị xoá giữa chừng: vẫn báo lỗi đọc, không báo "không có"
         raise SystemExit("%s không có mô-đun %s (.py hoặc bản biên dịch nạp được)." % (thu_muc, ten))
     if not spec.has_location:      # gói namespace: không có tệp (origin None)
         raise SystemExit("%s: %s là gói namespace tại %s, không phải mô-đun %s.py."
@@ -67,7 +74,12 @@ def _tep_se_nap(thu_muc, ten):
     if os.path.isfile(nguon) and not _cung_tep(spec.origin, nguon):
         raise SystemExit("%s: Python sẽ nạp %s thay cho tệp nguồn %s (một bản biên dịch cũ hoặc một gói cùng "
                          "tên nằm cạnh). Bỏ tệp/thư mục đó hoặc chọn thư mục khác." % (thu_muc, spec.origin, nguon))
-    return spec.origin
+    return spec
+
+
+def _tep_se_nap(thu_muc, ten):
+    """Tệp mà bộ import của Python sẽ nạp cho `ten` từ `thu_muc` (xem _tim_spec)."""
+    return _tim_spec(thu_muc, ten).origin
 
 
 def _nguon_thuc(mod):
@@ -122,27 +134,19 @@ def nap_rb(duong_dan):
     if os.path.isdir(duong_dan):
         # Thư mục NGƯỜI DÙNG đưa (không phải thư mục đích của liên kết): cả hai tệp lấy từ đây.
         thu_muc = os.path.abspath(duong_dan)
-        # Hỏi bộ import của Python tệp nào sẽ được nạp, rồi đòi đúng tệp đó sau khi nạp.
+        # Hỏi bộ import của Python spec nào sẽ dùng cho từng mô-đun, rồi nạp ĐÚNG spec đó (không import theo
+        # tên qua sys.path): dự đoán và lần nạp thật không thể lệch, và không đụng sys.path hay cache bộ tìm.
         # Kiểm mô-đun chính trước: thư mục sai thì báo thiếu rbda_priority_pipeline, đúng như cách dùng ghi.
-        ao = {ten: _tep_se_nap(thu_muc, ten) for ten in reversed(_TEN)}
+        specs = {ten: _tim_spec(thu_muc, ten) for ten in reversed(_TEN)}
 
         def nap(ten):
-            # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi trả sys.path
-            # và mục của thư mục trong sys.path_importer_cache về như cũ (không để lại bộ tìm cho thư mục tạm,
-            # không thay bộ tìm sẵn có khi thư mục vốn đã ở trên sys.path).
-            co_san = thu_muc in sys.path_importer_cache
-            cu = sys.path_importer_cache.get(thu_muc)
-            sys.path.insert(0, thu_muc)
-            try:
-                importlib.import_module(ten)
-            finally:
-                sys.path.remove(thu_muc)
-                if co_san:
-                    sys.path_importer_cache[thu_muc] = cu
-                else:
-                    sys.path_importer_cache.pop(thu_muc, None)
+            # Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
+            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này.
+            mod = importlib.util.module_from_spec(specs[ten])
+            sys.modules[ten] = mod
+            specs[ten].loader.exec_module(mod)
 
-        return _nap_co_kiem(ao, nap, "thư mục %s" % thu_muc)
+        return _nap_co_kiem({ten: s.origin for ten, s in specs.items()}, nap, "thư mục %s" % thu_muc)
     if not os.path.isfile(duong_dan):
         raise SystemExit("%s không phải thư mục kho mã cũng không phải tệp PyInstaller (không tồn tại)."
                          % duong_dan)

@@ -734,9 +734,14 @@ def test_tep_se_nap_khong_dung_toi_cache_bo_tim(tmp_path):
     (tmp_path / "rbda_priority_pipeline.py").write_text("A = 1\n", encoding="utf-8")
     _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
     assert str(tmp_path) not in sys.path_importer_cache
-    goc = sys.path_importer_cache.get(_GOC)
-    _chung._tep_se_nap(_GOC, "rbda_priority_pipeline")
-    assert sys.path_importer_cache.get(_GOC) is goc
+    # Mục sẵn có (tự gieo, để không phụ thuộc thứ tự test) phải giữ nguyên đúng đối tượng.
+    goc = object()
+    sys.path_importer_cache[str(tmp_path)] = goc
+    try:
+        _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
+        assert sys.path_importer_cache[str(tmp_path)] is goc
+    finally:
+        sys.path_importer_cache.pop(str(tmp_path), None)
 
 
 def test_nap_rb_khong_de_lai_bo_tim_trong_cache(tmp_path):
@@ -747,6 +752,19 @@ def test_nap_rb_khong_de_lai_bo_tim_trong_cache(tmp_path):
                               "sys.argv[2] in sys.path)", str(tmp_path))
     assert kq.returncode == 0, kq.stderr
     assert kq.stdout.split() == ["False", "False"]
+
+
+def test_nap_rb_bo_qua_bo_tim_cu_trong_cache(tmp_path):
+    # Thư mục đã ở trên sys.path và cache giữ một mục CŨ (None: thư mục từng chưa tồn tại). nap_rb vẫn nạp
+    # đúng tệp vừa ghi (không đi qua cache), và giữ nguyên mục cache cũng như sys.path của tiến trình.
+    for ten, ma in (("rbda_priority_pipeline", "A = 1\n"), ("i18n_errors", "B = 1\n")):
+        (tmp_path / (ten + ".py")).write_text(ma, encoding="utf-8")
+    kq = _chay_tien_trinh_moi(
+        "sys.path.append(sys.argv[2]); sys.path_importer_cache[sys.argv[2]] = None\n"
+        "r = m.nap_rb(sys.argv[2])\n"
+        "print(r.A, sys.path_importer_cache[sys.argv[2]] is None, sys.path.count(sys.argv[2]))", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["1", "True", "1"]
 
 
 def test_nap_rb_bao_ro_thu_muc_chi_co_pyc_trong_pycache(tmp_path):
