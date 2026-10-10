@@ -67,6 +67,7 @@ def _goi_cai_dat():
         return frozenset()
 
 
+@functools.cache
 def _khong_the_bi_che(ten):
     """Mô-đun dựng sẵn hay đóng băng: BuiltinImporter / FrozenImporter của CPython đứng trước mọi đường dẫn, tệp
     cạnh mã không che được. Chỉ hỏi hai bộ tìm này (không tác dụng phụ); bộ tìm cài thêm thì KHÔNG hỏi."""
@@ -76,14 +77,16 @@ def _khong_the_bi_che(ten):
 def _tu_thu_muc(thu_muc):
     """Hàm `ten -> bool`: một lần chạy thật (thư mục đã chọn đứng đầu sys.path) có thể lấy `ten` — toàn bộ hay
     một phần gói namespace — từ thư mục đó không? Mô-đun dựng sẵn / đóng băng xét trước, ở `la_ten`
-    (_khong_the_bi_che). Bảo thủ: nghi ngờ thì coi là có (từ chối rõ, không đo nhầm).
+    (_khong_the_bi_che). Không xét được thì dừng hẳn với lỗi rõ (không đoán, không đo nhầm).
 
     1. bộ tìm của thư mục, dựng từ sys.path_hooks như PathFinder làm (thư mục không được ghi vào
        sys.path_importer_cache): không thấy -> không; thấy mô-đun / gói thường -> có;
     2. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường
        (PathFinder chạy các móc đường dẫn trên sys.path như mọi import của chính mã được đo trong tiến trình này);
     3. lỗi (móc ném lỗi khác ImportError với thư mục — PathFinder cũng chỉ bỏ qua ImportError —, hay lỗi khi tìm)
-       -> SystemExit nêu đúng lỗi, chỉ khi thật sự cần xét một tên.
+       -> SystemExit nêu đúng lỗi, chỉ khi thật sự cần xét một tên. Mọi tên không dựng sẵn / đóng băng đều cần
+       xét, kể cả thư viện chuẩn (tệp `json.py` cạnh mã vẫn che được `json`) — và lần chạy thật cũng hỏng ở
+       chính móc đó khi import tên ấy.
 
     Bộ tìm cài thêm trong sys.meta_path KHÔNG được hỏi: gọi chúng có thể đổi trạng thái tiến trình (vd
     DistutilsMetaFinder của setuptools), và bộ tìm chuyển tiếp cho PathFinder sẽ thấy thư mục khi chạy thật. Tên

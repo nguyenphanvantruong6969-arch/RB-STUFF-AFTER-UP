@@ -962,9 +962,14 @@ def test_nap_rb_moc_duong_dan_loi_thanh_systemexit_ro(tmp_path, cho_loi):
     assert "nsx" in kq.stderr and "moc hong" in kq.stderr        # nêu đúng tên và đúng lỗi gốc
 
 
-def test_nap_rb_moc_loi_khong_chan_ma_chi_import_dung_san(tmp_path):
-    # Móc lỗi với thư mục nhưng mã chỉ import mô-đun dựng sẵn / thư viện chuẩn (không cần xét thư mục): nhận.
-    _ghi_hai_tep(tmp_path, "import sys\nGIA_TRI = 1\n")
+@pytest.mark.parametrize("ma_rb, nhan", [
+    ("import sys\nGIA_TRI = 1\n", True),      # dựng sẵn: không cần xét thư mục -> nhận
+    ("import json\nGIA_TRI = 1\n", False),    # thư viện chuẩn thường: tệp json.py cạnh mã che được -> phải xét
+])
+def test_nap_rb_moc_loi_chi_chan_ten_can_xet_thu_muc(tmp_path, ma_rb, nhan):
+    # Móc lỗi với thư mục: mô-đun dựng sẵn / đóng băng không cần xét thư mục -> nhận; tên khác (kể cả thư viện
+    # chuẩn) không xét được -> SystemExit nêu lỗi gốc (lần chạy thật cũng hỏng ở chính móc đó).
+    _ghi_hai_tep(tmp_path, ma_rb)
     kq = _chay_tien_trinh_moi(
         "def moc(p):\n"
         "    if p == sys.argv[2]:\n"
@@ -972,8 +977,12 @@ def test_nap_rb_moc_loi_khong_chan_ma_chi_import_dung_san(tmp_path):
         "    raise ImportError\n"
         "sys.path_hooks.insert(0, moc)\n"
         "print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
-    assert kq.returncode == 0, kq.stderr
-    assert kq.stdout.strip() == "1"
+    if nhan:
+        assert kq.returncode == 0, kq.stderr
+        assert kq.stdout.strip() == "1"
+    else:
+        assert kq.returncode != 0 and "json" in kq.stderr and "moc hong" in kq.stderr
+        assert "Traceback" not in kq.stderr
 
 
 def test_nap_rb_bo_tim_thu_muc_theo_sys_path_hooks(tmp_path):
