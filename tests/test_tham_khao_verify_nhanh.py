@@ -884,24 +884,56 @@ def test_nap_rb_nhan_tep_trung_ten_mo_dun_dung_san_hay_dong_bang(tmp_path):
     assert kq.stdout.strip() == "1"
 
 
-def test_nap_rb_nhan_ten_do_bo_tim_dung_truoc_pathfinder_cung_cap(tmp_path):
-    # Một bộ tìm trong sys.meta_path đứng trước PathFinder cung cấp `hookmod`: thư mục `hookmod/` (dữ liệu, không
-    # __init__) cạnh mã không bao giờ được dùng — không được từ chối.
-    _ghi_hai_tep(tmp_path, "import hookmod\nGIA_TRI = hookmod.X\n")
-    (tmp_path / "hookmod").mkdir()
+_BO_TIM_MOC = (
+    "import importlib.machinery as im\n"
+    "class N:\n"
+    "    def create_module(self, spec): return None\n"
+    "    def exec_module(self, mod): mod.X = 7\n"
+    "class F:\n"
+    "    goi = []\n"
+    "    @staticmethod\n"
+    "    def find_spec(ten, path=None, target=None):\n"
+    "        F.goi.append(ten)\n"
+    "        if ten == 'hookmod':\n"
+    "            return im.ModuleSpec(ten, N())\n"
+    "        return im.PathFinder.find_spec(ten, path) if CHUYEN_TIEP else None\n"
+    "sys.meta_path.insert(0, F)\n")
+
+
+@pytest.mark.parametrize("chuyen_tiep, ma_rb, canh", [
+    # bộ tìm cài thêm cung cấp `hookmod`, thư mục có `hookmod/`: bảo thủ — từ chối rõ, KHÔNG hỏi bộ tìm cài thêm
+    # (gọi chúng có thể có tác dụng phụ, vd DistutilsMetaFinder của setuptools)
+    (False, "import hookmod\nGIA_TRI = hookmod.X\n", "hookmod/"),
+    # bộ tìm chuyển tiếp cho PathFinder (kiểu móc của pytest / typeguard): lúc chạy thật thư mục đứng đầu sys.path
+    # nên nó trả tệp `pytest.py` cạnh mã — phải từ chối dù dưới kịch bản nó thấy bản pytest đã cài
+    (True, "import pytest\nGIA_TRI = 1\n", "pytest.py"),
+])
+def test_nap_rb_khong_hoi_bo_tim_cai_them_va_tu_choi_bao_thu(tmp_path, chuyen_tiep, ma_rb, canh):
+    _ghi_hai_tep(tmp_path, ma_rb)
+    if canh.endswith("/"):
+        (tmp_path / canh).mkdir()
+    else:
+        (tmp_path / canh).write_text("X = 1\n", encoding="utf-8")
+    ten = canh.rstrip("/").split(".")[0]
+    kq = _chay_tien_trinh_moi(
+        "CHUYEN_TIEP = %r\n" % chuyen_tiep + _BO_TIM_MOC
+        + "\ntry:\n    m.nap_rb(sys.argv[2])\nexcept SystemExit as e:\n    print(e)\nprint(F.goi)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert ten in kq.stdout and "GIA_TRI" not in kq.stdout
+    assert kq.stdout.strip().splitlines()[-1] == "[]"       # bộ tìm cài thêm không bị gọi lần nào
+
+
+def test_nap_rb_bo_tim_thu_muc_theo_sys_path_hooks(tmp_path):
+    # Một móc đường dẫn (kiểu Hy) thêm đuôi `.khac`: lần chạy thật lấy `openpyxl.khac` cạnh mã thay gói đã cài —
+    # phải từ chối. Bộ tìm của thư mục phải dựng từ sys.path_hooks như PathFinder, không tự liệt kê đuôi.
+    _ghi_hai_tep(tmp_path, "import openpyxl\nGIA_TRI = 1\n")
+    (tmp_path / "openpyxl.khac").write_text("X = 1\n", encoding="utf-8")
     kq = _chay_tien_trinh_moi(
         "import importlib.machinery as im\n"
-        "class N:\n"
-        "    def create_module(self, spec): return None\n"
-        "    def exec_module(self, mod): mod.X = 7\n"
-        "class F:\n"
-        "    @staticmethod\n"
-        "    def find_spec(ten, path=None, target=None):\n"
-        "        return im.ModuleSpec(ten, N()) if ten == 'hookmod' else None\n"
-        "sys.meta_path.insert(0, F)\n"
-        "print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
-    assert kq.returncode == 0, kq.stderr
-    assert kq.stdout.strip() == "7"
+        "sys.path_hooks.insert(0, im.FileFinder.path_hook((im.SourceFileLoader, ['.py', '.khac'])))\n"
+        "sys.path_importer_cache.clear()\n"
+        "m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and "openpyxl" in kq.stderr and "Traceback" not in kq.stderr
 
 
 def test_nap_rb_tu_choi_thu_muc_gop_vao_goi_namespace_da_cai(tmp_path):

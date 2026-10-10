@@ -67,45 +67,46 @@ def _goi_cai_dat():
         return frozenset()
 
 
-def _bo_tim_truoc_cung_cap(ten):
-    """Một bộ tìm trong sys.meta_path đứng TRƯỚC PathFinder (dựng sẵn, đóng băng, móc cài thêm) cung cấp `ten`?
-    Khi đó cả lần chạy thật lẫn kịch bản đều lấy từ nó, thư mục nào cũng không chen vào được."""
-    for f in sys.meta_path:
-        if f is importlib.machinery.PathFinder:
-            return False
-        try:
-            if f.find_spec(ten, None) is not None:
-                return True
-        except Exception:           # bộ tìm lạ hỏng: bỏ qua nó, như thể không cung cấp
-            pass
-    return False
+def _khong_the_bi_che(ten):
+    """Mô-đun dựng sẵn hay đóng băng: BuiltinImporter / FrozenImporter của CPython đứng trước mọi đường dẫn, tệp
+    cạnh mã không che được. Chỉ hỏi hai bộ tìm này (không tác dụng phụ); bộ tìm cài thêm thì KHÔNG hỏi."""
+    return ten in sys.builtin_module_names or importlib.machinery.FrozenImporter.find_spec(ten) is not None
 
 
 def _tu_thu_muc(thu_muc):
-    """Hàm `ten -> bool`: một lần chạy thật (thư mục đã chọn đứng đầu sys.path) có lấy `ten` — toàn bộ hay một
-    phần gói namespace — từ thư mục đó không? Hỏi chính các bộ tìm của trình thông dịch, đúng thứ tự import:
+    """Hàm `ten -> bool`: một lần chạy thật (thư mục đã chọn đứng đầu sys.path) có thể lấy `ten` — toàn bộ hay
+    một phần gói namespace — từ thư mục đó không? Bảo thủ: nghi ngờ thì coi là có (từ chối rõ, không đo nhầm).
 
-    1. bộ tìm trong sys.meta_path đứng trước PathFinder (dựng sẵn, đóng băng, móc cài thêm) có cung cấp -> không;
-    2. FileFinder của thư mục (như PathFinder tạo cho nó) không thấy gì -> không; thấy mô-đun / gói thường -> có;
-    3. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường
-       (thường thắng namespace).
+    1. dựng sẵn / đóng băng -> không (xem _khong_the_bi_che);
+    2. bộ tìm của thư mục, dựng từ sys.path_hooks như PathFinder làm (không ghi vào sys.path_importer_cache):
+       không thấy -> không; thấy mô-đun / gói thường -> có; lỗi -> có;
+    3. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường.
 
-    Không gọi PathFinder với thư mục (sẽ thêm mục vào sys.path_importer_cache); kết quả nhớ theo tên.
+    Bộ tìm cài thêm trong sys.meta_path KHÔNG được hỏi: gọi chúng có thể đổi trạng thái tiến trình (vd
+    DistutilsMetaFinder của setuptools), và bộ tìm chuyển tiếp cho PathFinder sẽ thấy thư mục khi chạy thật. Tên
+    do chúng cung cấp mà thư mục cũng có thì bị từ chối — báo lỗi thừa nhưng không bao giờ đo nhầm mã.
     """
-    m = importlib.machinery
-    bo_tim = m.FileFinder(thu_muc, (m.ExtensionFileLoader, m.EXTENSION_SUFFIXES),
-                          (m.SourceFileLoader, m.SOURCE_SUFFIXES), (m.SourcelessFileLoader, m.BYTECODE_SUFFIXES))
+    bo_tim = None
+    for moc in sys.path_hooks:
+        try:
+            bo_tim = moc(thu_muc)
+            break
+        except ImportError:
+            continue
 
     @functools.cache
     def co(ten):
-        if _bo_tim_truoc_cung_cap(ten):
+        if _khong_the_bi_che(ten) or bo_tim is None:
             return False
-        rieng = bo_tim.find_spec(ten)
+        try:
+            rieng = bo_tim.find_spec(ten)
+        except Exception:
+            return True
         if rieng is None:
             return False
         if rieng.loader is not None:
             return True
-        ngoai = m.PathFinder.find_spec(ten)
+        ngoai = importlib.machinery.PathFinder.find_spec(ten)
         return ngoai is None or ngoai.origin in (None, "namespace")
 
     return co
@@ -156,7 +157,7 @@ def _import_la(cay, cho_phep, tu_thu_muc=lambda ten: False):
     """Tên mô-đun mà cây ast `cay` import (đầu tệp LẪN trong hàm, cả import tương đối) không đo được:
     - mô-đun anh em: tên mà một lần chạy thật lấy (toàn bộ hay một phần) từ thư mục đã chọn (`tu_thu_muc`, xem
       _tu_thu_muc) và không thuộc `cho_phep` — luôn từ chối, kể cả trong try;
-    - tên ngoài thư viện chuẩn, gói đã cài, bộ tìm đứng trước PathFinder và `cho_phep`, trừ import tuỳ chọn: nằm trong khối try (kể cả thân
+    - tên ngoài thư viện chuẩn, gói đã cài và `cho_phep`, trừ import tuỳ chọn: nằm trong khối try (kể cả thân
       lớp định nghĩa ở đó; thân hàm / lambda thì không — chạy lúc gọi) mà nhánh except ĐẦU TIÊN bắt được
       ImportError không kết thúc bằng ném lại / thoát tiến trình (xem _bat_importerror).
 
@@ -177,7 +178,7 @@ def _import_la(cay, cho_phep, tu_thu_muc=lambda ten: False):
             return False
         if tu_thu_muc(ten):
             return True
-        if ten in sys.stdlib_module_names or _bo_tim_truoc_cung_cap(ten):
+        if ten in sys.stdlib_module_names:
             return False
         return id(nut) not in tuy_chon and ten not in _goi_cai_dat()
 
