@@ -5,6 +5,8 @@ Một bản duy nhất cho bộ nạp mô-đun và bộ sinh dữ liệu, để 
 Dữ liệu sinh ra là DỮ LIỆU MÔ PHỎNG, không phải dữ liệu thật.
 """
 import ast
+import functools
+import importlib.machinery
 import importlib.util
 import marshal
 import os
@@ -54,50 +56,70 @@ def _tep_nguon(thu_muc, ten):
     return tep
 
 
-_GOI_CAI_DAT = []
-
-
+@functools.cache
 def _goi_cai_dat():
     """Tên gói cấp cao nhất của các bản phân phối đã cài (site-packages), theo siêu dữ liệu cài đặt.
     Quét một lần mỗi tiến trình, và chỉ khi có tên chưa rõ."""
-    if not _GOI_CAI_DAT:
-        try:
-            from importlib.metadata import packages_distributions
-            _GOI_CAI_DAT.append(set(packages_distributions()))
-        except Exception:      # siêu dữ liệu hỏng / thiếu: coi như không có gói cài thêm (thận trọng)
-            _GOI_CAI_DAT.append(set())
-    return _GOI_CAI_DAT[0]
+    try:
+        from importlib.metadata import packages_distributions
+        return frozenset(packages_distributions())
+    except Exception:          # siêu dữ liệu hỏng / thiếu: coi như không có gói cài thêm (thận trọng)
+        return frozenset()
 
 
 def _anh_em(thu_muc):
-    """Tên import được từ chính `thu_muc` (tệp .py, mô-đun mở rộng, thư mục = gói / gói namespace)."""
-    import importlib.machinery
-    duoi = tuple(importlib.machinery.SOURCE_SUFFIXES + importlib.machinery.EXTENSION_SUFFIXES)
-    ten = set()
+    """Tên import được từ chính `thu_muc`, như FileFinder: trả (chắc, namespace).
+
+    chắc = tệp nguồn / bản biên dịch / mô-đun mở rộng `<tên><đuôi>` và gói thường (thư mục có __init__) —
+    che được cả thư viện chuẩn lẫn gói đã cài. namespace = thư mục không có __init__: chỉ là phần gói
+    namespace, không che được mô-đun thật nào, chỉ thành mô-đun khi tên không có ở đâu khác.
+    """
+    duoi = (importlib.machinery.SOURCE_SUFFIXES + importlib.machinery.BYTECODE_SUFFIXES
+            + importlib.machinery.EXTENSION_SUFFIXES)
+    chac, namespace = set(), set()
     for muc in os.scandir(thu_muc):
         if muc.is_dir():
-            ten.add(muc.name)
-        elif muc.name.endswith(duoi):
-            ten.add(muc.name.split(".")[0])
-    return {t for t in ten if t.isidentifier()}
+            co_init = any(os.path.isfile(os.path.join(muc.path, "__init__" + d)) for d in duoi)
+            (chac if co_init else namespace).add(muc.name)
+        else:
+            chac.update(muc.name[:-len(d)] for d in duoi if muc.name.endswith(d))
+    return ({t for t in chac if t.isidentifier()}, {t for t in namespace if t.isidentifier()})
 
 
-def _bat_importerror(nut_try):
-    """Khối try có nhánh except bắt ImportError / ModuleNotFoundError mà KHÔNG chỉ ném lại (đường lui thật)?"""
-    for h in nut_try.handlers:
-        loai = [] if h.type is None else (h.type.elts if isinstance(h.type, ast.Tuple) else [h.type])
-        bat = h.type is None or any(getattr(t, "id", None) in ("ImportError", "ModuleNotFoundError")
-                                    for t in loai)
-        if bat and not isinstance(h.body[-1], ast.Raise):
-            return True
+_KET_THUC = {("sys", "exit"), ("os", "_exit"), (None, "exit"), (None, "quit")}
+
+
+def _ket_thuc(cau):
+    """Câu lệnh cuối nhánh except làm nhánh không phải đường lui: ném lại / ném lỗi khác / thoát tiến trình."""
+    if isinstance(cau, ast.Raise):
+        return True
+    if isinstance(cau, ast.Expr) and isinstance(cau.value, ast.Call):
+        ham = cau.value.func
+        if isinstance(ham, ast.Name):
+            return (None, ham.id) in _KET_THUC
+        if isinstance(ham, ast.Attribute) and isinstance(ham.value, ast.Name):
+            return (ham.value.id, ham.attr) in _KET_THUC
     return False
 
 
-_PHAM_VI_MOI = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)
+_BAT_DUOC_IMPORTERROR = ("ImportError", "ModuleNotFoundError", "Exception", "BaseException")
+
+
+def _bat_importerror(nut_try):
+    """Nhánh except ĐẦU TIÊN bắt được ImportError (theo thứ tự, như lúc chạy) là đường lui thật: không kết thúc
+    bằng ném lại / thoát tiến trình? Điều kiện động (vd `if STRICT: raise`) không xét được tĩnh: coi là đường lui."""
+    for h in nut_try.handlers:
+        loai = [] if h.type is None else (h.type.elts if isinstance(h.type, ast.Tuple) else [h.type])
+        if h.type is None or any(getattr(t, "id", None) in _BAT_DUOC_IMPORTERROR for t in loai):
+            return not _ket_thuc(h.body[-1])
+    return False
+
+
+_PHAM_VI_MOI = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)   # thân lớp chạy ngay: không thuộc đây
 
 
 def _cung_cap(nut):
-    """`nut` và các nút chạy ngay cùng nó: không đi vào thân hàm / lớp / lambda (chạy lúc gọi, ngoài try)."""
+    """`nut` và các nút chạy ngay cùng nó: không đi vào thân hàm / lambda (chạy lúc gọi, ngoài try)."""
     if isinstance(nut, _PHAM_VI_MOI):
         return
     yield nut
@@ -105,10 +127,11 @@ def _cung_cap(nut):
         yield from _cung_cap(con)
 
 
-def _import_la(cay, cho_phep, anh_em=frozenset()):
+def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
     """Tên mô-đun mà cây ast `cay` import (đầu tệp LẪN trong hàm, cả import tương đối) không đo được:
-    - mô-đun anh em có mặt trong thư mục đã chọn (`anh_em`) mà không thuộc `cho_phep` — luôn từ chối, kể cả
-      trong try hay trùng tên gói đã cài / thư viện chuẩn (import theo tên sẽ không lấy tệp trong thư mục);
+    - mô-đun anh em có mặt trong thư mục đã chọn (`anh_em` = (chắc, namespace), xem _anh_em) mà không thuộc
+      `cho_phep` — luôn từ chối, kể cả trong try; loại chắc từ chối cả khi trùng tên gói đã cài / thư viện chuẩn
+      (import theo tên sẽ không lấy tệp trong thư mục), loại namespace chỉ khi tên không có ở đâu khác;
     - tên ngoài thư viện chuẩn, gói đã cài và `cho_phep`, trừ khi nằm trực tiếp trong khối try có nhánh
       `except ImportError` không ném lại (import tuỳ chọn có đường lui; import trong hàm định nghĩa trong
       khối try chạy lúc gọi nên không được che).
@@ -117,6 +140,7 @@ def _import_la(cay, cho_phep, anh_em=frozenset()):
     chỗ khác (vd thư mục hiện hành) — từ chối từ đầu. Không bắt được import động bằng chuỗi; mã hiện tại không dùng.
     """
     cho_phep = set(cho_phep)
+    chac, namespace = anh_em
     tuy_chon = set()
     for nut in ast.walk(cay):
         if isinstance(nut, _CAC_TRY) and _bat_importerror(nut):
@@ -126,11 +150,13 @@ def _import_la(cay, cho_phep, anh_em=frozenset()):
     def la_ten(ten, nut):
         if ten in cho_phep:
             return False
-        if ten in anh_em:
+        if ten in chac:
             return True
-        if ten in sys.stdlib_module_names or id(nut) in tuy_chon:
+        if ten in sys.stdlib_module_names or ten in sys.builtin_module_names:
             return False
-        return ten not in _goi_cai_dat()
+        if ten in namespace:
+            return ten not in _goi_cai_dat()
+        return id(nut) not in tuy_chon and ten not in _goi_cai_dat()
 
     la = set()
     for nut in ast.walk(cay):
@@ -147,7 +173,7 @@ def _import_la(cay, cho_phep, anh_em=frozenset()):
     return sorted(la)
 
 
-def _bien_dich_da_kiem(tep, cho_phep, anh_em=frozenset()):
+def _bien_dich_da_kiem(tep, cho_phep, anh_em=(frozenset(), frozenset())):
     """Đọc tệp MỘT lần, kiểm import trên chính bản đã đọc rồi biên dịch đúng bản đó (không có khe giữa lúc
     kiểm và lúc chạy). SystemExit rõ cho lỗi đọc, lỗi cú pháp và import lạ."""
     try:
@@ -180,11 +206,12 @@ def _nguon_thuc(mod):
 _TEN = ("i18n_errors", "rbda_priority_pipeline")   # i18n_errors trước: mô-đun chính import nó theo tên
 
 
-def _nap_co_kiem(ao, nap, mo_ta):
+def _nap_co_kiem(ao, nap, mo_ta, chuan_bi=None):
     """Một luật cho mọi nguồn: `ao` = {tên mô-đun: đường dẫn mong đợi}.
 
     Đã nạp đúng cả hai từ đó -> trả bản đã nạp. Đã nạp từ nơi khác -> SystemExit (mỗi tiến trình một bản).
-    Chưa có -> gọi `nap(ten)` theo thứ tự _TEN; hỏng giữa chừng thì gỡ mọi mô-đun vừa thêm.
+    Chưa có -> gọi `chuan_bi(chua_co)` (nếu có) một lần cho mọi mô-đun còn thiếu, rồi `nap(ten)` theo thứ tự
+    _TEN; hỏng giữa chừng thì gỡ mọi mô-đun vừa thêm.
     """
     da_nap = {ten: getattr(sys.modules.get(ten), "__file__", None) for ten in _TEN}
     if all(_cung_nguon(da_nap[ten], ao[ten]) for ten in _TEN):
@@ -195,6 +222,8 @@ def _nap_co_kiem(ao, nap, mo_ta):
                              % (ten, _nguon_thuc(sys.modules[ten]), mo_ta))
     chua_co = [ten for ten in _TEN if ten not in sys.modules]
     try:
+        if chuan_bi is not None:
+            chuan_bi(chua_co)
         for ten in chua_co:
             nap(ten)
             # Kiểm SAU khi nạp (mô-đun có thể tự thay mình trong sys.modules khi chạy).
@@ -226,21 +255,24 @@ def nap_rb(duong_dan):
         cho_phep = {ten: set(_TEN[:i]) for i, ten in enumerate(_TEN)}
         ma = {}
 
+        def chuan_bi(chua_co):
+            # Kiểm tĩnh và biên dịch MỌI tệp sắp nạp trước khi chạy tệp nào (hỏng ở mô-đun chính thì i18n_errors
+            # cũng chưa chạy); tệp đã nạp đúng bản thì không đọc lại. Dựng đủ rồi mới gán (không nửa vời).
+            anh_em = _anh_em(thu_muc)
+            ma.update({t: _bien_dich_da_kiem(tep[t], cho_phep[t], anh_em) for t in chua_co})
+
         def nap(ten):
-            # Lần nạp đầu: kiểm tĩnh và biên dịch CẢ HAI tệp trước khi chạy tệp nào (hỏng ở mô-đun chính thì
-            # i18n_errors cũng chưa chạy). Đã nạp sẵn đúng bản thì _nap_co_kiem trả luôn, không gọi tới đây.
-            if not ma:
-                anh_em = _anh_em(thu_muc)
-                ma.update((t, _bien_dich_da_kiem(tep[t], cho_phep[t], anh_em)) for t in _TEN)
             # Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
-            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này.
-            spec = importlib.util.spec_from_file_location(ten, tep[ten])
+            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này. Spec không có bộ nạp và không trỏ tới
+            # .pyc: mã chỉ chạy qua đường đã kiểm (importlib.reload không thể đi vòng qua phép kiểm).
+            spec = importlib.machinery.ModuleSpec(ten, None, origin=tep[ten])
             mod = importlib.util.module_from_spec(spec)
-            mod.__cached__ = None               # không có bản .pyc nào được ghi / dùng
+            mod.__file__ = tep[ten]
+            mod.__cached__ = None
             sys.modules[ten] = mod
             exec(ma[ten], mod.__dict__)
 
-        return _nap_co_kiem(tep, nap, "thư mục %s" % thu_muc)
+        return _nap_co_kiem(tep, nap, "thư mục %s" % thu_muc, chuan_bi)
     if not os.path.isfile(duong_dan):
         raise SystemExit("%s không phải thư mục kho mã cũng không phải tệp PyInstaller (không tồn tại)."
                          % duong_dan)

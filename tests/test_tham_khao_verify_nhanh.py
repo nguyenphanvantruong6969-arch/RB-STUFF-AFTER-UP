@@ -830,6 +830,70 @@ def test_nap_rb_tu_choi_import_anh_em_du_tuy_chon_hay_trung_goi_cai(tmp_path, ma
     assert kq.returncode != 0 and mong in kq.stderr and "Traceback" not in kq.stderr
 
 
+@pytest.mark.parametrize("ma_rb, tep_canh, thu_muc_canh", [
+    # thân lớp chạy NGAY trong khối try: đường lui có che
+    ("try:\n    class Cfg:\n        import goi_khong_co_that as j\nexcept ImportError:\n    Cfg = None\n"
+     "GIA_TRI = 1\n", None, None),
+    # thư mục dữ liệu không có __init__.py trùng tên thư viện chuẩn / gói đã cài: không che được import
+    ("import random\nimport csv\nimport openpyxl\nGIA_TRI = 1\n", None, ("random", "csv", "openpyxl")),
+    # tệp nhiều dấu chấm không import được dưới tên phần đầu
+    ("import random\nimport json\nGIA_TRI = 1\n", ("random.old.py", "json.backup.py"), None),
+])
+def test_nap_rb_nhan_ma_hop_le_khong_bao_nham_anh_em(tmp_path, ma_rb, tep_canh, thu_muc_canh):
+    _ghi_hai_tep(tmp_path, ma_rb)
+    for t in tep_canh or ():
+        (tmp_path / t).write_text("X = 1\n", encoding="utf-8")
+    for d in thu_muc_canh or ():
+        (tmp_path / d).mkdir()
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "1"
+
+
+@pytest.mark.parametrize("ma_rb, tep_canh", [
+    # bản biên dịch không nguồn nằm cạnh: FileFinder sẽ nạp nó khi thư mục nằm trên sys.path
+    ("try:\n    import helpers\nexcept ImportError:\n    helpers = None\nGIA_TRI = 1\n", "helpers.pyc"),
+    # gói thường (có __init__.py) cạnh mã che được cả tên thư viện chuẩn
+    ("import random\nGIA_TRI = 1\n", "random/__init__.py"),
+    # nhánh except kết thúc tiến trình: không phải đường lui
+    ("import sys\ntry:\n    import mo_dun_anh_em\nexcept ImportError:\n    sys.exit('thieu')\nGIA_TRI = 1\n", None),
+    # nhánh except Exception đứng trước và ném lại: nhánh ImportError phía sau không bao giờ chạy
+    ("try:\n    import mo_dun_anh_em\nexcept Exception:\n    raise\nexcept ImportError:\n    pass\nGIA_TRI = 1\n",
+     None),
+])
+def test_nap_rb_tu_choi_anh_em_bien_dich_goi_thuong_va_nhanh_khong_lui(tmp_path, ma_rb, tep_canh):
+    _ghi_hai_tep(tmp_path, ma_rb)
+    if tep_canh:
+        (tmp_path / tep_canh).parent.mkdir(exist_ok=True)
+        (tmp_path / tep_canh).write_bytes(b"")
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    ten = (tep_canh or "mo_dun_anh_em").split("/")[0].split(".")[0]
+    assert kq.returncode != 0 and ten in kq.stderr and "Traceback" not in kq.stderr
+
+
+def test_nap_rb_khong_kiem_lai_i18n_errors_da_nap_dung(tmp_path):
+    # i18n_errors đã nạp đúng tệp của thư mục: chỉ mô-đun chính được đọc / kiểm, dù tệp i18n_errors trên đĩa
+    # đã bị sửa thành bản sẽ bị từ chối.
+    _ghi_hai_tep(tmp_path)
+    kq = _chay_tien_trinh_moi(
+        "import importlib.util as u\n"
+        "sp = u.spec_from_file_location('i18n_errors', sys.argv[2] + '/i18n_errors.py')\n"
+        "mm = u.module_from_spec(sp); sys.modules['i18n_errors'] = mm; sp.loader.exec_module(mm)\n"
+        "open(sys.argv[2] + '/i18n_errors.py', 'w').write('import rbda_priority_pipeline\\n')\n"
+        "print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "1"
+
+
+def test_nap_rb_spec_khong_tro_toi_pyc_va_khong_nap_lai_vong_qua_kiem(tmp_path):
+    _ghi_hai_tep(tmp_path)
+    kq = _chay_tien_trinh_moi(
+        "r = m.nap_rb(sys.argv[2])\nprint(r.__spec__.cached, r.__spec__.loader, r.__file__ == sys.argv[2] + "
+        "'/rbda_priority_pipeline.py')", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["None", "None", "True"]
+
+
 def test_nap_rb_nhan_import_tuy_chon_except_sao(tmp_path):
     _ghi_hai_tep(tmp_path, "try:\n    import goi_khong_co_that\nexcept* ImportError:\n    pass\nGIA_TRI = 1\n")
     kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
