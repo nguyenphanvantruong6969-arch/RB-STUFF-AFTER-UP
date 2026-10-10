@@ -871,6 +871,34 @@ def test_nap_rb_tu_choi_anh_em_bien_dich_goi_thuong_va_nhanh_khong_lui(tmp_path,
     assert kq.returncode != 0 and ten in kq.stderr and "Traceback" not in kq.stderr
 
 
+def test_nap_rb_nhan_tep_trung_ten_mo_dun_dung_san_hay_dong_bang(tmp_path):
+    # time (dựng sẵn) và os (đóng băng) được nạp TRƯỚC FileFinder: tệp cùng tên cạnh mã không che được.
+    _ghi_hai_tep(tmp_path, "import time\nimport os\nGIA_TRI = 1\n")
+    (tmp_path / "time.py").write_text("X = 1\n", encoding="utf-8")
+    (tmp_path / "os.py").write_text("X = 1\n", encoding="utf-8")
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "1"
+
+
+def test_nap_rb_tu_choi_thu_muc_gop_vao_goi_namespace_da_cai(tmp_path):
+    # Gói đã cài là gói NAMESPACE: thư mục cùng tên cạnh mã (không __init__) được gộp vào khi thư mục nằm trên
+    # sys.path, nên `nsgoi.helper` chạy thật lấy từ thư mục — dưới nap_rb thì không: phải từ chối.
+    ngoai = tmp_path / "ngoai"
+    (ngoai / "nsgoi").mkdir(parents=True)
+    (ngoai / "nsgoi" / "sub_a.py").write_text("A = 1\n", encoding="utf-8")
+    (ngoai / "nsgoi-1.0.dist-info").mkdir()
+    (ngoai / "nsgoi-1.0.dist-info" / "METADATA").write_text("Metadata-Version: 2.1\nName: nsgoi\nVersion: 1.0\n",
+                                                            encoding="utf-8")
+    (ngoai / "nsgoi-1.0.dist-info" / "top_level.txt").write_text("nsgoi\n", encoding="utf-8")
+    chon = tmp_path / "chon"
+    (chon / "nsgoi").mkdir(parents=True)
+    (chon / "nsgoi" / "helper.py").write_text("H = 1\n", encoding="utf-8")
+    _ghi_hai_tep(chon, "import nsgoi.helper\nGIA_TRI = 1\n")
+    kq = _chay_tien_trinh_moi("sys.path.insert(0, sys.argv[3])\nm.nap_rb(sys.argv[2])", str(chon), str(ngoai))
+    assert kq.returncode != 0 and "nsgoi" in kq.stderr and "Traceback" not in kq.stderr
+
+
 def test_nap_rb_khong_kiem_lai_i18n_errors_da_nap_dung(tmp_path):
     # i18n_errors đã nạp đúng tệp của thư mục: chỉ mô-đun chính được đọc / kiểm, dù tệp i18n_errors trên đĩa
     # đã bị sửa thành bản sẽ bị từ chối.

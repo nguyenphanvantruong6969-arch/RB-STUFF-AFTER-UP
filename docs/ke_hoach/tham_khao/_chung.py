@@ -71,19 +71,33 @@ def _anh_em(thu_muc):
     """Tên import được từ chính `thu_muc`, như FileFinder: trả (chắc, namespace).
 
     chắc = tệp nguồn / bản biên dịch / mô-đun mở rộng `<tên><đuôi>` và gói thường (thư mục có __init__) —
-    che được cả thư viện chuẩn lẫn gói đã cài. namespace = thư mục không có __init__: chỉ là phần gói
-    namespace, không che được mô-đun thật nào, chỉ thành mô-đun khi tên không có ở đâu khác.
+    che được thư viện chuẩn lẫn gói đã cài (trừ mô-đun dựng sẵn / đóng băng, nạp trước FileFinder).
+    namespace = thư mục không có __init__: chỉ là phần gói namespace — không che được mô-đun / gói thường, nhưng
+    được GỘP vào gói namespace cùng tên ở chỗ khác.
     """
-    duoi = (importlib.machinery.SOURCE_SUFFIXES + importlib.machinery.BYTECODE_SUFFIXES
-            + importlib.machinery.EXTENSION_SUFFIXES)
+    duoi = importlib.machinery.all_suffixes()
     chac, namespace = set(), set()
-    for muc in os.scandir(thu_muc):
-        if muc.is_dir():
-            co_init = any(os.path.isfile(os.path.join(muc.path, "__init__" + d)) for d in duoi)
-            (chac if co_init else namespace).add(muc.name)
-        else:
-            chac.update(muc.name[:-len(d)] for d in duoi if muc.name.endswith(d))
+    with os.scandir(thu_muc) as cac_muc:
+        for muc in cac_muc:
+            if muc.is_dir():
+                co_init = any(os.path.isfile(os.path.join(muc.path, "__init__" + d)) for d in duoi)
+                (chac if co_init else namespace).add(muc.name)
+            else:
+                chac.update(muc.name[:-len(d)] for d in duoi if muc.name.endswith(d))
     return ({t for t in chac if t.isidentifier()}, {t for t in namespace if t.isidentifier()})
+
+
+def _nap_truoc_filefinder(ten):
+    """Mô-đun dựng sẵn hay đóng băng: BuiltinImporter / FrozenImporter đứng trước FileFinder, tệp cạnh mã
+    không che được."""
+    return ten in sys.builtin_module_names or importlib.machinery.FrozenImporter.find_spec(ten) is not None
+
+
+def _mo_dun_thuong_ngoai(ten):
+    """Trên sys.path (không tính thư mục đã chọn, vốn không nằm trên đó) `ten` là mô-đun / gói THƯỜNG? Gói
+    namespace hay không có thì không: thư mục namespace cùng tên cạnh mã sẽ được gộp vào / thành chính nó."""
+    spec = importlib.machinery.PathFinder.find_spec(ten)
+    return spec is not None and spec.origin not in (None, "namespace")
 
 
 _KET_THUC = {("sys", "exit"), ("os", "_exit"), (None, "exit"), (None, "quit")}
@@ -132,12 +146,15 @@ def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
     - mô-đun anh em có mặt trong thư mục đã chọn (`anh_em` = (chắc, namespace), xem _anh_em) mà không thuộc
       `cho_phep` — luôn từ chối, kể cả trong try; loại chắc từ chối cả khi trùng tên gói đã cài / thư viện chuẩn
       (import theo tên sẽ không lấy tệp trong thư mục), loại namespace chỉ khi tên không có ở đâu khác;
-    - tên ngoài thư viện chuẩn, gói đã cài và `cho_phep`, trừ khi nằm trực tiếp trong khối try có nhánh
-      `except ImportError` không ném lại (import tuỳ chọn có đường lui; import trong hàm định nghĩa trong
-      khối try chạy lúc gọi nên không được che).
+      mô-đun dựng sẵn / đóng băng không bao giờ bị tệp cạnh mã che;
+    - tên ngoài thư viện chuẩn, gói đã cài và `cho_phep`, trừ import tuỳ chọn: nằm trong khối try (kể cả thân
+      lớp định nghĩa ở đó; thân hàm / lambda thì không — chạy lúc gọi) mà nhánh except ĐẦU TIÊN bắt được
+      ImportError không kết thúc bằng ném lại / thoát tiến trình (xem _bat_importerror).
 
     Kịch bản đo mã nạp từ một thư mục KHÔNG nằm trên sys.path: mô-đun anh em sẽ hỏng hoặc lấy nhầm bản ở
-    chỗ khác (vd thư mục hiện hành) — từ chối từ đầu. Không bắt được import động bằng chuỗi; mã hiện tại không dùng.
+    chỗ khác (vd thư mục hiện hành) — từ chối từ đầu. Tên KHÔNG có trong thư mục thì lúc chạy thật lẫn dưới
+    kịch bản đều tìm trên cùng sys.path, nên luật import tuỳ chọn chỉ nhằm báo lỗi sớm và rõ, không quyết định
+    đúng/sai của phép đo. Không bắt được import động bằng chuỗi; mã hiện tại không dùng.
     """
     cho_phep = set(cho_phep)
     chac, namespace = anh_em
@@ -148,14 +165,14 @@ def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
                 tuy_chon.update(id(n) for n in _cung_cap(con))
 
     def la_ten(ten, nut):
-        if ten in cho_phep:
+        if ten in cho_phep or _nap_truoc_filefinder(ten):
             return False
         if ten in chac:
             return True
-        if ten in sys.stdlib_module_names or ten in sys.builtin_module_names:
-            return False
         if ten in namespace:
-            return ten not in _goi_cai_dat()
+            return not _mo_dun_thuong_ngoai(ten)
+        if ten in sys.stdlib_module_names:
+            return False
         return id(nut) not in tuy_chon and ten not in _goi_cai_dat()
 
     la = set()
