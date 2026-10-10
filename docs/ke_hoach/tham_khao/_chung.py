@@ -75,34 +75,37 @@ def _khong_the_bi_che(ten):
 
 def _tu_thu_muc(thu_muc):
     """Hàm `ten -> bool`: một lần chạy thật (thư mục đã chọn đứng đầu sys.path) có thể lấy `ten` — toàn bộ hay
-    một phần gói namespace — từ thư mục đó không? Bảo thủ: nghi ngờ thì coi là có (từ chối rõ, không đo nhầm).
+    một phần gói namespace — từ thư mục đó không? Mô-đun dựng sẵn / đóng băng xét trước, ở `la_ten`
+    (_khong_the_bi_che). Bảo thủ: nghi ngờ thì coi là có (từ chối rõ, không đo nhầm).
 
-    1. dựng sẵn / đóng băng -> không (xem _khong_the_bi_che);
-    2. bộ tìm của thư mục, dựng từ sys.path_hooks như PathFinder làm (không ghi vào sys.path_importer_cache):
-       không thấy -> không; thấy mô-đun / gói thường -> có; móc ném lỗi khác ImportError với thư mục -> SystemExit;
-    3. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường;
-       mọi lỗi khi tìm -> có.
+    1. bộ tìm của thư mục, dựng từ sys.path_hooks như PathFinder làm (thư mục không được ghi vào
+       sys.path_importer_cache): không thấy -> không; thấy mô-đun / gói thường -> có;
+    2. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường
+       (PathFinder chạy các móc đường dẫn trên sys.path như mọi import của chính mã được đo trong tiến trình này);
+    3. lỗi (móc ném lỗi khác ImportError với thư mục — PathFinder cũng chỉ bỏ qua ImportError —, hay lỗi khi tìm)
+       -> SystemExit nêu đúng lỗi, chỉ khi thật sự cần xét một tên.
 
     Bộ tìm cài thêm trong sys.meta_path KHÔNG được hỏi: gọi chúng có thể đổi trạng thái tiến trình (vd
     DistutilsMetaFinder của setuptools), và bộ tìm chuyển tiếp cho PathFinder sẽ thấy thư mục khi chạy thật. Tên
     do chúng cung cấp mà thư mục cũng có thì bị từ chối — báo lỗi thừa nhưng không bao giờ đo nhầm mã.
     """
-    bo_tim = None
+    bo_tim, loi_moc = None, None
     for moc in sys.path_hooks:
         try:
             bo_tim = moc(thu_muc)
             break
         except ImportError:
             continue
-        except Exception as e:      # PathFinder chỉ bỏ qua ImportError: lần chạy thật cũng hỏng ở đây
-            raise SystemExit("Móc đường dẫn %r lỗi với thư mục %s: %s" % (moc, thu_muc, e))
-    if bo_tim is None:              # không móc nào nhận thư mục: lần chạy thật cũng không import được gì từ đó
+        except Exception as e:
+            loi_moc = "móc đường dẫn %r lỗi với thư mục %s: %s" % (moc, thu_muc, e)
+            break
+    if bo_tim is None and loi_moc is None:   # không móc nào nhận thư mục: lần chạy thật cũng không lấy gì từ đó
         return lambda ten: False
 
     @functools.cache
     def co(ten):
-        if _khong_the_bi_che(ten):
-            return False
+        if loi_moc is not None:
+            raise SystemExit("Không xét được %s: %s" % (ten, loi_moc))
         try:
             rieng = bo_tim.find_spec(ten)
             if rieng is None:
@@ -110,8 +113,9 @@ def _tu_thu_muc(thu_muc):
             if rieng.loader is not None:
                 return True
             ngoai = importlib.machinery.PathFinder.find_spec(ten)
-        except Exception:           # nghi ngờ: coi là có (từ chối rõ)
-            return True
+        except Exception as e:
+            raise SystemExit("Không xét được %s có đến từ thư mục %s không: %s: %s"
+                             % (ten, thu_muc, type(e).__name__, e))
         return ngoai is None or ngoai.origin in (None, "namespace")
 
     return co
@@ -179,11 +183,11 @@ def _import_la(cay, cho_phep, tu_thu_muc=lambda ten: False):
                 tuy_chon.update(id(n) for n in _cung_cap(con))
 
     def la_ten(ten, nut):
-        if ten in cho_phep:
+        if ten in cho_phep or _khong_the_bi_che(ten):
             return False
         if tu_thu_muc(ten):
             return True
-        if ten in sys.stdlib_module_names or _khong_the_bi_che(ten):
+        if ten in sys.stdlib_module_names:
             return False
         return id(nut) not in tuy_chon and ten not in _goi_cai_dat()
 
