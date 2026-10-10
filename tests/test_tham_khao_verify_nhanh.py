@@ -784,12 +784,39 @@ def test_nap_rb_nhan_ma_import_thu_vien_chuan_ke_ca_mo_dun_c(tmp_path):
     assert kq.stdout.strip() == "py"
 
 
-def test_nap_rb_khong_them_muc_cache_cho_thu_muc_moi(tmp_path):
-    # Thư mục chưa từng có mục trong sys.path_importer_cache: nạp xong vẫn không có.
-    _ghi_hai_tep(tmp_path)
-    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.argv[2] in sys.path_importer_cache)", str(tmp_path))
+def test_nap_rb_nhan_goi_da_cai_va_import_tuy_chon(tmp_path):
+    # Gói đã cài trong site-packages (openpyxl là phụ thuộc sản phẩm) và import tuỳ chọn có đường lui
+    # (try/except ImportError) không phải "mô-đun anh em": phải nhận.
+    _ghi_hai_tep(tmp_path, "import openpyxl\n"
+                           "try:\n    import goi_khong_co_that\nexcept ImportError:\n    goi_khong_co_that = None\n"
+                           "GIA_TRI = goi_khong_co_that is None\n")
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
     assert kq.returncode == 0, kq.stderr
-    assert kq.stdout.strip() == "False"
+    assert kq.stdout.strip() == "True"
+
+
+@pytest.mark.parametrize("ma_loi, mong", [
+    ("import rbda_priority_pipeline\nNGUON = 'py'\n", "rbda_priority_pipeline"),     # nạp trước bản chính
+    ("from .helpers import f\nNGUON = 'py'\n", ".helpers"),                          # tên mô-đun, không ".helpers.f"
+    ("def f(:\n", "phân tích"),                                                       # lỗi cú pháp
+])
+def test_nap_rb_tu_choi_i18n_errors_khong_hop_le(tmp_path, ma_loi, mong):
+    _ghi_hai_tep(tmp_path, ma_loi=ma_loi)
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and mong in kq.stderr and "Traceback" not in kq.stderr
+    if mong == ".helpers":
+        assert ".helpers.f" not in kq.stderr
+
+
+def test_nap_rb_da_nap_dung_ban_thi_khong_kiem_lai(tmp_path):
+    # Đã nạp đúng thư mục này: lần gọi sau trả bản đã nạp (không đọc lại tệp), kể cả khi tệp vừa bị sửa.
+    _ghi_hai_tep(tmp_path)
+    kq = _chay_tien_trinh_moi(
+        "r = m.nap_rb(sys.argv[2])\n"
+        "open(sys.argv[2] + '/rbda_priority_pipeline.py', 'w').write('import mo_dun_anh_em\\n')\n"
+        "print(m.nap_rb(sys.argv[2]) is r)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "True"
 
 
 def test_nap_rb_bao_ro_muc_sys_modules_khong_ro_nguon():

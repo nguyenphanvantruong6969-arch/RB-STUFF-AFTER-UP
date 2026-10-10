@@ -52,32 +52,73 @@ def _tep_nguon(thu_muc, ten):
     return tep
 
 
-def _import_la(tep):
-    """Các import trong tệp nguồn (ở đầu tệp LẪN bên trong hàm) không thuộc thư viện chuẩn và không là
-    i18n_errors / rbda_priority_pipeline. Đọc tĩnh bằng ast, trước khi chạy gì cả.
+def _goi_cai_dat():
+    """Tên gói cấp cao nhất của các bản phân phối đã cài (site-packages), theo siêu dữ liệu cài đặt."""
+    try:
+        from importlib.metadata import packages_distributions
+        return set(packages_distributions())
+    except Exception:          # siêu dữ liệu hỏng / thiếu: coi như không có gói cài thêm (thận trọng)
+        return set()
 
-    Kịch bản chỉ đo được mã import thư viện chuẩn và i18n_errors: mô-đun anh em khác không nằm trên
-    sys.path nên hoặc hỏng, hoặc lấy nhầm bản ở chỗ khác (vd thư mục hiện hành) — từ chối từ đầu.
-    Không bắt được import động bằng chuỗi (importlib.import_module(...)); mã hiện tại không dùng.
+
+def _bat_importerror(nut_try):
+    """Khối try có nhánh except bắt ImportError / ModuleNotFoundError (import tuỳ chọn có đường lui)?"""
+    for h in nut_try.handlers:
+        loai = h.type
+        ten = [loai] if loai is not None and not hasattr(loai, "elts") else list(getattr(loai, "elts", []))
+        if loai is None or any(getattr(t, "id", None) in ("ImportError", "ModuleNotFoundError") for t in ten):
+            return True
+    return False
+
+
+def _import_la(cay, cho_phep):
+    """Tên mô-đun mà cây ast `cay` import (đầu tệp LẪN trong hàm, cả import tương đối) nằm ngoài:
+    thư viện chuẩn, gói đã cài trong site-packages, và `cho_phep`. Bỏ qua import trong khối try có
+    `except ImportError` (import tuỳ chọn có đường lui).
+
+    Kịch bản đo mã nạp từ một thư mục KHÔNG nằm trên sys.path: mô-đun anh em sẽ hỏng hoặc lấy nhầm bản ở
+    chỗ khác (vd thư mục hiện hành) — từ chối từ đầu. Không bắt được import động bằng chuỗi; mã hiện tại không dùng.
     """
     import ast
-    with open(tep, "rb") as f:
-        cay = ast.parse(f.read(), filename=tep)
+    duoc = set(sys.stdlib_module_names) | _goi_cai_dat() | set(cho_phep)
+    tuy_chon = set()
+    for nut in ast.walk(cay):
+        if isinstance(nut, ast.Try) and _bat_importerror(nut):
+            for con in nut.body:
+                tuy_chon.update(id(n) for n in ast.walk(con))
     la = set()
     for nut in ast.walk(cay):
+        if id(nut) in tuy_chon:
+            continue
         if isinstance(nut, ast.Import):
-            ten_goc = [a.name.split(".")[0] for a in nut.names]
+            la.update(t for t in (a.name.split(".")[0] for a in nut.names) if t not in duoc)
         elif isinstance(nut, ast.ImportFrom):
             if nut.level:                       # import tương đối: không có gói nào ở đây
-                goc = "." * nut.level + (nut.module + "." if nut.module else "")
-                la.update(goc + a.name for a in nut.names)
-                continue
-            ten_goc = [nut.module.split(".")[0]]
-        else:
-            continue
-        la.update(t for t in ten_goc
-                  if t not in sys.stdlib_module_names and t not in _TEN and t != "__future__")
+                if nut.module:
+                    la.add("." * nut.level + nut.module)
+                else:
+                    la.update("." * nut.level + a.name for a in nut.names)
+            elif nut.module.split(".")[0] not in duoc:
+                la.add(nut.module.split(".")[0])
     return sorted(la)
+
+
+def _bien_dich_da_kiem(tep, cho_phep):
+    """Đọc tệp MỘT lần, kiểm import trên chính bản đã đọc rồi biên dịch đúng bản đó (không có khe giữa lúc
+    kiểm và lúc chạy). SystemExit rõ cho lỗi đọc, lỗi cú pháp và import lạ."""
+    import ast
+    try:
+        with open(tep, "rb") as f:
+            nguon = f.read()
+        cay = ast.parse(nguon, filename=tep)
+    except (OSError, SyntaxError, ValueError) as e:
+        raise SystemExit("Không đọc / phân tích được %s: %s" % (tep, e))
+    la = _import_la(cay, cho_phep)
+    if la:
+        raise SystemExit("%s import mô-đun ngoài thư viện chuẩn và gói đã cài: %s. Kịch bản chỉ đo được mã "
+                         "import những thứ đó và i18n_errors (mô-đun anh em sẽ không đến từ thư mục đã chọn)."
+                         % (tep, ", ".join(la)))
+    return compile(cay, tep, "exec")
 
 
 def _nguon_thuc(mod):
@@ -135,21 +176,19 @@ def nap_rb(duong_dan):
         # Nạp thẳng <thu_muc>/<tên>.py (không import theo tên qua sys.path, không đụng cache bộ tìm).
         # Kiểm mô-đun chính trước: thư mục sai thì báo thiếu rbda_priority_pipeline, đúng như cách dùng ghi.
         tep = {ten: _tep_nguon(thu_muc, ten) for ten in reversed(_TEN)}
-        # Kiểm TĨNH trước khi chạy gì: mã đo chỉ được import thư viện chuẩn và i18n_errors (xem _import_la).
-        for ten in reversed(_TEN):
-            la = _import_la(tep[ten])
-            if la:
-                raise SystemExit("%s import mô-đun ngoài thư viện chuẩn: %s. Kịch bản chỉ đo được mã import thư "
-                                 "viện chuẩn và i18n_errors (mô-đun anh em sẽ không đến từ thư mục đã chọn)."
-                                 % (tep[ten], ", ".join(la)))
+        # Mô-đun được import mô-đun nào trong _TEN: chỉ mô-đun nạp TRƯỚC nó (i18n_errors nạp trước nên không
+        # được import rbda_priority_pipeline — lúc đó bản này chưa có, import theo tên sẽ lấy nhầm bản khác).
+        cho_phep = {ten: set(_TEN[:i]) for i, ten in enumerate(_TEN)}
 
         def nap(ten):
-            # Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
+            # Kiểm tĩnh và biên dịch ngay lúc nạp (đã nạp sẵn đúng bản thì _nap_co_kiem trả luôn, không kiểm
+            # lại). Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
             # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này.
+            ma = _bien_dich_da_kiem(tep[ten], cho_phep[ten])
             spec = importlib.util.spec_from_file_location(ten, tep[ten])
             mod = importlib.util.module_from_spec(spec)
             sys.modules[ten] = mod
-            spec.loader.exec_module(mod)
+            exec(ma, mod.__dict__)
 
         return _nap_co_kiem(tep, nap, "thư mục %s" % thu_muc)
     if not os.path.isfile(duong_dan):
