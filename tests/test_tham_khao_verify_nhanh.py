@@ -404,12 +404,13 @@ def test_kiem_tien_de_nhan_so_boc_tham_kieu_numpy():
     exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
-def test_kiem_tien_de_bao_valueerror_khi_chua_nap_rbda(monkeypatch):
-    # Hợp đồng: mọi vi phạm tiền đề là ValueError, kể cả chưa có mô-đun rbda để kiểm sức chứa.
+def test_kiem_tien_de_bao_runtimeerror_khi_chua_nap_rbda(monkeypatch):
+    # Chưa nạp mô-đun rbda là lỗi cài đặt, KHÔNG phải vi phạm tiền đề dữ liệu: RuntimeError, để người gọi
+    # bắt ValueError rồi chạy lại toàn bộ không nuốt mất lỗi này.
     monkeypatch.setattr(exp_resume, "rb", None)
     monkeypatch.delitem(sys.modules, "rbda_priority_pipeline")
     cu, moi, moi_ids, res0 = _them_em_moi(2)
-    with pytest.raises(ValueError, match="chưa nạp"):
+    with pytest.raises(RuntimeError, match="chưa nạp"):
         exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
@@ -438,13 +439,29 @@ def test_kiem_tien_de_coi_nhom_rong_va_none_la_mot():
     assert asg == _chay_lai(moi)
 
 
-def test_kiem_tien_de_chap_nhan_diem_nan_khong_doi():
+def test_compute_club_priority_phu_thuoc_thu_tu_khi_co_diem_nan():
+    # Tiền đề của test dưới: có NaN thì thứ hạng của chính mã sản phẩm phụ thuộc thứ tự đầu vào.
+    diem = {"a": 5.0, "b": float("nan"), "c": 3.0}
+    stb = {"a": 1, "b": 2, "c": 3}
+    assert (rb.compute_club_priority("X", ["a", "b", "c"], diem, stb)
+            != rb.compute_club_priority("X", ["c", "b", "a"], diem, stb))
+
+
+@pytest.mark.parametrize("ben", ["cu_va_moi", "chi_em_moi"])
+def test_kiem_tien_de_tu_choi_diem_nan(ben):
+    # NaN làm thứ hạng cũ không còn đáng tin (xem test trên): từ chối, không coi NaN == NaN.
     cu, moi, moi_ids, res0 = _them_em_moi(2)
-    c = next(c for c, t in cu["tested"].items() if t)
-    s = next(iter(cu["tested"][c]))
-    cu["tested"][c] = dict(cu["tested"][c], **{s: float("nan")})
-    moi["tested"][c] = dict(moi["tested"][c], **{s: float("nan")})
-    exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+    if ben == "cu_va_moi":
+        c = next(c for c, t in cu["tested"].items() if t)
+        s = next(iter(cu["tested"][c]))
+        cu["tested"][c] = dict(cu["tested"][c], **{s: float("nan")})
+        moi["tested"][c] = dict(moi["tested"][c], **{s: float("nan")})
+    else:
+        n = moi_ids[0]
+        c = moi["prefs"][n][1]
+        moi["tested"][c] = dict(moi["tested"][c], **{n: float("nan")})
+    with pytest.raises(ValueError, match="NaN"):
+        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
 
 
 def test_kiem_tien_de_khong_bo_qua_kiem_suc_chua_khi_chua_gan_rb(monkeypatch):
@@ -526,7 +543,7 @@ def test_nap_rb_nap_i18n_errors_khi_mo_dun_chinh_da_co(tmp_path):
     assert os.path.realpath(kq.stdout.strip()) == os.path.realpath(str(tmp_path / "i18n_errors.py"))
 
 
-def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None, kieu_cu=False):
+def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None, kieu_cu=False, thieu_rbda=False):
     """Dựng một tệp PyInstaller tối thiểu (CArchive + PYZ) chứa i18n_errors và rbda_priority_pipeline."""
     import marshal
     import struct
@@ -535,7 +552,7 @@ def _tao_exe_gia(duong, ma_rb="GIA_TRI = 42\n", pyver=None, kieu_cu=False):
         pyver = sys.version_info.major * 100 + sys.version_info.minor
     than, muc = b"", []
     for ten, ma in (("i18n_errors", "def err(code, **p):\n    return {'code': code, 'params': p}\n"),
-                    ("rbda_priority_pipeline", ma_rb)):
+                    ("rbda_priority_pipeline", ma_rb))[:1 if thieu_rbda else 2]:
         nen = zlib.compress(marshal.dumps(compile(ma, ten + ".py", "exec")))
         muc.append((ten, (0, 12 + len(than), len(nen))))
         than += nen
@@ -608,6 +625,32 @@ def test_nap_rb_lay_ca_hai_tep_tu_thu_muc_nguoi_dung_dua(tmp_path):
     kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.modules['i18n_errors'].NGUON)", str(a))
     assert kq.returncode == 0, kq.stderr
     assert kq.stdout.strip() == "A"
+
+
+def test_nap_rb_tu_choi_thu_muc_thieu_i18n_errors(tmp_path):
+    # Thư mục chỉ có rbda_priority_pipeline.py; tiến trình có một i18n_errors khác trên sys.path (kho mã).
+    # Import theo tên sẽ lấy nhầm tệp đó: phải từ chối và không để mô-đun nào lại trong tiến trình.
+    (tmp_path / "rbda_priority_pipeline.py").write_text("GIA_TRI = 1\n", encoding="utf-8")
+    kq = _chay_tien_trinh_moi(
+        "sys.path.insert(0, sys.argv[3])\n"
+        "try:\n    m.nap_rb(sys.argv[2])\nexcept SystemExit as e:\n"
+        "    print('TU_CHOI', 'i18n_errors' in sys.modules, 'rbda_priority_pipeline' in sys.modules)",
+        str(tmp_path), _GOC)
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.split() == ["TU_CHOI", "False", "False"]
+
+
+def test_nap_rb_bao_ro_muc_sys_modules_khong_ro_nguon():
+    kq = _chay_tien_trinh_moi("sys.modules['i18n_errors'] = None\nm.nap_rb(sys.argv[2])", _GOC)
+    assert kq.returncode != 0 and "không rõ nguồn" in kq.stderr
+
+
+def test_nap_rb_bao_ro_tep_build_thieu_mo_dun(tmp_path):
+    exe = tmp_path / "ChuongTrinhKhac.exe"
+    _tao_exe_gia(str(exe), thieu_rbda=True)
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(exe))
+    assert kq.returncode != 0 and "không chứa mô-đun rbda_priority_pipeline" in kq.stderr
+    assert "KeyError" not in kq.stderr
 
 
 def test_nap_rb_ban_build_hong_khong_de_mo_dun_do_dang(tmp_path):

@@ -31,7 +31,9 @@ def _lay_rb():
         return rb
     mod = sys.modules.get("rbda_priority_pipeline")
     if mod is None:
-        raise ValueError("resume_da: chưa nạp rbda_priority_pipeline (gán exp_resume.rb hoặc dùng nap_rb).")
+        # Lỗi cài đặt, không phải vi phạm tiền đề dữ liệu: RuntimeError để người gọi bắt ValueError
+        # (rồi chạy lại toàn bộ) không nuốt mất nó.
+        raise RuntimeError("exp_resume: chưa nạp rbda_priority_pipeline (gán exp_resume.rb hoặc dùng nap_rb).")
     return mod
 
 
@@ -45,13 +47,15 @@ def _nhom(v):
     return v or None
 
 
-def _cung_diem(a, b):
-    # So hai bảng điểm; NaN coi như bằng NaN (dict != thì NaN luôn khác).
-    return a.keys() == b.keys() and all(a[k] == b[k] or (a[k] != a[k] and b[k] != b[k]) for k in a)
+def _co_nan(bang_diem):
+    # compute_club_priority sắp theo (-điểm, ...): có NaN thì phép so không nhất quán và thứ tự phụ thuộc
+    # thứ tự đầu vào -> thứ hạng cũ không còn đáng tin. Từ chối thay vì coi NaN == NaN.
+    return any(v != v for t in bang_diem.values() for v in t.values())
 
 
 def kiem_tien_de(res0, cu, moi, new_ids):
-    """Kiểm tiền đề của resume_da; vi phạm thì ValueError nêu rõ chỗ sai.
+    """Kiểm tiền đề của resume_da; dữ liệu vi phạm thì ValueError nêu rõ chỗ sai
+    (chưa nạp mô-đun rbda là lỗi cài đặt: RuntimeError).
 
     `cu` là dữ liệu đã cho ra `res0`, `moi` là dữ liệu bây giờ; cả hai là dict có các khoá
     students, clubs, tested, apps, prefs, stb. Tiếp tục DA cho đúng kết quả chạy lại CHỈ khi thay đổi
@@ -98,11 +102,13 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                              % (s, sorted(clb_moi.intersection(p1))))
         if _nhom(cu["students"][s].get("reserve_group")) != _nhom(moi["students"][s].get("reserve_group")):
             raise ValueError("resume_da: nhóm dự trữ của em cũ %s đã đổi (cần chạy lại)." % s)
+    if _co_nan(cu["tested"]) or _co_nan(moi["tested"]):
+        raise ValueError("resume_da: có điểm NaN — thứ hạng phụ thuộc thứ tự đầu vào (cần chạy lại toàn bộ).")
     for c in set(clubs0) | set(cu["tested"]):
         # Bỏ em mới ở CẢ hai phía: điểm nhập trước cho em đến muộn không phải "em cũ đổi điểm".
         t0 = {k: v for k, v in cu["tested"].get(c, {}).items() if k not in moi_set}
         t1 = {k: v for k, v in moi["tested"].get(c, {}).items() if k not in moi_set}
-        if not _cung_diem(t0, t1):
+        if t0 != t1:
             raise ValueError("resume_da: điểm của em cũ ở CLB %s đã đổi (cần chạy lại)." % c)
     apps_set = {c: set(v) for c, v in moi["apps"].items()}
     for c in clubs1:

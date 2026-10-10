@@ -44,12 +44,21 @@ def _nap_co_kiem(ao, nap, mo_ta):
         return sys.modules["rbda_priority_pipeline"]
     for ten in _TEN:
         if ten in sys.modules and not (da_nap[ten] and _cung_tep(da_nap[ten], ao[ten])):
+            if not da_nap[ten]:
+                raise SystemExit("Tiến trình này đã có mục %s trong sys.modules nhưng không rõ nguồn (None hoặc "
+                                 "mô-đun giả, không có __file__); muốn đo %s hãy chạy một tiến trình riêng."
+                                 % (ten, mo_ta))
             raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo %s hãy chạy một tiến trình riêng."
                              % (ten, da_nap[ten], mo_ta))
     chua_co = [ten for ten in _TEN if ten not in sys.modules]
     try:
         for ten in chua_co:
             nap(ten)
+            # Kiểm SAU khi nạp: import theo tên có thể lấy tệp cùng tên ở chỗ khác trên sys.path.
+            tep = getattr(sys.modules.get(ten), "__file__", None)
+            if not (tep and _cung_tep(tep, ao[ten])):
+                raise SystemExit("%s không có %s.py (đã nạp nhầm từ %s): cần đủ cả hai tệp trong %s."
+                                 % (mo_ta, ten, tep, mo_ta))
     except BaseException:
         for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
             sys.modules.pop(ten, None)
@@ -91,6 +100,8 @@ def nap_rb(duong_dan):
         if "pyz" not in trang_thai:
             trang_thai["pyz"], trang_thai["mods"] = _doc_pyz(duong_dan)
         pyz, mods = trang_thai["pyz"], trang_thai["mods"]
+        if ten not in mods:
+            raise SystemExit("Tệp %s không chứa mô-đun %s: không phải bản build rbda-kiosk?" % (duong_dan, ten))
         _ispkg, off, ln = mods[ten]
         co = marshal.loads(zlib.decompress(pyz[off:off + ln]))
         m = types.ModuleType(ten)
