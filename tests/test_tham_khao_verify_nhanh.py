@@ -808,6 +808,67 @@ def test_nap_rb_tu_choi_i18n_errors_khong_hop_le(tmp_path, ma_loi, mong):
         assert ".helpers.f" not in kq.stderr
 
 
+@pytest.mark.parametrize("ma_rb, ma_loi, tep_canh, mong", [
+    # import tuỳ chọn nhưng tên là mô-đun anh em có mặt trong thư mục đã chọn: vẫn từ chối
+    ("GIA_TRI = 1\n", "try:\n    import rbda_priority_pipeline\nexcept ImportError:\n    pass\nNGUON = 'py'\n",
+     None, "rbda_priority_pipeline"),
+    ("try:\n    import mo_dun_anh_em\nexcept ImportError:\n    mo_dun_anh_em = None\nGIA_TRI = 1\n", None,
+     "mo_dun_anh_em.py", "mo_dun_anh_em"),
+    # import nằm trong hàm định nghĩa trong khối try: chạy lúc gọi, đường lui không che
+    ("try:\n    def f():\n        import mo_dun_anh_em\nexcept ImportError:\n    pass\nGIA_TRI = 1\n", None,
+     None, "mo_dun_anh_em"),
+    # nhánh except chỉ ném lại: không phải đường lui
+    ("try:\n    import mo_dun_anh_em\nexcept ImportError:\n    raise\nGIA_TRI = 1\n", None, None, "mo_dun_anh_em"),
+    # tệp anh em trùng tên một gói đã cài: import sẽ lấy bản site-packages, không phải tệp trong thư mục
+    ("import openpyxl\nGIA_TRI = 1\n", None, "openpyxl.py", "openpyxl"),
+])
+def test_nap_rb_tu_choi_import_anh_em_du_tuy_chon_hay_trung_goi_cai(tmp_path, ma_rb, ma_loi, tep_canh, mong):
+    _ghi_hai_tep(tmp_path, ma_rb, *([ma_loi] if ma_loi else []))
+    if tep_canh:
+        (tmp_path / tep_canh).write_text("X = 1\n", encoding="utf-8")
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and mong in kq.stderr and "Traceback" not in kq.stderr
+
+
+def test_nap_rb_nhan_import_tuy_chon_except_sao(tmp_path):
+    _ghi_hai_tep(tmp_path, "try:\n    import goi_khong_co_that\nexcept* ImportError:\n    pass\nGIA_TRI = 1\n")
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "1"
+
+
+def test_nap_rb_kiem_ca_hai_tep_truoc_khi_chay_tep_nao(tmp_path):
+    # Mô-đun chính hỏng: i18n_errors (nạp trước) không được chạy chút nào.
+    _ghi_hai_tep(tmp_path, "def f(:\n", "print('DA_CHAY')\nNGUON = 'py'\n")
+    kq = _chay_tien_trinh_moi(
+        "\ntry:\n    m.nap_rb(sys.argv[2])\nexcept SystemExit:\n    print('i18n_errors' in sys.modules)",
+        str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert "DA_CHAY" not in kq.stdout and kq.stdout.strip() == "False"
+
+
+def test_nap_rb_bao_ro_ly_do_i18n_errors_khong_duoc_import_mo_dun_chinh(tmp_path):
+    _ghi_hai_tep(tmp_path, ma_loi="import rbda_priority_pipeline\nNGUON = 'py'\n")
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and "nạp trước" in kq.stderr
+
+
+def test_nap_rb_khong_tro_toi_tep_bien_dich_khong_ton_tai(tmp_path):
+    _ghi_hai_tep(tmp_path)
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).__cached__)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "None"
+
+
+def test_nap_rb_khong_them_muc_cache_cho_thu_muc_moi(tmp_path):
+    # Thư mục chưa từng có mục trong sys.path_importer_cache: nạp xong vẫn không có (chặn hồi quy kiểu
+    # chèn tạm thư mục vào sys.path rồi import theo tên).
+    _ghi_hai_tep(tmp_path)
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.argv[2] in sys.path_importer_cache)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "False"
+
+
 def test_nap_rb_da_nap_dung_ban_thi_khong_kiem_lai(tmp_path):
     # Đã nạp đúng thư mục này: lần gọi sau trả bản đã nạp (không đọc lại tệp), kể cả khi tệp vừa bị sửa.
     _ghi_hai_tep(tmp_path)
