@@ -873,12 +873,35 @@ def test_nap_rb_tu_choi_anh_em_bien_dich_goi_thuong_va_nhanh_khong_lui(tmp_path,
 
 def test_nap_rb_nhan_tep_trung_ten_mo_dun_dung_san_hay_dong_bang(tmp_path):
     # time (dựng sẵn) và os (đóng băng) được nạp TRƯỚC FileFinder: tệp cùng tên cạnh mã không che được.
+    import importlib.machinery
+    if "time" not in sys.builtin_module_names or importlib.machinery.FrozenImporter.find_spec("os") is None:
+        pytest.skip("trình thông dịch này không dựng sẵn time / không đóng băng os")
     _ghi_hai_tep(tmp_path, "import time\nimport os\nGIA_TRI = 1\n")
     (tmp_path / "time.py").write_text("X = 1\n", encoding="utf-8")
     (tmp_path / "os.py").write_text("X = 1\n", encoding="utf-8")
     kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
     assert kq.returncode == 0, kq.stderr
     assert kq.stdout.strip() == "1"
+
+
+def test_nap_rb_nhan_ten_do_bo_tim_dung_truoc_pathfinder_cung_cap(tmp_path):
+    # Một bộ tìm trong sys.meta_path đứng trước PathFinder cung cấp `hookmod`: thư mục `hookmod/` (dữ liệu, không
+    # __init__) cạnh mã không bao giờ được dùng — không được từ chối.
+    _ghi_hai_tep(tmp_path, "import hookmod\nGIA_TRI = hookmod.X\n")
+    (tmp_path / "hookmod").mkdir()
+    kq = _chay_tien_trinh_moi(
+        "import importlib.machinery as im\n"
+        "class N:\n"
+        "    def create_module(self, spec): return None\n"
+        "    def exec_module(self, mod): mod.X = 7\n"
+        "class F:\n"
+        "    @staticmethod\n"
+        "    def find_spec(ten, path=None, target=None):\n"
+        "        return im.ModuleSpec(ten, N()) if ten == 'hookmod' else None\n"
+        "sys.meta_path.insert(0, F)\n"
+        "print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "7"
 
 
 def test_nap_rb_tu_choi_thu_muc_gop_vao_goi_namespace_da_cai(tmp_path):

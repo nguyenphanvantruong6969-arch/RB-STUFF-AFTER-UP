@@ -67,37 +67,48 @@ def _goi_cai_dat():
         return frozenset()
 
 
-def _anh_em(thu_muc):
-    """Tên import được từ chính `thu_muc`, như FileFinder: trả (chắc, namespace).
+def _bo_tim_truoc_cung_cap(ten):
+    """Một bộ tìm trong sys.meta_path đứng TRƯỚC PathFinder (dựng sẵn, đóng băng, móc cài thêm) cung cấp `ten`?
+    Khi đó cả lần chạy thật lẫn kịch bản đều lấy từ nó, thư mục nào cũng không chen vào được."""
+    for f in sys.meta_path:
+        if f is importlib.machinery.PathFinder:
+            return False
+        try:
+            if f.find_spec(ten, None) is not None:
+                return True
+        except Exception:           # bộ tìm lạ hỏng: bỏ qua nó, như thể không cung cấp
+            pass
+    return False
 
-    chắc = tệp nguồn / bản biên dịch / mô-đun mở rộng `<tên><đuôi>` và gói thường (thư mục có __init__) —
-    che được thư viện chuẩn lẫn gói đã cài (trừ mô-đun dựng sẵn / đóng băng, nạp trước FileFinder).
-    namespace = thư mục không có __init__: chỉ là phần gói namespace — không che được mô-đun / gói thường, nhưng
-    được GỘP vào gói namespace cùng tên ở chỗ khác.
+
+def _tu_thu_muc(thu_muc):
+    """Hàm `ten -> bool`: một lần chạy thật (thư mục đã chọn đứng đầu sys.path) có lấy `ten` — toàn bộ hay một
+    phần gói namespace — từ thư mục đó không? Hỏi chính các bộ tìm của trình thông dịch, đúng thứ tự import:
+
+    1. bộ tìm trong sys.meta_path đứng trước PathFinder (dựng sẵn, đóng băng, móc cài thêm) có cung cấp -> không;
+    2. FileFinder của thư mục (như PathFinder tạo cho nó) không thấy gì -> không; thấy mô-đun / gói thường -> có;
+    3. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường
+       (thường thắng namespace).
+
+    Không gọi PathFinder với thư mục (sẽ thêm mục vào sys.path_importer_cache); kết quả nhớ theo tên.
     """
-    duoi = importlib.machinery.all_suffixes()
-    chac, namespace = set(), set()
-    with os.scandir(thu_muc) as cac_muc:
-        for muc in cac_muc:
-            if muc.is_dir():
-                co_init = any(os.path.isfile(os.path.join(muc.path, "__init__" + d)) for d in duoi)
-                (chac if co_init else namespace).add(muc.name)
-            else:
-                chac.update(muc.name[:-len(d)] for d in duoi if muc.name.endswith(d))
-    return ({t for t in chac if t.isidentifier()}, {t for t in namespace if t.isidentifier()})
+    m = importlib.machinery
+    bo_tim = m.FileFinder(thu_muc, (m.ExtensionFileLoader, m.EXTENSION_SUFFIXES),
+                          (m.SourceFileLoader, m.SOURCE_SUFFIXES), (m.SourcelessFileLoader, m.BYTECODE_SUFFIXES))
 
+    @functools.cache
+    def co(ten):
+        if _bo_tim_truoc_cung_cap(ten):
+            return False
+        rieng = bo_tim.find_spec(ten)
+        if rieng is None:
+            return False
+        if rieng.loader is not None:
+            return True
+        ngoai = m.PathFinder.find_spec(ten)
+        return ngoai is None or ngoai.origin in (None, "namespace")
 
-def _nap_truoc_filefinder(ten):
-    """Mô-đun dựng sẵn hay đóng băng: BuiltinImporter / FrozenImporter đứng trước FileFinder, tệp cạnh mã
-    không che được."""
-    return ten in sys.builtin_module_names or importlib.machinery.FrozenImporter.find_spec(ten) is not None
-
-
-def _mo_dun_thuong_ngoai(ten):
-    """Trên sys.path (không tính thư mục đã chọn, vốn không nằm trên đó) `ten` là mô-đun / gói THƯỜNG? Gói
-    namespace hay không có thì không: thư mục namespace cùng tên cạnh mã sẽ được gộp vào / thành chính nó."""
-    spec = importlib.machinery.PathFinder.find_spec(ten)
-    return spec is not None and spec.origin not in (None, "namespace")
+    return co
 
 
 _KET_THUC = {("sys", "exit"), ("os", "_exit"), (None, "exit"), (None, "quit")}
@@ -141,13 +152,11 @@ def _cung_cap(nut):
         yield from _cung_cap(con)
 
 
-def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
+def _import_la(cay, cho_phep, tu_thu_muc=lambda ten: False):
     """Tên mô-đun mà cây ast `cay` import (đầu tệp LẪN trong hàm, cả import tương đối) không đo được:
-    - mô-đun anh em có mặt trong thư mục đã chọn (`anh_em` = (chắc, namespace), xem _anh_em) mà không thuộc
-      `cho_phep` — luôn từ chối, kể cả trong try; loại chắc từ chối cả khi trùng tên gói đã cài / thư viện chuẩn
-      (import theo tên sẽ không lấy tệp trong thư mục), loại namespace chỉ khi tên không có ở đâu khác;
-      mô-đun dựng sẵn / đóng băng không bao giờ bị tệp cạnh mã che;
-    - tên ngoài thư viện chuẩn, gói đã cài và `cho_phep`, trừ import tuỳ chọn: nằm trong khối try (kể cả thân
+    - mô-đun anh em: tên mà một lần chạy thật lấy (toàn bộ hay một phần) từ thư mục đã chọn (`tu_thu_muc`, xem
+      _tu_thu_muc) và không thuộc `cho_phep` — luôn từ chối, kể cả trong try;
+    - tên ngoài thư viện chuẩn, gói đã cài, bộ tìm đứng trước PathFinder và `cho_phep`, trừ import tuỳ chọn: nằm trong khối try (kể cả thân
       lớp định nghĩa ở đó; thân hàm / lambda thì không — chạy lúc gọi) mà nhánh except ĐẦU TIÊN bắt được
       ImportError không kết thúc bằng ném lại / thoát tiến trình (xem _bat_importerror).
 
@@ -157,7 +166,6 @@ def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
     đúng/sai của phép đo. Không bắt được import động bằng chuỗi; mã hiện tại không dùng.
     """
     cho_phep = set(cho_phep)
-    chac, namespace = anh_em
     tuy_chon = set()
     for nut in ast.walk(cay):
         if isinstance(nut, _CAC_TRY) and _bat_importerror(nut):
@@ -165,13 +173,11 @@ def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
                 tuy_chon.update(id(n) for n in _cung_cap(con))
 
     def la_ten(ten, nut):
-        if ten in cho_phep or _nap_truoc_filefinder(ten):
+        if ten in cho_phep:
             return False
-        if ten in chac:
+        if tu_thu_muc(ten):
             return True
-        if ten in namespace:
-            return not _mo_dun_thuong_ngoai(ten)
-        if ten in sys.stdlib_module_names:
+        if ten in sys.stdlib_module_names or _bo_tim_truoc_cung_cap(ten):
             return False
         return id(nut) not in tuy_chon and ten not in _goi_cai_dat()
 
@@ -190,7 +196,7 @@ def _import_la(cay, cho_phep, anh_em=(frozenset(), frozenset())):
     return sorted(la)
 
 
-def _bien_dich_da_kiem(tep, cho_phep, anh_em=(frozenset(), frozenset())):
+def _bien_dich_da_kiem(tep, cho_phep, tu_thu_muc=lambda ten: False):
     """Đọc tệp MỘT lần, kiểm import trên chính bản đã đọc rồi biên dịch đúng bản đó (không có khe giữa lúc
     kiểm và lúc chạy). SystemExit rõ cho lỗi đọc, lỗi cú pháp và import lạ."""
     try:
@@ -199,7 +205,7 @@ def _bien_dich_da_kiem(tep, cho_phep, anh_em=(frozenset(), frozenset())):
         cay = ast.parse(nguon, filename=tep)
     except (OSError, SyntaxError, ValueError) as e:
         raise SystemExit("Không đọc / phân tích được %s: %s" % (tep, e))
-    la = _import_la(cay, cho_phep, anh_em)
+    la = _import_la(cay, cho_phep, tu_thu_muc)
     if la:
         duoc = ", ".join(sorted(cho_phep)) or "không mô-đun nào của kho mã (nó được nạp trước)"
         raise SystemExit("%s import mô-đun anh em hoặc mô-đun ngoài thư viện chuẩn và gói đã cài: %s. Trong kho "
@@ -275,8 +281,8 @@ def nap_rb(duong_dan):
         def chuan_bi(chua_co):
             # Kiểm tĩnh và biên dịch MỌI tệp sắp nạp trước khi chạy tệp nào (hỏng ở mô-đun chính thì i18n_errors
             # cũng chưa chạy); tệp đã nạp đúng bản thì không đọc lại. Dựng đủ rồi mới gán (không nửa vời).
-            anh_em = _anh_em(thu_muc)
-            ma.update({t: _bien_dich_da_kiem(tep[t], cho_phep[t], anh_em) for t in chua_co})
+            tu_thu_muc = _tu_thu_muc(thu_muc)
+            ma.update({t: _bien_dich_da_kiem(tep[t], cho_phep[t], tu_thu_muc) for t in chua_co})
 
         def nap(ten):
             # Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
