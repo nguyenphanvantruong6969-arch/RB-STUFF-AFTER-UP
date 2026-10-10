@@ -659,15 +659,39 @@ def test_nap_rb_nhan_ban_bien_dich_khong_kem_nguon(tmp_path):
     assert kq.stdout.strip() == "pyc"
 
 
-def test_cung_nguon_tu_choi_ban_bien_dich_cu_canh_tep_nguon(tmp_path):
-    # Có rbda_priority_pipeline.py thì một .so/.pyd cũ cùng tên mà Python nạp trước KHÔNG được nhận.
+def test_tep_se_nap_tu_choi_ban_bien_dich_cu_canh_tep_nguon(tmp_path):
+    # Có rbda_priority_pipeline.py mà bộ import của Python sẽ nạp một bản mở rộng (.so/.pyd) cũ cùng tên
+    # trước: từ chối. Dùng hậu tố mở rộng thật của máy này nên đúng trên cả Linux lẫn Windows.
+    import importlib.machinery
     py = tmp_path / "rbda_priority_pipeline.py"
-    so = str(tmp_path / "rbda_priority_pipeline.cpython-311-x86_64-linux-gnu.so")
     py.write_text("GIA_TRI = 1\n", encoding="utf-8")
-    assert not _chung._cung_nguon(so, str(py))
-    assert _chung._cung_nguon(str(py), str(py))
-    py.unlink()
-    assert _chung._cung_nguon(so, str(py))               # không có .py: nhận bản biên dịch không kèm nguồn
+    assert _chung._cung_tep(_chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline"), str(py))
+    (tmp_path / ("rbda_priority_pipeline" + importlib.machinery.EXTENSION_SUFFIXES[0])).write_bytes(b"cu")
+    with pytest.raises(SystemExit, match="thay cho tệp nguồn"):
+        _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
+
+
+def test_tep_se_nap_bo_qua_pyc_co_the_trong_pycache(tmp_path):
+    # Thư mục chỉ có __pycache__/<tên>.cpython-XY.pyc: Python KHÔNG nạp được -> báo rõ "không có mô-đun".
+    import py_compile
+    nguon = tmp_path / "rbda_priority_pipeline.py"
+    nguon.write_text("GIA_TRI = 1\n", encoding="utf-8")
+    py_compile.compile(str(nguon))
+    nguon.unlink()
+    with pytest.raises(SystemExit, match="không có mô-đun rbda_priority_pipeline"):
+        _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
+
+
+def test_nap_rb_bao_ro_thu_muc_chi_co_pyc_trong_pycache(tmp_path):
+    # Hành vi qua nap_rb: thư mục chỉ có __pycache__/<tên>.cpython-XY.pyc -> SystemExit rõ, không traceback.
+    import py_compile
+    for ten in ("rbda_priority_pipeline", "i18n_errors"):
+        nguon = tmp_path / (ten + ".py")
+        nguon.write_text("A = 1\n", encoding="utf-8")
+        py_compile.compile(str(nguon))
+        nguon.unlink()
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and "không có mô-đun" in kq.stderr and "Traceback" not in kq.stderr
 
 
 def test_nap_rb_nhan_mo_dun_chinh_chi_co_ban_bien_dich(tmp_path):

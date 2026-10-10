@@ -4,6 +4,7 @@
 Một bản duy nhất cho bộ nạp mô-đun và bộ sinh dữ liệu, để hai kịch bản không lệch nhau.
 Dữ liệu sinh ra là DỮ LIỆU MÔ PHỎNG, không phải dữ liệu thật.
 """
+import importlib.machinery
 import importlib.util
 import marshal
 import os
@@ -31,38 +32,41 @@ def _cung_tep(a, b):
 
 
 def _cung_nguon(tep, mong_doi):
-    """`tep` (__file__ sau khi nạp) đúng là mô-đun `mong_doi` (<thư mục>/<tên>.py)?
+    """`tep` (__file__ của mô-đun) đúng là tệp `mong_doi`? (không có __file__ thì không)."""
+    return bool(tep) and _cung_tep(tep, mong_doi)
 
-    Có tệp nguồn <tên>.py thì PHẢI là chính nó: một bản biên dịch cũ (.so/.pyd) nằm cạnh mà Python ưu tiên
-    nạp trước sẽ bị từ chối, vì người dùng muốn đo mã nguồn. Chỉ khi KHÔNG có .py mới nhận bản biên dịch
-    không kèm nguồn (<tên>.pyc, .pyd, .so) trong cùng thư mục.
+
+def _tep_se_nap(thu_muc, ten):
+    """Tệp mà CHÍNH bộ import của Python sẽ nạp cho `ten` từ `thu_muc` (không đoán theo tên tệp).
+
+    SystemExit nếu thư mục không có mô-đun đó, nếu đó là gói namespace, hoặc nếu Python sẽ nạp một bản
+    biên dịch (.so/.pyd) cũ thay cho tệp nguồn <tên>.py đang có (người dùng muốn đo mã nguồn).
     """
-    if not tep:
-        return False
-    if _cung_tep(tep, mong_doi):
-        return True
-    if os.path.isfile(mong_doi):
-        return False
-    thu_muc, ten_tep = os.path.split(tep)
-    return (_cung_tep(thu_muc, os.path.dirname(mong_doi))
-            and ten_tep.split(".", 1)[0] == os.path.splitext(os.path.basename(mong_doi))[0])
-
-
-def _co_mo_dun(thu_muc, ten):
-    """Thư mục có mô-đun `ten`: tệp nguồn .py hoặc bản biên dịch không kèm nguồn."""
-    return any(f == ten + ".py" or (f.startswith(ten + ".") and f.endswith((".pyc", ".pyd", ".so")))
-               for f in os.listdir(thu_muc))
+    try:
+        spec = importlib.machinery.PathFinder.find_spec(ten, [thu_muc])
+    except (OSError, ImportError) as e:
+        raise SystemExit("Không đọc được %s để tìm %s: %s" % (thu_muc, ten, e))
+    if spec is None:
+        raise SystemExit("%s không có mô-đun %s (.py hoặc bản biên dịch nạp được)." % (thu_muc, ten))
+    if not spec.has_location:      # gói namespace: không có tệp (origin None)
+        raise SystemExit("%s: %s là gói namespace tại %s, không phải mô-đun %s.py."
+                         % (thu_muc, ten, list(spec.submodule_search_locations or []), ten))
+    nguon = os.path.join(thu_muc, ten + ".py")
+    if os.path.isfile(nguon) and not _cung_tep(spec.origin, nguon):
+        raise SystemExit("%s: Python sẽ nạp %s thay cho tệp nguồn %s (bản biên dịch cũ nằm cạnh?). Xoá bản đó "
+                         "hoặc chọn thư mục khác." % (thu_muc, spec.origin, nguon))
+    return spec.origin
 
 
 def _nguon_thuc(mod):
     """Mô tả nơi một mô-đun thật sự đến từ (gói namespace không có __file__ thì nêu __path__)."""
     if mod is None:
-        return "None"
+        return "một mục None không rõ nguồn trong sys.modules"
     tep = getattr(mod, "__file__", None)
     if tep:
         return tep
     duong = list(getattr(mod, "__path__", []) or [])
-    return "gói namespace tại %s" % duong if duong else "không rõ (không có __file__)"
+    return "gói namespace tại %s" % duong if duong else "một mô-đun không rõ nguồn (không có __file__)"
 
 
 _TEN = ("i18n_errors", "rbda_priority_pipeline")   # i18n_errors trước: mô-đun chính import nó theo tên
@@ -78,13 +82,9 @@ def _nap_co_kiem(ao, nap, mo_ta):
     if all(_cung_nguon(da_nap[ten], ao[ten]) for ten in _TEN):
         return sys.modules["rbda_priority_pipeline"]
     for ten in _TEN:
-        if ten in sys.modules and not (_cung_nguon(da_nap[ten], ao[ten])):
-            if not da_nap[ten]:
-                raise SystemExit("Tiến trình này đã có mục %s trong sys.modules nhưng không rõ nguồn (None hoặc "
-                                 "mô-đun giả, không có __file__); muốn đo %s hãy chạy một tiến trình riêng."
-                                 % (ten, mo_ta))
+        if ten in sys.modules and not _cung_nguon(da_nap[ten], ao[ten]):
             raise SystemExit("Tiến trình này đã nạp %s từ %s; muốn đo %s hãy chạy một tiến trình riêng."
-                             % (ten, da_nap[ten], mo_ta))
+                             % (ten, _nguon_thuc(sys.modules[ten]), mo_ta))
     chua_co = [ten for ten in _TEN if ten not in sys.modules]
     try:
         for ten in chua_co:
@@ -92,8 +92,7 @@ def _nap_co_kiem(ao, nap, mo_ta):
             # Kiểm SAU khi nạp: import theo tên có thể lấy tệp cùng tên ở chỗ khác trên sys.path.
             tep = getattr(sys.modules.get(ten), "__file__", None)
             if not _cung_nguon(tep, ao[ten]):
-                raise SystemExit("%s: mô-đun %s được nạp từ %s, không phải %s (thiếu tệp trong nguồn đã chọn, "
-                                 "bản biên dịch cũ nằm cạnh tệp nguồn, hoặc tệp cùng tên khác trên sys.path chen vào)."
+                raise SystemExit("%s: mô-đun %s được nạp từ %s, không phải %s."
                                  % (mo_ta, ten, _nguon_thuc(sys.modules.get(ten)), ao[ten]))
     except BaseException:
         for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
@@ -111,8 +110,8 @@ def nap_rb(duong_dan):
     if os.path.isdir(duong_dan):
         # Thư mục NGƯỜI DÙNG đưa (không phải thư mục đích của liên kết): cả hai tệp lấy từ đây.
         thu_muc = os.path.abspath(duong_dan)
-        if not _co_mo_dun(thu_muc, "rbda_priority_pipeline"):
-            raise SystemExit("%s không có rbda_priority_pipeline (.py hoặc bản biên dịch)." % duong_dan)
+        # Hỏi bộ import của Python tệp nào sẽ được nạp, rồi đòi đúng tệp đó sau khi nạp.
+        ao = {ten: _tep_se_nap(thu_muc, ten) for ten in _TEN}
 
         def nap(ten):
             # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi bỏ ra
@@ -123,8 +122,7 @@ def nap_rb(duong_dan):
             finally:
                 sys.path.remove(thu_muc)
 
-        return _nap_co_kiem({ten: os.path.join(thu_muc, ten + ".py") for ten in _TEN}, nap,
-                            "thư mục %s" % thu_muc)
+        return _nap_co_kiem(ao, nap, "thư mục %s" % thu_muc)
     if not os.path.isfile(duong_dan):
         raise SystemExit("%s không phải thư mục kho mã cũng không phải tệp PyInstaller (không tồn tại)."
                          % duong_dan)
