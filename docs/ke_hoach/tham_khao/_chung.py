@@ -4,7 +4,6 @@
 Một bản duy nhất cho bộ nạp mô-đun và bộ sinh dữ liệu, để hai kịch bản không lệch nhau.
 Dữ liệu sinh ra là DỮ LIỆU MÔ PHỎNG, không phải dữ liệu thật.
 """
-import importlib.machinery
 import importlib.util
 import marshal
 import os
@@ -36,50 +35,44 @@ def _cung_nguon(tep, mong_doi):
     return bool(tep) and _cung_tep(tep, mong_doi)
 
 
-def _doc_duoc(thu_muc):
+def _tep_nguon(thu_muc, ten):
+    """Đường dẫn tệp nguồn <thu_muc>/<ten>.py; SystemExit rõ nếu thư mục không đọc được hoặc thiếu tệp.
+
+    Kịch bản đo MÃ NGUỒN: nạp thẳng tệp .py này (không import theo tên), nên bản biên dịch cũ, gói cùng tên
+    hay gói namespace nằm cạnh không thể chen vào. Thư mục chỉ có bản biên dịch (.pyc) thì không nhận.
+    """
     try:
         os.scandir(thu_muc).close()
     except OSError as e:
         raise SystemExit("Không đọc được thư mục %s: %s" % (thu_muc, e))
+    tep = os.path.join(thu_muc, ten + ".py")
+    if not os.path.isfile(tep):
+        raise SystemExit("%s không có %s.py (cần tệp nguồn; bản biên dịch không kèm nguồn không được nhận)."
+                         % (thu_muc, ten))
+    return tep
 
 
-def _bo_tim_cua(thu_muc):
-    """Bộ tìm mà CHÍNH Python dùng cho `thu_muc`: gọi lần lượt sys.path_hooks như PathFinder, nhưng tạo mới
-    và không ghi vào sys.path_importer_cache (danh sách tệp luôn mới, không đụng trạng thái toàn cục)."""
-    for hook in sys.path_hooks:
-        try:
-            return hook(thu_muc)
-        except ImportError:
-            continue
-    raise SystemExit("Không có bộ tìm mô-đun nào nhận thư mục %s." % thu_muc)
+def _thu_muc_chuan():
+    """Các thư mục thư viện của trình thông dịch (thư viện chuẩn, site-packages)."""
+    import sysconfig
+    duong = sysconfig.get_paths()
+    return [os.path.normcase(os.path.realpath(duong[k])) for k in ("stdlib", "platstdlib", "purelib", "platlib")
+            if duong.get(k)]
 
 
-def _tim_spec(thu_muc, ten):
-    """Spec mà bộ import của Python sẽ dùng cho `ten` từ `thu_muc` (không đoán theo tên tệp).
-
-    SystemExit nếu thư mục không đọc được, không có mô-đun đó, đó là gói namespace, hoặc Python sẽ nạp một bản
-    biên dịch (.so/.pyd) cũ hay một gói cùng tên thay cho tệp nguồn <tên>.py đang có (người dùng muốn đo mã
-    nguồn). Thư mục KHÔNG có <tên>.py thì nhận đúng thứ Python nạp (bản biên dịch không kèm nguồn, hay gói
-    <tên>/__init__.py): đó chính là mã sẽ chạy khi import từ thư mục này.
-    """
-    _doc_duoc(thu_muc)   # bộ tìm tệp nuốt lỗi quyền đọc rồi trả None: kiểm trước để báo đúng lỗi
-    spec = _bo_tim_cua(thu_muc).find_spec(ten)
-    if spec is None:
-        _doc_duoc(thu_muc)   # thư mục vừa mất quyền / bị xoá giữa chừng: vẫn báo lỗi đọc, không báo "không có"
-        raise SystemExit("%s không có mô-đun %s (.py hoặc bản biên dịch nạp được)." % (thu_muc, ten))
-    if not spec.has_location:      # gói namespace: không có tệp (origin None)
-        raise SystemExit("%s: %s là gói namespace tại %s, không phải mô-đun %s.py."
-                         % (thu_muc, ten, list(spec.submodule_search_locations or []), ten))
-    nguon = os.path.join(thu_muc, ten + ".py")
-    if os.path.isfile(nguon) and not _cung_tep(spec.origin, nguon):
-        raise SystemExit("%s: Python sẽ nạp %s thay cho tệp nguồn %s (một bản biên dịch cũ hoặc một gói cùng "
-                         "tên nằm cạnh). Bỏ tệp/thư mục đó hoặc chọn thư mục khác." % (thu_muc, spec.origin, nguon))
-    return spec
-
-
-def _tep_se_nap(thu_muc, ten):
-    """Tệp mà bộ import của Python sẽ nạp cho `ten` từ `thu_muc` (xem _tim_spec)."""
-    return _tim_spec(thu_muc, ten).origin
+def _phu_thuoc_la(truoc, thu_muc):
+    """Mô-đun mới xuất hiện trong sys.modules (ngoài _TEN) có tệp nằm NGOÀI thư viện chuẩn / site-packages:
+    mã đo đã import một mô-đun anh em và nó đến từ chỗ khác thư mục đã chọn (vd thư mục hiện hành)."""
+    chuan = _thu_muc_chuan()
+    la = []
+    for ten in set(sys.modules) - truoc - set(_TEN):
+        tep = getattr(sys.modules.get(ten), "__file__", None)
+        if not tep:
+            continue           # mô-đun dựng sẵn
+        tep = os.path.normcase(os.path.realpath(tep))
+        if not any(tep.startswith(g + os.sep) for g in chuan):
+            la.append((ten, tep))
+    return sorted(la)
 
 
 def _nguon_thuc(mod):
@@ -113,7 +106,7 @@ def _nap_co_kiem(ao, nap, mo_ta):
     try:
         for ten in chua_co:
             nap(ten)
-            # Kiểm SAU khi nạp: import theo tên có thể lấy tệp cùng tên ở chỗ khác trên sys.path.
+            # Kiểm SAU khi nạp (mô-đun có thể tự thay mình trong sys.modules khi chạy).
             tep = getattr(sys.modules.get(ten), "__file__", None)
             if not _cung_nguon(tep, ao[ten]):
                 raise SystemExit("%s: mô-đun %s được nạp từ %s, không phải %s."
@@ -134,19 +127,26 @@ def nap_rb(duong_dan):
     if os.path.isdir(duong_dan):
         # Thư mục NGƯỜI DÙNG đưa (không phải thư mục đích của liên kết): cả hai tệp lấy từ đây.
         thu_muc = os.path.abspath(duong_dan)
-        # Hỏi bộ import của Python spec nào sẽ dùng cho từng mô-đun, rồi nạp ĐÚNG spec đó (không import theo
-        # tên qua sys.path): dự đoán và lần nạp thật không thể lệch, và không đụng sys.path hay cache bộ tìm.
+        # Nạp thẳng <thu_muc>/<tên>.py (không import theo tên qua sys.path, không đụng cache bộ tìm).
         # Kiểm mô-đun chính trước: thư mục sai thì báo thiếu rbda_priority_pipeline, đúng như cách dùng ghi.
-        specs = {ten: _tim_spec(thu_muc, ten) for ten in reversed(_TEN)}
+        tep = {ten: _tep_nguon(thu_muc, ten) for ten in reversed(_TEN)}
 
         def nap(ten):
             # Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
-            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này.
-            mod = importlib.util.module_from_spec(specs[ten])
+            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này. Mã hiện tại chỉ import thư viện
+            # chuẩn và i18n_errors; nếu một phiên bản khác import mô-đun anh em thì nó sẽ không đến từ thư mục
+            # này — phát hiện và từ chối thay vì đo lẫn mã.
+            truoc = set(sys.modules)
+            spec = importlib.util.spec_from_file_location(ten, tep[ten])
+            mod = importlib.util.module_from_spec(spec)
             sys.modules[ten] = mod
-            specs[ten].loader.exec_module(mod)
+            spec.loader.exec_module(mod)
+            la = _phu_thuoc_la(truoc, thu_muc)
+            if la:
+                raise SystemExit("%s.py import thêm mô-đun ngoài thư viện chuẩn, nạp từ chỗ khác thư mục đã chọn: "
+                                 "%s. Kịch bản chỉ đo được mã import thư viện chuẩn và i18n_errors." % (ten, la))
 
-        return _nap_co_kiem({ten: s.origin for ten, s in specs.items()}, nap, "thư mục %s" % thu_muc)
+        return _nap_co_kiem(tep, nap, "thư mục %s" % thu_muc)
     if not os.path.isfile(duong_dan):
         raise SystemExit("%s không phải thư mục kho mã cũng không phải tệp PyInstaller (không tồn tại)."
                          % duong_dan)
