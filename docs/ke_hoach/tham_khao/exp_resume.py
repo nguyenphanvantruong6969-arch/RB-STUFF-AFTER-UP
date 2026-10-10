@@ -37,8 +37,12 @@ def _lay_rb():
     return mod
 
 
-def _so_boc_tham_hop_le(v):
-    # Số thực bất kỳ (int, numpy.int64, float) nhưng không bool, không NaN; chuỗi đọc từ CSV thì không.
+def _so_hop_le(v):
+    """Một luật cho mọi số mà compute_club_priority đem ra sắp (số bốc thăm, điểm).
+
+    Số thực bất kỳ (int, numpy.int64, float) nhưng không bool, không NaN; chuỗi đọc từ CSV, None, pd.NA
+    thì không. NaN làm phép so không nhất quán nên thứ tự phụ thuộc thứ tự đầu vào (đã tái hiện).
+    """
     return isinstance(v, numbers.Real) and not isinstance(v, bool) and v == v
 
 
@@ -47,10 +51,13 @@ def _nhom(v):
     return v or None
 
 
-def _co_nan(bang_diem):
-    # compute_club_priority sắp theo (-điểm, ...): có NaN thì phép so không nhất quán và thứ tự phụ thuộc
-    # thứ tự đầu vào -> thứ hạng cũ không còn đáng tin. Từ chối thay vì coi NaN == NaN.
-    return any(v != v for t in bang_diem.values() for v in t.values())
+def _diem_sai(bang_diem):
+    # (CLB, em, giá trị) đầu tiên không phải số hợp lệ, hoặc None.
+    for c, t in bang_diem.items():
+        for s, v in t.items():
+            if not _so_hop_le(v):
+                return c, s, v
+    return None
 
 
 def kiem_tien_de(res0, cu, moi, new_ids):
@@ -102,8 +109,12 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                              % (s, sorted(clb_moi.intersection(p1))))
         if _nhom(cu["students"][s].get("reserve_group")) != _nhom(moi["students"][s].get("reserve_group")):
             raise ValueError("resume_da: nhóm dự trữ của em cũ %s đã đổi (cần chạy lại)." % s)
-    if _co_nan(cu["tested"]) or _co_nan(moi["tested"]):
-        raise ValueError("resume_da: có điểm NaN — thứ hạng phụ thuộc thứ tự đầu vào (cần chạy lại toàn bộ).")
+    for ten, bang in (("cũ", cu["tested"]), ("mới", moi["tested"])):
+        sai = _diem_sai(bang)
+        if sai:
+            # Thận trọng: từ chối cả điểm không dùng tới (vd của em không có trong apps) — chỉ tốn một lần chạy lại.
+            raise ValueError("resume_da: điểm không hợp lệ (NaN / không phải số) ở dữ liệu %s: CLB %s, em %s, %r "
+                             "(cần chạy lại toàn bộ)." % (ten, sai[0], sai[1], sai[2]))
     for c in set(clubs0) | set(cu["tested"]):
         # Bỏ em mới ở CẢ hai phía: điểm nhập trước cho em đến muộn không phải "em cũ đổi điểm".
         t0 = {k: v for k, v in cu["tested"].get(c, {}).items() if k not in moi_set}
@@ -124,7 +135,7 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                                  "(cần apps chứa mọi nguyện vọng, như hop_ung_vien)." % (s, c, c))
     cu_stb, moi_stb = cu["stb"], moi["stb"]
     for ten, bang, ds in (("cũ", cu_stb, cu_hs), ("mới", moi_stb, cu_hs | moi_set)):
-        thieu = [s for s in ds if not _so_boc_tham_hop_le(bang.get(s))]
+        thieu = [s for s in ds if not _so_hop_le(bang.get(s))]
         if thieu:
             raise ValueError("resume_da: thiếu số bốc thăm hoặc không phải số (dữ liệu %s) của %s."
                              % (ten, sorted(thieu)[:5]))

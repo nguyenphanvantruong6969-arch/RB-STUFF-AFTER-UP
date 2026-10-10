@@ -30,6 +30,20 @@ def _cung_tep(a, b):
     return os.path.normcase(os.path.realpath(a)) == os.path.normcase(os.path.realpath(b))
 
 
+def _cung_nguon(tep, mong_doi):
+    """`tep` (__file__ sau khi nạp) đúng là mô-đun `mong_doi` (<thư mục>/<tên>.py)?
+
+    Nhận cả bản đã biên dịch không kèm nguồn (<tên>.pyc, .pyd, .so) nằm trong cùng thư mục.
+    """
+    if not tep:
+        return False
+    if _cung_tep(tep, mong_doi):
+        return True
+    thu_muc, ten_tep = os.path.split(tep)
+    return (_cung_tep(thu_muc, os.path.dirname(mong_doi))
+            and ten_tep.split(".", 1)[0] == os.path.splitext(os.path.basename(mong_doi))[0])
+
+
 _TEN = ("i18n_errors", "rbda_priority_pipeline")   # i18n_errors trước: mô-đun chính import nó theo tên
 
 
@@ -40,10 +54,10 @@ def _nap_co_kiem(ao, nap, mo_ta):
     Chưa có -> gọi `nap(ten)` theo thứ tự _TEN; hỏng giữa chừng thì gỡ mọi mô-đun vừa thêm.
     """
     da_nap = {ten: getattr(sys.modules.get(ten), "__file__", None) for ten in _TEN}
-    if all(da_nap[ten] and _cung_tep(da_nap[ten], ao[ten]) for ten in _TEN):
+    if all(_cung_nguon(da_nap[ten], ao[ten]) for ten in _TEN):
         return sys.modules["rbda_priority_pipeline"]
     for ten in _TEN:
-        if ten in sys.modules and not (da_nap[ten] and _cung_tep(da_nap[ten], ao[ten])):
+        if ten in sys.modules and not (_cung_nguon(da_nap[ten], ao[ten])):
             if not da_nap[ten]:
                 raise SystemExit("Tiến trình này đã có mục %s trong sys.modules nhưng không rõ nguồn (None hoặc "
                                  "mô-đun giả, không có __file__); muốn đo %s hãy chạy một tiến trình riêng."
@@ -56,9 +70,9 @@ def _nap_co_kiem(ao, nap, mo_ta):
             nap(ten)
             # Kiểm SAU khi nạp: import theo tên có thể lấy tệp cùng tên ở chỗ khác trên sys.path.
             tep = getattr(sys.modules.get(ten), "__file__", None)
-            if not (tep and _cung_tep(tep, ao[ten])):
-                raise SystemExit("%s không có %s.py (đã nạp nhầm từ %s): cần đủ cả hai tệp trong %s."
-                                 % (mo_ta, ten, tep, mo_ta))
+            if not _cung_nguon(tep, ao[ten]):
+                raise SystemExit("%s: mô-đun %s được nạp từ %s, không phải %s (thiếu tệp trong nguồn đã chọn, "
+                                 "hoặc tệp cùng tên khác trên sys.path chen vào)." % (mo_ta, ten, tep, ao[ten]))
     except BaseException:
         for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
             sys.modules.pop(ten, None)

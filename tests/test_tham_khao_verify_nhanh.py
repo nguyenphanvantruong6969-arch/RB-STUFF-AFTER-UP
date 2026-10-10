@@ -439,29 +439,33 @@ def test_kiem_tien_de_coi_nhom_rong_va_none_la_mot():
     assert asg == _chay_lai(moi)
 
 
-def test_compute_club_priority_phu_thuoc_thu_tu_khi_co_diem_nan():
-    # Tiền đề của test dưới: có NaN thì thứ hạng của chính mã sản phẩm phụ thuộc thứ tự đầu vào.
+def test_tien_de_nan_lam_thu_tu_compute_club_priority_phu_thuoc_dau_vao():
+    # Lý do test dưới tồn tại. Không khẳng định mã sản phẩm PHẢI lỗi: nếu sau này compute_club_priority
+    # xử lý NaN xác định thì test này tự bỏ qua, không chặn bản sửa đúng.
     diem = {"a": 5.0, "b": float("nan"), "c": 3.0}
     stb = {"a": 1, "b": 2, "c": 3}
-    assert (rb.compute_club_priority("X", ["a", "b", "c"], diem, stb)
-            != rb.compute_club_priority("X", ["c", "b", "a"], diem, stb))
+    if (rb.compute_club_priority("X", ["a", "b", "c"], diem, stb)
+            == rb.compute_club_priority("X", ["c", "b", "a"], diem, stb)):
+        pytest.skip("compute_club_priority đã xử lý NaN xác định")
 
 
+@pytest.mark.parametrize("gia_tri", [float("nan"), "7.5", None, True])
 @pytest.mark.parametrize("ben", ["cu_va_moi", "chi_em_moi"])
-def test_kiem_tien_de_tu_choi_diem_nan(ben):
-    # NaN làm thứ hạng cũ không còn đáng tin (xem test trên): từ chối, không coi NaN == NaN.
+def test_kiem_tien_de_tu_choi_diem_khong_hop_le(ben, gia_tri):
+    # NaN (thứ tự phụ thuộc đầu vào), chuỗi CSV, None, bool: compute_club_priority không sắp đúng được.
+    # Phải là ValueError rõ ràng (người gọi bắt để chạy lại toàn bộ), không phải TypeError giữa chừng.
     cu, moi, moi_ids, res0 = _them_em_moi(2)
     if ben == "cu_va_moi":
         c = next(c for c, t in cu["tested"].items() if t)
         s = next(iter(cu["tested"][c]))
-        cu["tested"][c] = dict(cu["tested"][c], **{s: float("nan")})
-        moi["tested"][c] = dict(moi["tested"][c], **{s: float("nan")})
+        cu["tested"][c] = dict(cu["tested"][c], **{s: gia_tri})
+        moi["tested"][c] = dict(moi["tested"][c], **{s: gia_tri})
     else:
         n = moi_ids[0]
         c = moi["prefs"][n][1]
-        moi["tested"][c] = dict(moi["tested"][c], **{n: float("nan")})
-    with pytest.raises(ValueError, match="NaN"):
-        exp_resume.kiem_tien_de(res0, cu, moi, moi_ids)
+        moi["tested"][c] = dict(moi["tested"][c], **{n: gia_tri})
+    with pytest.raises(ValueError, match="điểm không hợp lệ"):
+        exp_resume.resume_da(res0, cu, moi, moi_ids)
 
 
 def test_kiem_tien_de_khong_bo_qua_kiem_suc_chua_khi_chua_gan_rb(monkeypatch):
@@ -638,6 +642,19 @@ def test_nap_rb_tu_choi_thu_muc_thieu_i18n_errors(tmp_path):
         str(tmp_path), _GOC)
     assert kq.returncode == 0, kq.stderr
     assert kq.stdout.split() == ["TU_CHOI", "False", "False"]
+
+
+def test_nap_rb_nhan_ban_bien_dich_khong_kem_nguon(tmp_path):
+    # Thư mục chỉ có i18n_errors.pyc (không có .py): nạp đúng từ thư mục đó, không bị coi là "nạp nhầm".
+    import py_compile
+    (tmp_path / "rbda_priority_pipeline.py").write_text("GIA_TRI = 1\n", encoding="utf-8")
+    nguon = tmp_path / "nguon_i18n.py"
+    nguon.write_text("NGUON = 'pyc'\n", encoding="utf-8")
+    py_compile.compile(str(nguon), cfile=str(tmp_path / "i18n_errors.pyc"))
+    nguon.unlink()
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.modules['i18n_errors'].NGUON)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "pyc"
 
 
 def test_nap_rb_bao_ro_muc_sys_modules_khong_ro_nguon():
