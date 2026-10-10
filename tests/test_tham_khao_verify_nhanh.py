@@ -580,7 +580,7 @@ def _chay_tien_trinh_moi(ma, *thong_so):
     import subprocess
     dau = ("import importlib.util, sys;"
            "sp = importlib.util.spec_from_file_location('c', sys.argv[1]);"
-           "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m);")
+           "m = importlib.util.module_from_spec(sp); sp.loader.exec_module(m)\n")
     return subprocess.run([sys.executable, "-I", "-c", dau + ma, os.path.join(_THAM_KHAO, "_chung.py"), *thong_so],
                           capture_output=True, text=True)
 
@@ -893,7 +893,8 @@ _BO_TIM_MOC = (
     "    goi = []\n"
     "    @staticmethod\n"
     "    def find_spec(ten, path=None, target=None):\n"
-    "        F.goi.append(ten)\n"
+    "        if ten in ('hookmod', 'pytest'):\n"
+    "            F.goi.append(ten)\n"
     "        if ten == 'hookmod':\n"
     "            return im.ModuleSpec(ten, N())\n"
     "        return im.PathFinder.find_spec(ten, path) if CHUYEN_TIEP else None\n"
@@ -921,6 +922,44 @@ def test_nap_rb_khong_hoi_bo_tim_cai_them_va_tu_choi_bao_thu(tmp_path, chuyen_ti
     assert kq.returncode == 0, kq.stderr
     assert ten in kq.stdout and "GIA_TRI" not in kq.stdout
     assert kq.stdout.strip().splitlines()[-1] == "[]"       # bộ tìm cài thêm không bị gọi lần nào
+
+
+def test_nap_rb_nhan_mo_dun_dung_san_dong_bang_ngoai_danh_sach_thu_vien_chuan(tmp_path):
+    # Mô-đun dựng sẵn / đóng băng không có trong sys.stdlib_module_names (vd __phello__, xxsubtype) không bao giờ
+    # đến từ thư mục: phải nhận.
+    import importlib.machinery
+    ten = [t for t in sys.builtin_module_names if t not in sys.stdlib_module_names]
+    if importlib.machinery.FrozenImporter.find_spec("__phello__") is not None:
+        ten.append("__phello__")
+    if not ten:
+        pytest.skip("trình thông dịch này không có mô-đun dựng sẵn / đóng băng ngoài danh sách thư viện chuẩn")
+    _ghi_hai_tep(tmp_path, "".join("import %s\n" % t for t in ten) + "GIA_TRI = 1\n")
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip().splitlines()[-1] == "1"
+
+
+@pytest.mark.parametrize("cho_loi", ["moc_thu_muc", "pathfinder"])
+def test_nap_rb_moc_duong_dan_loi_thanh_systemexit_ro(tmp_path, cho_loi):
+    # Móc đường dẫn ném lỗi không phải ImportError — với thư mục đã chọn, hoặc với một mục sys.path khác khi xét
+    # phần namespace: SystemExit rõ / từ chối, không traceback.
+    _ghi_hai_tep(tmp_path, "import nsx.a\nGIA_TRI = 1\n")
+    (tmp_path / "nsx").mkdir()
+    (tmp_path / "nsx" / "a.py").write_text("A = 1\n", encoding="utf-8")
+    hong = tmp_path / "hong"
+    hong.mkdir()
+    dich = str(tmp_path) if cho_loi == "moc_thu_muc" else str(hong)
+    kq = _chay_tien_trinh_moi(
+        "\ndef moc(p):\n"
+        "    if p == %r:\n"
+        "        raise OSError('moc hong')\n"
+        "    raise ImportError\n"
+        "sys.path_hooks.insert(0, moc)\n"
+        "sys.path.insert(0, %r)\n"
+        "sys.path_importer_cache.clear()\n"
+        "m.nap_rb(sys.argv[2])" % (dich, str(hong)), str(tmp_path))
+    assert kq.returncode != 0 and "Traceback" not in kq.stderr
+    assert ("moc hong" in kq.stderr) if cho_loi == "moc_thu_muc" else ("nsx" in kq.stderr)
 
 
 def test_nap_rb_bo_tim_thu_muc_theo_sys_path_hooks(tmp_path):

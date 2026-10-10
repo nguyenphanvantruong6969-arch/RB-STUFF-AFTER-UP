@@ -79,8 +79,9 @@ def _tu_thu_muc(thu_muc):
 
     1. dựng sẵn / đóng băng -> không (xem _khong_the_bi_che);
     2. bộ tìm của thư mục, dựng từ sys.path_hooks như PathFinder làm (không ghi vào sys.path_importer_cache):
-       không thấy -> không; thấy mô-đun / gói thường -> có; lỗi -> có;
-    3. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường.
+       không thấy -> không; thấy mô-đun / gói thường -> có; móc ném lỗi khác ImportError với thư mục -> SystemExit;
+    3. thư mục chỉ có phần gói namespace -> có, trừ khi PathFinder trên sys.path tìm được mô-đun / gói thường;
+       mọi lỗi khi tìm -> có.
 
     Bộ tìm cài thêm trong sys.meta_path KHÔNG được hỏi: gọi chúng có thể đổi trạng thái tiến trình (vd
     DistutilsMetaFinder của setuptools), và bộ tìm chuyển tiếp cho PathFinder sẽ thấy thư mục khi chạy thật. Tên
@@ -93,20 +94,24 @@ def _tu_thu_muc(thu_muc):
             break
         except ImportError:
             continue
+        except Exception as e:      # PathFinder chỉ bỏ qua ImportError: lần chạy thật cũng hỏng ở đây
+            raise SystemExit("Móc đường dẫn %r lỗi với thư mục %s: %s" % (moc, thu_muc, e))
+    if bo_tim is None:              # không móc nào nhận thư mục: lần chạy thật cũng không import được gì từ đó
+        return lambda ten: False
 
     @functools.cache
     def co(ten):
-        if _khong_the_bi_che(ten) or bo_tim is None:
+        if _khong_the_bi_che(ten):
             return False
         try:
             rieng = bo_tim.find_spec(ten)
-        except Exception:
+            if rieng is None:
+                return False
+            if rieng.loader is not None:
+                return True
+            ngoai = importlib.machinery.PathFinder.find_spec(ten)
+        except Exception:           # nghi ngờ: coi là có (từ chối rõ)
             return True
-        if rieng is None:
-            return False
-        if rieng.loader is not None:
-            return True
-        ngoai = importlib.machinery.PathFinder.find_spec(ten)
         return ngoai is None or ngoai.origin in (None, "namespace")
 
     return co
@@ -178,7 +183,7 @@ def _import_la(cay, cho_phep, tu_thu_muc=lambda ten: False):
             return False
         if tu_thu_muc(ten):
             return True
-        if ten in sys.stdlib_module_names:
+        if ten in sys.stdlib_module_names or _khong_the_bi_che(ten):
             return False
         return id(nut) not in tuy_chon and ten not in _goi_cai_dat()
 
