@@ -2,6 +2,7 @@
 """Thử tiếp tục DA từ trạng thái cũ (mục G1) và so với chạy lại toàn bộ.
 Chạy: python exp_resume.py <thư mục chứa rbda_priority_pipeline.py | PhanBoCauLacBo.exe>
 Dữ liệu tự sinh."""
+import decimal
 import importlib.util
 import json
 import numbers
@@ -40,9 +41,11 @@ def _lay_rb():
 def _so_hop_le(v):
     """Một luật cho mọi số mà compute_club_priority đem ra sắp (số bốc thăm, điểm).
 
-    Số thực bất kỳ (int, numpy.int64, float) nhưng không bool, không NaN; chuỗi đọc từ CSV, None, pd.NA
-    thì không. NaN làm phép so không nhất quán nên thứ tự phụ thuộc thứ tự đầu vào (đã tái hiện).
+    Số thực bất kỳ (int, numpy.int64, float, Decimal) nhưng không bool, không NaN; chuỗi đọc từ CSV, None,
+    pd.NA thì không. NaN làm phép so không nhất quán nên thứ tự phụ thuộc thứ tự đầu vào (đã tái hiện).
     """
+    if isinstance(v, decimal.Decimal):
+        return not v.is_nan()      # Decimal không là numbers.Real; so sNaN thì ném lỗi nên hỏi is_nan()
     return isinstance(v, numbers.Real) and not isinstance(v, bool) and v == v
 
 
@@ -109,12 +112,13 @@ def kiem_tien_de(res0, cu, moi, new_ids):
                              % (s, sorted(clb_moi.intersection(p1))))
         if _nhom(cu["students"][s].get("reserve_group")) != _nhom(moi["students"][s].get("reserve_group")):
             raise ValueError("resume_da: nhóm dự trữ của em cũ %s đã đổi (cần chạy lại)." % s)
-    for ten, bang in (("cũ", cu["tested"]), ("mới", moi["tested"])):
-        sai = _diem_sai(bang)
-        if sai:
-            # Thận trọng: từ chối cả điểm không dùng tới (vd của em không có trong apps) — chỉ tốn một lần chạy lại.
-            raise ValueError("resume_da: điểm không hợp lệ (NaN / không phải số) ở dữ liệu %s: CLB %s, em %s, %r "
-                             "(cần chạy lại toàn bộ)." % (ten, sai[0], sai[1], sai[2]))
+    # Chỉ cần kiểm dữ liệu mới: điểm em cũ phải bằng hệt dữ liệu cũ (so ngay dưới), điểm em mới ở dữ liệu
+    # cũ thì bỏ qua. Thận trọng: từ chối cả điểm không dùng tới (vd em không có trong apps) — chỉ tốn một
+    # lần chạy lại toàn bộ, không bao giờ cho kết quả sai.
+    sai = _diem_sai(moi["tested"])
+    if sai:
+        raise ValueError("resume_da: điểm không hợp lệ (NaN / không phải số): CLB %s, em %s, %r "
+                         "(cần chạy lại toàn bộ)." % sai)
     for c in set(clubs0) | set(cu["tested"]):
         # Bỏ em mới ở CẢ hai phía: điểm nhập trước cho em đến muộn không phải "em cũ đổi điểm".
         t0 = {k: v for k, v in cu["tested"].get(c, {}).items() if k not in moi_set}

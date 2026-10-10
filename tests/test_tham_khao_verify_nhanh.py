@@ -439,16 +439,18 @@ def test_kiem_tien_de_coi_nhom_rong_va_none_la_mot():
     assert asg == _chay_lai(moi)
 
 
-def test_tien_de_nan_lam_thu_tu_compute_club_priority_phu_thuoc_dau_vao():
-    # Lý do test dưới tồn tại. Không khẳng định mã sản phẩm PHẢI lỗi: nếu sau này compute_club_priority
-    # xử lý NaN xác định thì test này tự bỏ qua, không chặn bản sửa đúng.
-    diem = {"a": 5.0, "b": float("nan"), "c": 3.0}
-    stb = {"a": 1, "b": 2, "c": 3}
-    if (rb.compute_club_priority("X", ["a", "b", "c"], diem, stb)
-            == rb.compute_club_priority("X", ["c", "b", "a"], diem, stb)):
-        pytest.skip("compute_club_priority đã xử lý NaN xác định")
+def test_kiem_tien_de_nhan_diem_decimal():
+    # Decimal không là numbers.Real nhưng compute_club_priority sắp được: không được từ chối nhầm.
+    import decimal
+    cu, moi, moi_ids, res0 = _them_em_moi(2)
+    for d in (cu, moi):
+        d["tested"] = {c: {s: decimal.Decimal(str(v)) for s, v in t.items()} for c, t in d["tested"].items()}
+    asg, _ = exp_resume.resume_da(res0, cu, moi, moi_ids)
+    assert asg == _chay_lai(moi)
 
 
+# Vì sao từ chối NaN: compute_club_priority sắp theo (-điểm, ...), NaN làm phép so không nhất quán nên
+# thứ tự phụ thuộc thứ tự đầu vào (đã tái hiện: ["a","b","c"] và ["c","b","a"] cho hai thứ tự khác nhau).
 @pytest.mark.parametrize("gia_tri", [float("nan"), "7.5", None, True])
 @pytest.mark.parametrize("ben", ["cu_va_moi", "chi_em_moi"])
 def test_kiem_tien_de_tu_choi_diem_khong_hop_le(ben, gia_tri):
@@ -655,6 +657,38 @@ def test_nap_rb_nhan_ban_bien_dich_khong_kem_nguon(tmp_path):
     kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.modules['i18n_errors'].NGUON)", str(tmp_path))
     assert kq.returncode == 0, kq.stderr
     assert kq.stdout.strip() == "pyc"
+
+
+def test_cung_nguon_tu_choi_ban_bien_dich_cu_canh_tep_nguon(tmp_path):
+    # Có rbda_priority_pipeline.py thì một .so/.pyd cũ cùng tên mà Python nạp trước KHÔNG được nhận.
+    py = tmp_path / "rbda_priority_pipeline.py"
+    so = str(tmp_path / "rbda_priority_pipeline.cpython-311-x86_64-linux-gnu.so")
+    py.write_text("GIA_TRI = 1\n", encoding="utf-8")
+    assert not _chung._cung_nguon(so, str(py))
+    assert _chung._cung_nguon(str(py), str(py))
+    py.unlink()
+    assert _chung._cung_nguon(so, str(py))               # không có .py: nhận bản biên dịch không kèm nguồn
+
+
+def test_nap_rb_nhan_mo_dun_chinh_chi_co_ban_bien_dich(tmp_path):
+    import py_compile
+    for ten, ma in (("rbda_priority_pipeline", "GIA_TRI = 7\n"), ("i18n_errors", "NGUON = 'pyc'\n")):
+        nguon = tmp_path / ("nguon_" + ten + ".py")
+        nguon.write_text(ma, encoding="utf-8")
+        py_compile.compile(str(nguon), cfile=str(tmp_path / (ten + ".pyc")))
+        nguon.unlink()
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).GIA_TRI)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "7"
+
+
+def test_nap_rb_neu_ro_goi_namespace_chen_vao(tmp_path):
+    # Thư mục chọn có thư mục con i18n_errors/ (không __init__.py) và không có i18n_errors.py:
+    # import trả gói namespace (__file__ None) — thông báo phải nêu nơi của gói đó.
+    (tmp_path / "rbda_priority_pipeline.py").write_text("GIA_TRI = 1\n", encoding="utf-8")
+    (tmp_path / "i18n_errors").mkdir()
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and "gói namespace" in kq.stderr
 
 
 def test_nap_rb_bao_ro_muc_sys_modules_khong_ro_nguon():

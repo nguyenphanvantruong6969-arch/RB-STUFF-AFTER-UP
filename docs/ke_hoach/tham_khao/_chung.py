@@ -33,15 +33,36 @@ def _cung_tep(a, b):
 def _cung_nguon(tep, mong_doi):
     """`tep` (__file__ sau khi nạp) đúng là mô-đun `mong_doi` (<thư mục>/<tên>.py)?
 
-    Nhận cả bản đã biên dịch không kèm nguồn (<tên>.pyc, .pyd, .so) nằm trong cùng thư mục.
+    Có tệp nguồn <tên>.py thì PHẢI là chính nó: một bản biên dịch cũ (.so/.pyd) nằm cạnh mà Python ưu tiên
+    nạp trước sẽ bị từ chối, vì người dùng muốn đo mã nguồn. Chỉ khi KHÔNG có .py mới nhận bản biên dịch
+    không kèm nguồn (<tên>.pyc, .pyd, .so) trong cùng thư mục.
     """
     if not tep:
         return False
     if _cung_tep(tep, mong_doi):
         return True
+    if os.path.isfile(mong_doi):
+        return False
     thu_muc, ten_tep = os.path.split(tep)
     return (_cung_tep(thu_muc, os.path.dirname(mong_doi))
             and ten_tep.split(".", 1)[0] == os.path.splitext(os.path.basename(mong_doi))[0])
+
+
+def _co_mo_dun(thu_muc, ten):
+    """Thư mục có mô-đun `ten`: tệp nguồn .py hoặc bản biên dịch không kèm nguồn."""
+    return any(f == ten + ".py" or (f.startswith(ten + ".") and f.endswith((".pyc", ".pyd", ".so")))
+               for f in os.listdir(thu_muc))
+
+
+def _nguon_thuc(mod):
+    """Mô tả nơi một mô-đun thật sự đến từ (gói namespace không có __file__ thì nêu __path__)."""
+    if mod is None:
+        return "None"
+    tep = getattr(mod, "__file__", None)
+    if tep:
+        return tep
+    duong = list(getattr(mod, "__path__", []) or [])
+    return "gói namespace tại %s" % duong if duong else "không rõ (không có __file__)"
 
 
 _TEN = ("i18n_errors", "rbda_priority_pipeline")   # i18n_errors trước: mô-đun chính import nó theo tên
@@ -72,7 +93,8 @@ def _nap_co_kiem(ao, nap, mo_ta):
             tep = getattr(sys.modules.get(ten), "__file__", None)
             if not _cung_nguon(tep, ao[ten]):
                 raise SystemExit("%s: mô-đun %s được nạp từ %s, không phải %s (thiếu tệp trong nguồn đã chọn, "
-                                 "hoặc tệp cùng tên khác trên sys.path chen vào)." % (mo_ta, ten, tep, ao[ten]))
+                                 "bản biên dịch cũ nằm cạnh tệp nguồn, hoặc tệp cùng tên khác trên sys.path chen vào)."
+                                 % (mo_ta, ten, _nguon_thuc(sys.modules.get(ten)), ao[ten]))
     except BaseException:
         for ten in chua_co:   # nạp hỏng: không để mô-đun dở dang trong tiến trình
             sys.modules.pop(ten, None)
@@ -89,8 +111,8 @@ def nap_rb(duong_dan):
     if os.path.isdir(duong_dan):
         # Thư mục NGƯỜI DÙNG đưa (không phải thư mục đích của liên kết): cả hai tệp lấy từ đây.
         thu_muc = os.path.abspath(duong_dan)
-        if not os.path.isfile(os.path.join(thu_muc, "rbda_priority_pipeline.py")):
-            raise SystemExit("%s không có rbda_priority_pipeline.py." % duong_dan)
+        if not _co_mo_dun(thu_muc, "rbda_priority_pipeline"):
+            raise SystemExit("%s không có rbda_priority_pipeline (.py hoặc bản biên dịch)." % duong_dan)
 
         def nap(ten):
             # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi bỏ ra
