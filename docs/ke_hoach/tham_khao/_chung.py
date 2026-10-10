@@ -43,9 +43,18 @@ def _tep_se_nap(thu_muc, ten):
     biên dịch (.so/.pyd) cũ thay cho tệp nguồn <tên>.py đang có (người dùng muốn đo mã nguồn).
     """
     try:
+        os.listdir(thu_muc)        # FileFinder nuốt lỗi quyền đọc rồi trả None: kiểm trước để báo đúng lỗi
+    except OSError as e:
+        raise SystemExit("Không đọc được thư mục %s: %s" % (thu_muc, e))
+    # Bộ tìm tệp mới mỗi lần (bỏ bản cũ trong sys.path_importer_cache cả trước lẫn sau): danh sách tệp không
+    # bị cũ khi thư mục vừa đổi trong cùng một nhịp mtime, và không để lại bộ tìm cho thư mục tạm.
+    sys.path_importer_cache.pop(thu_muc, None)
+    try:
         spec = importlib.machinery.PathFinder.find_spec(ten, [thu_muc])
-    except (OSError, ImportError) as e:
-        raise SystemExit("Không đọc được %s để tìm %s: %s" % (thu_muc, ten, e))
+    except ImportError as e:
+        raise SystemExit("Không tìm được %s trong %s: %s" % (ten, thu_muc, e))
+    finally:
+        sys.path_importer_cache.pop(thu_muc, None)
     if spec is None:
         raise SystemExit("%s không có mô-đun %s (.py hoặc bản biên dịch nạp được)." % (thu_muc, ten))
     if not spec.has_location:      # gói namespace: không có tệp (origin None)
@@ -53,8 +62,8 @@ def _tep_se_nap(thu_muc, ten):
                          % (thu_muc, ten, list(spec.submodule_search_locations or []), ten))
     nguon = os.path.join(thu_muc, ten + ".py")
     if os.path.isfile(nguon) and not _cung_tep(spec.origin, nguon):
-        raise SystemExit("%s: Python sẽ nạp %s thay cho tệp nguồn %s (bản biên dịch cũ nằm cạnh?). Xoá bản đó "
-                         "hoặc chọn thư mục khác." % (thu_muc, spec.origin, nguon))
+        raise SystemExit("%s: Python sẽ nạp %s thay cho tệp nguồn %s (một bản biên dịch cũ hoặc một gói cùng "
+                         "tên nằm cạnh). Bỏ tệp/thư mục đó hoặc chọn thư mục khác." % (thu_muc, spec.origin, nguon))
     return spec.origin
 
 
@@ -111,7 +120,8 @@ def nap_rb(duong_dan):
         # Thư mục NGƯỜI DÙNG đưa (không phải thư mục đích của liên kết): cả hai tệp lấy từ đây.
         thu_muc = os.path.abspath(duong_dan)
         # Hỏi bộ import của Python tệp nào sẽ được nạp, rồi đòi đúng tệp đó sau khi nạp.
-        ao = {ten: _tep_se_nap(thu_muc, ten) for ten in _TEN}
+        # Kiểm mô-đun chính trước: thư mục sai thì báo thiếu rbda_priority_pipeline, đúng như cách dùng ghi.
+        ao = {ten: _tep_se_nap(thu_muc, ten) for ten in reversed(_TEN)}
 
         def nap(ten):
             # Nạp theo tên (mô-đun import nhau theo tên) với thư mục tạm đứng đầu sys.path, rồi bỏ ra

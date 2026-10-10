@@ -659,6 +659,14 @@ def test_nap_rb_nhan_ban_bien_dich_khong_kem_nguon(tmp_path):
     assert kq.stdout.strip() == "pyc"
 
 
+def _bien_dich_vao_pycache(nguon):
+    """Ghi <thư mục>/__pycache__/<tên>.<thẻ>.pyc ở ĐÚNG chỗ đó (bỏ qua PYTHONPYCACHEPREFIX), và kiểm là có."""
+    import py_compile
+    dich = nguon.parent / "__pycache__" / ("%s.%s.pyc" % (nguon.stem, sys.implementation.cache_tag))
+    py_compile.compile(str(nguon), cfile=str(dich))
+    assert dich.is_file()
+
+
 def test_tep_se_nap_tu_choi_ban_bien_dich_cu_canh_tep_nguon(tmp_path):
     # Có rbda_priority_pipeline.py mà bộ import của Python sẽ nạp một bản mở rộng (.so/.pyd) cũ cùng tên
     # trước: từ chối. Dùng hậu tố mở rộng thật của máy này nên đúng trên cả Linux lẫn Windows.
@@ -673,22 +681,48 @@ def test_tep_se_nap_tu_choi_ban_bien_dich_cu_canh_tep_nguon(tmp_path):
 
 def test_tep_se_nap_bo_qua_pyc_co_the_trong_pycache(tmp_path):
     # Thư mục chỉ có __pycache__/<tên>.cpython-XY.pyc: Python KHÔNG nạp được -> báo rõ "không có mô-đun".
-    import py_compile
     nguon = tmp_path / "rbda_priority_pipeline.py"
     nguon.write_text("GIA_TRI = 1\n", encoding="utf-8")
-    py_compile.compile(str(nguon))
+    _bien_dich_vao_pycache(nguon)
     nguon.unlink()
     with pytest.raises(SystemExit, match="không có mô-đun rbda_priority_pipeline"):
         _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
 
 
+def test_tep_se_nap_bao_loi_doc_thu_muc(tmp_path, monkeypatch):
+    # Không đọc được thư mục (quyền): báo đúng lỗi đọc, không phải "không có mô-đun".
+    def tu_choi(_):
+        raise PermissionError("không có quyền")
+    monkeypatch.setattr(_chung.os, "listdir", tu_choi)
+    with pytest.raises(SystemExit, match="Không đọc được thư mục"):
+        _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
+
+
+def test_tep_se_nap_bao_dung_khi_goi_cung_ten_nam_canh(tmp_path):
+    (tmp_path / "rbda_priority_pipeline.py").write_text("A = 1\n", encoding="utf-8")
+    (tmp_path / "rbda_priority_pipeline").mkdir()
+    (tmp_path / "rbda_priority_pipeline" / "__init__.py").write_text("A = 2\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match="gói cùng tên"):
+        _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
+
+
+def test_nap_rb_thu_muc_sai_bao_thieu_mo_dun_chinh(tmp_path):
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
+    assert kq.returncode != 0 and "không có mô-đun rbda_priority_pipeline" in kq.stderr
+
+
+def test_tep_se_nap_khong_de_lai_bo_tim_trong_cache(tmp_path):
+    (tmp_path / "rbda_priority_pipeline.py").write_text("A = 1\n", encoding="utf-8")
+    _chung._tep_se_nap(str(tmp_path), "rbda_priority_pipeline")
+    assert str(tmp_path) not in sys.path_importer_cache
+
+
 def test_nap_rb_bao_ro_thu_muc_chi_co_pyc_trong_pycache(tmp_path):
     # Hành vi qua nap_rb: thư mục chỉ có __pycache__/<tên>.cpython-XY.pyc -> SystemExit rõ, không traceback.
-    import py_compile
     for ten in ("rbda_priority_pipeline", "i18n_errors"):
         nguon = tmp_path / (ten + ".py")
         nguon.write_text("A = 1\n", encoding="utf-8")
-        py_compile.compile(str(nguon))
+        _bien_dich_vao_pycache(nguon)
         nguon.unlink()
     kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2])", str(tmp_path))
     assert kq.returncode != 0 and "không có mô-đun" in kq.stderr and "Traceback" not in kq.stderr
