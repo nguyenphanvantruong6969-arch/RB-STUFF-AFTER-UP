@@ -750,16 +750,46 @@ def test_nap_rb_khong_dung_toi_sys_path_va_cache(tmp_path):
     assert kq.stdout.split() == ["1", "True", "True"]
 
 
-def test_nap_rb_tu_choi_mo_dun_anh_em_nap_tu_cho_khac(tmp_path):
-    # Một phiên bản khác của rbda_priority_pipeline import mô-đun anh em (khong_co_trong_chuan) ở đầu tệp;
-    # nó không nằm trong thư mục đã chọn mà ở một thư mục khác trên sys.path -> đo lẫn mã: phải từ chối.
+@pytest.mark.parametrize("ma_rb, cho_anh_em", [
+    ("import mo_dun_anh_em\nGIA_TRI = 1\n", "khac"),                       # đầu tệp, bản ở thư mục khác
+    ("def f():\n    import mo_dun_anh_em\n    return 1\nGIA_TRI = 1\n", "khac"),   # bên trong hàm
+    ("import mo_dun_anh_em\nGIA_TRI = 1\n", "chon"),                       # anh em nằm ngay thư mục đã chọn
+    ("from . import mo_dun_anh_em\nGIA_TRI = 1\n", "chon"),                # import tương đối
+])
+def test_nap_rb_tu_choi_ma_import_mo_dun_ngoai_thu_vien_chuan(tmp_path, ma_rb, cho_anh_em):
+    # Mô-đun anh em không đến được từ thư mục đã chọn (thư mục không nằm trên sys.path): hoặc hỏng, hoặc lấy
+    # nhầm bản ở chỗ khác. Kiểm tĩnh trước khi chạy -> SystemExit rõ, không traceback, không chạy mã nào.
     chon, khac = tmp_path / "chon", tmp_path / "khac"
     chon.mkdir()
     khac.mkdir()
-    _ghi_hai_tep(chon, "import mo_dun_anh_em\nGIA_TRI = 1\n")
-    (khac / "mo_dun_anh_em.py").write_text("X = 1\n", encoding="utf-8")
-    kq = _chay_tien_trinh_moi("sys.path.insert(0, sys.argv[3]); m.nap_rb(sys.argv[2])", str(chon), str(khac))
-    assert kq.returncode != 0 and "mo_dun_anh_em" in kq.stderr and "Traceback" not in kq.stderr
+    _ghi_hai_tep(chon, ma_rb)
+    ((chon if cho_anh_em == "chon" else khac) / "mo_dun_anh_em.py").write_text("X = 1\n", encoding="utf-8")
+    kq = _chay_tien_trinh_moi(
+        "sys.path.insert(0, sys.argv[3])\n"
+        "try:\n    m.nap_rb(sys.argv[2])\nexcept SystemExit as e:\n"
+        "    print(e); print(sorted(k for k in ('mo_dun_anh_em', 'i18n_errors', 'rbda_priority_pipeline')"
+        " if k in sys.modules))", str(chon), str(khac))
+    assert kq.returncode == 0, kq.stderr
+    assert "mo_dun_anh_em" in kq.stdout and "ngoài thư viện chuẩn" in kq.stdout
+    assert kq.stdout.strip().splitlines()[-1] == "[]"          # không mô-đun nào bị nạp
+
+
+def test_nap_rb_nhan_ma_import_thu_vien_chuan_ke_ca_mo_dun_c(tmp_path):
+    # sqlite3, unicodedata, decimal là thư viện chuẩn (trên Windows nằm ở <base>\\DLLs): không được từ chối.
+    _ghi_hai_tep(tmp_path, "import sqlite3\nimport unicodedata\nfrom decimal import Decimal\n"
+                           "def f():\n    import zlib\n    from i18n_errors import NGUON\n    return NGUON\n"
+                           "GIA_TRI = 1\n")
+    kq = _chay_tien_trinh_moi("print(m.nap_rb(sys.argv[2]).f())", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "py"
+
+
+def test_nap_rb_khong_them_muc_cache_cho_thu_muc_moi(tmp_path):
+    # Thư mục chưa từng có mục trong sys.path_importer_cache: nạp xong vẫn không có.
+    _ghi_hai_tep(tmp_path)
+    kq = _chay_tien_trinh_moi("m.nap_rb(sys.argv[2]); print(sys.argv[2] in sys.path_importer_cache)", str(tmp_path))
+    assert kq.returncode == 0, kq.stderr
+    assert kq.stdout.strip() == "False"
 
 
 def test_nap_rb_bao_ro_muc_sys_modules_khong_ro_nguon():

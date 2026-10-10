@@ -52,26 +52,31 @@ def _tep_nguon(thu_muc, ten):
     return tep
 
 
-def _thu_muc_chuan():
-    """Các thư mục thư viện của trình thông dịch (thư viện chuẩn, site-packages)."""
-    import sysconfig
-    duong = sysconfig.get_paths()
-    return [os.path.normcase(os.path.realpath(duong[k])) for k in ("stdlib", "platstdlib", "purelib", "platlib")
-            if duong.get(k)]
+def _import_la(tep):
+    """Các import trong tệp nguồn (ở đầu tệp LẪN bên trong hàm) không thuộc thư viện chuẩn và không là
+    i18n_errors / rbda_priority_pipeline. Đọc tĩnh bằng ast, trước khi chạy gì cả.
 
-
-def _phu_thuoc_la(truoc, thu_muc):
-    """Mô-đun mới xuất hiện trong sys.modules (ngoài _TEN) có tệp nằm NGOÀI thư viện chuẩn / site-packages:
-    mã đo đã import một mô-đun anh em và nó đến từ chỗ khác thư mục đã chọn (vd thư mục hiện hành)."""
-    chuan = _thu_muc_chuan()
-    la = []
-    for ten in set(sys.modules) - truoc - set(_TEN):
-        tep = getattr(sys.modules.get(ten), "__file__", None)
-        if not tep:
-            continue           # mô-đun dựng sẵn
-        tep = os.path.normcase(os.path.realpath(tep))
-        if not any(tep.startswith(g + os.sep) for g in chuan):
-            la.append((ten, tep))
+    Kịch bản chỉ đo được mã import thư viện chuẩn và i18n_errors: mô-đun anh em khác không nằm trên
+    sys.path nên hoặc hỏng, hoặc lấy nhầm bản ở chỗ khác (vd thư mục hiện hành) — từ chối từ đầu.
+    Không bắt được import động bằng chuỗi (importlib.import_module(...)); mã hiện tại không dùng.
+    """
+    import ast
+    with open(tep, "rb") as f:
+        cay = ast.parse(f.read(), filename=tep)
+    la = set()
+    for nut in ast.walk(cay):
+        if isinstance(nut, ast.Import):
+            ten_goc = [a.name.split(".")[0] for a in nut.names]
+        elif isinstance(nut, ast.ImportFrom):
+            if nut.level:                       # import tương đối: không có gói nào ở đây
+                goc = "." * nut.level + (nut.module + "." if nut.module else "")
+                la.update(goc + a.name for a in nut.names)
+                continue
+            ten_goc = [nut.module.split(".")[0]]
+        else:
+            continue
+        la.update(t for t in ten_goc
+                  if t not in sys.stdlib_module_names and t not in _TEN and t != "__future__")
     return sorted(la)
 
 
@@ -130,21 +135,21 @@ def nap_rb(duong_dan):
         # Nạp thẳng <thu_muc>/<tên>.py (không import theo tên qua sys.path, không đụng cache bộ tìm).
         # Kiểm mô-đun chính trước: thư mục sai thì báo thiếu rbda_priority_pipeline, đúng như cách dùng ghi.
         tep = {ten: _tep_nguon(thu_muc, ten) for ten in reversed(_TEN)}
+        # Kiểm TĨNH trước khi chạy gì: mã đo chỉ được import thư viện chuẩn và i18n_errors (xem _import_la).
+        for ten in reversed(_TEN):
+            la = _import_la(tep[ten])
+            if la:
+                raise SystemExit("%s import mô-đun ngoài thư viện chuẩn: %s. Kịch bản chỉ đo được mã import thư "
+                                 "viện chuẩn và i18n_errors (mô-đun anh em sẽ không đến từ thư mục đã chọn)."
+                                 % (tep[ten], ", ".join(la)))
 
         def nap(ten):
             # Như import: đặt vào sys.modules TRƯỚC khi chạy, để `from i18n_errors import err` bên trong
-            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này. Mã hiện tại chỉ import thư viện
-            # chuẩn và i18n_errors; nếu một phiên bản khác import mô-đun anh em thì nó sẽ không đến từ thư mục
-            # này — phát hiện và từ chối thay vì đo lẫn mã.
-            truoc = set(sys.modules)
+            # rbda_priority_pipeline lấy đúng bản vừa nạp từ thư mục này.
             spec = importlib.util.spec_from_file_location(ten, tep[ten])
             mod = importlib.util.module_from_spec(spec)
             sys.modules[ten] = mod
             spec.loader.exec_module(mod)
-            la = _phu_thuoc_la(truoc, thu_muc)
-            if la:
-                raise SystemExit("%s.py import thêm mô-đun ngoài thư viện chuẩn, nạp từ chỗ khác thư mục đã chọn: "
-                                 "%s. Kịch bản chỉ đo được mã import thư viện chuẩn và i18n_errors." % (ten, la))
 
         return _nap_co_kiem(tep, nap, "thư mục %s" % thu_muc)
     if not os.path.isfile(duong_dan):
